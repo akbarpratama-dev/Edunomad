@@ -1,0 +1,392 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { toast } from "sonner";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { AppShell } from "@/components/layout/AppShell";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { ListSkeleton } from "@/components/common/LoadingState";
+import { ErrorState } from "@/components/common/ErrorState";
+import { ProjectDetailView } from "@/components/project/ProjectDetailView";
+import { ProjectMembersPanel } from "@/components/project/ProjectMembersPanel";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { useAuthStore } from "@/stores/authStore";
+import { ApiError } from "@/lib/apiClient";
+import { projectApi, type ProjectDetail } from "@/services/projectApi";
+import { applicationApi } from "@/services/applicationApi";
+
+// Confirm-and-run lifecycle action button (Workflow 5/11/15).
+function LifecycleAction({
+  label,
+  title,
+  description,
+  confirmLabel,
+  run,
+  onDone,
+  destructive,
+}: {
+  label: string;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  run: () => Promise<unknown>;
+  onDone: () => void;
+  destructive?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const confirm = async () => {
+    setBusy(true);
+    try {
+      await run();
+      toast.success(`${label} berhasil`);
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : `Gagal: ${label}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <Button
+        variant={destructive ? "destructive" : "default"}
+        disabled={busy}
+        onClick={() => setOpen(true)}
+      >
+        {label}
+      </Button>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={title}
+        description={description}
+        confirmLabel={confirmLabel}
+        cancelLabel="Batal"
+        destructive={destructive}
+        onConfirm={confirm}
+      />
+    </>
+  );
+}
+
+// Senior apply-as-mentor dialog (Workflow 3).
+function SeniorApplyDialog({ project }: { project: ProjectDetail }) {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    setBusy(true);
+    try {
+      await applicationApi.applyAsMentor(project.id, message.trim() || undefined);
+      toast.success("Lamaran mentor terkirim");
+      setOpen(false);
+      setMessage("");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal mengirim lamaran");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Apply sebagai Mentor</Button>
+      <Dialog open={open} onOpenChange={(o) => !busy && setOpen(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Apply sebagai Mentor</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="senior-message">Pesan untuk UMKM (opsional)</Label>
+            <Textarea
+              id="senior-message"
+              rows={4}
+              placeholder="Ceritakan pengalaman relevan Anda untuk proyek ini"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={busy}>
+              Batal
+            </Button>
+            <Button onClick={submit} disabled={busy}>
+              Kirim Lamaran
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+// Beginner apply-to-role dialog (Workflow 4).
+function BeginnerApplyDialog({ project }: { project: ProjectDetail }) {
+  const [open, setOpen] = useState(false);
+  const [roleId, setRoleId] = useState("");
+  const [motivation, setMotivation] = useState("");
+  const [busy, setBusy] = useState(false);
+  const hasRoles = project.projectRoles.length > 0;
+
+  const submit = async () => {
+    if (!roleId) {
+      toast.error("Pilih peran terlebih dahulu");
+      return;
+    }
+    setBusy(true);
+    try {
+      await applicationApi.applyToRole(project.id, {
+        project_role_id: roleId,
+        motivation: motivation.trim() || undefined,
+      });
+      toast.success("Lamaran terkirim");
+      setOpen(false);
+      setRoleId("");
+      setMotivation("");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal mengirim lamaran");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)} disabled={!hasRoles}>
+        Apply ke Peran
+      </Button>
+      {!hasRoles && (
+        <p className="text-body-sm text-neutral-gray">Proyek ini belum membuka peran.</p>
+      )}
+      <Dialog open={open} onOpenChange={(o) => !busy && setOpen(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Apply ke Peran</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="role">Peran</Label>
+            <Select value={roleId} onValueChange={(v) => setRoleId(v ?? "")}>
+              <SelectTrigger id="role">
+                <SelectValue placeholder="Pilih peran" />
+              </SelectTrigger>
+              <SelectContent>
+                {project.projectRoles.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>
+                    {r.roleName} · {r.capacity} orang
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="motivation">Motivasi (opsional)</Label>
+            <Textarea
+              id="motivation"
+              rows={4}
+              placeholder="Mengapa Anda cocok untuk peran ini?"
+              value={motivation}
+              onChange={(e) => setMotivation(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={busy}>
+              Batal
+            </Button>
+            <Button onClick={submit} disabled={busy}>
+              Kirim Lamaran
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+// Role-appropriate action panel for the project detail page.
+function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () => void }) {
+  const appUser = useAuthStore((s) => s.appUser)!;
+  const isOwner = appUser.role === "UMKM" && project.umkm.id === appUser.id;
+  const isLeadSenior = appUser.role === "SENIOR" && project.senior?.id === appUser.id;
+  const recruiting = project.status === "RECRUITING";
+  const hasSenior = !!project.senior;
+
+  if (isOwner) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col gap-2 pt-2">
+          <p className="text-body font-semibold text-neutral-dark">Anda pemilik proyek ini</p>
+          {project.status === "AWAITING_COMPLETION" && (
+            <LifecycleAction
+              label="Konfirmasi Penyelesaian"
+              title="Konfirmasi penyelesaian proyek?"
+              description="Proyek akan ditandai SELESAI dan menjadi read-only. Semua anggota aktif akan ditandai selesai."
+              confirmLabel="Ya, Selesaikan"
+              run={() => projectApi.confirmCompletion(project.id)}
+              onDone={reload}
+            />
+          )}
+          <Button render={<Link href={`/projects/${project.id}/manage`} />}>
+            Kelola Lamaran Senior
+          </Button>
+          <Button variant="outline" render={<Link href="/my-projects" />}>
+            Proyek Saya
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isLeadSenior) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col gap-2 pt-2">
+          <p className="text-body font-semibold text-neutral-dark">
+            Anda mentor proyek ini
+          </p>
+          {recruiting && (
+            <LifecycleAction
+              label="Mulai Proyek"
+              title="Mulai proyek ini?"
+              description="Status proyek berubah dari Rekrutmen menjadi Aktif. Pastikan tim sudah siap — minimal satu beginner telah bergabung."
+              confirmLabel="Ya, Mulai"
+              run={() => projectApi.start(project.id)}
+              onDone={reload}
+            />
+          )}
+          {project.status === "ACTIVE" && (
+            <LifecycleAction
+              label="Ajukan Penyelesaian"
+              title="Ajukan penyelesaian proyek?"
+              description="UMKM akan diminta mengonfirmasi penyelesaian. Status berubah menjadi Menunggu Konfirmasi."
+              confirmLabel="Ya, Ajukan"
+              run={() => projectApi.requestCompletion(project.id)}
+              onDone={reload}
+            />
+          )}
+          <Button render={<Link href={`/projects/${project.id}/applicants`} />}>
+            Kelola Lamaran Beginner
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (appUser.role === "SENIOR") {
+    return (
+      <Card>
+        <CardContent className="flex flex-col gap-2 pt-2">
+          {recruiting && !hasSenior ? (
+            <SeniorApplyDialog project={project} />
+          ) : (
+            <>
+              <Button disabled>Apply sebagai Mentor</Button>
+              <p className="text-body-sm text-neutral-gray">
+                {hasSenior
+                  ? "Proyek ini sudah memiliki mentor."
+                  : "Proyek ini tidak sedang membuka rekrutmen."}
+              </p>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (appUser.role === "BEGINNER") {
+    return (
+      <Card>
+        <CardContent className="flex flex-col gap-2 pt-2">
+          {recruiting && hasSenior ? (
+            <BeginnerApplyDialog project={project} />
+          ) : (
+            <>
+              <Button disabled>Apply ke Peran</Button>
+              <p className="text-body-sm text-neutral-gray">
+                {!recruiting
+                  ? "Proyek ini tidak sedang membuka rekrutmen."
+                  : "Menunggu mentor senior bergabung sebelum rekrutmen beginner dibuka."}
+              </p>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return null;
+}
+
+function Content() {
+  const params = useParams<{ id: string }>();
+  const id = params.id;
+  const [project, setProject] = useState<ProjectDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = () => {
+    setLoading(true);
+    setError(null);
+    projectApi
+      .detail(id)
+      .then(setProject)
+      .catch((err) =>
+        setError(err instanceof ApiError ? err.message : "Gagal memuat proyek")
+      )
+      .finally(() => setLoading(false));
+  };
+  useEffect(load, [id]);
+
+  return (
+    <AppShell
+      breadcrumbs={[
+        { label: "Telusuri Proyek", href: "/projects" },
+        { label: project?.title ?? "Detail" },
+      ]}
+    >
+      <div className="mx-auto w-full max-w-3xl">
+        {loading ? (
+          <ListSkeleton rows={5} />
+        ) : error ? (
+          <ErrorState message={error} onAction={load} />
+        ) : project ? (
+          <div className="flex flex-col gap-4">
+            <ProjectDetailView project={project} />
+            <ActionPanel project={project} reload={load} />
+            <ProjectMembersPanel key={project.status} project={project} />
+          </div>
+        ) : null}
+      </div>
+    </AppShell>
+  );
+}
+
+export default function ProjectDetailPage() {
+  return (
+    <AuthGuard>
+      <Content />
+    </AuthGuard>
+  );
+}
