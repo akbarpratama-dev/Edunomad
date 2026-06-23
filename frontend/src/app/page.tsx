@@ -1,4 +1,5 @@
 import { AuthedRedirect } from "@/components/landing/authed-redirect";
+import { SmoothScroll } from "@/components/landing/smooth-scroll";
 import { LandingHeader } from "@/components/landing/header";
 import { LandingFooter } from "@/components/landing/footer";
 import { Hero } from "@/components/landing/sections/hero";
@@ -16,6 +17,7 @@ export default function Home() {
   return (
     <div data-landing className="min-h-screen bg-ln-bg font-sans text-ln-ink antialiased">
       <AuthedRedirect />
+      <SmoothScroll />
       <a
         href="#main"
         className="sr-only rounded-lg bg-ln-ink px-4 py-2 text-sm font-semibold text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60]"

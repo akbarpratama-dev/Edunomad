@@ -5,6 +5,26 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-23 (batal redesign + smooth scroll)
+
+Prompt:
+Mulai redesign landing pakai taste-skill (lebih bebas dari Figma). Di tengah jalan user STOP: "pake yg sebelumnya saja, undo design nya, terapkan transisi animation smooth." → user lebih suka desain landing-v1 (berbasis Figma) daripada hasil redesign taste; minta smooth scroll transition.
+
+Hasil:
+Redesign taste (font Plus Jakarta Sans, hero editorial tanpa fake-cards, foto picsum, dll) DIBATALKAN — semua perubahan belum di-commit, jadi tinggal `git restore` 9 file + hapus trust-strip.tsx, balik ke `main` (landing-v1 utuh). Branch redesign/landing dibiarkan (kosong, == main). Lalu tambah **Lenis** smooth momentum scroll: components/landing/smooth-scroll.tsx (Lenis + RAF + cleanup, reduced-motion guard, anchor `a[href^="#"]` di-route lewat lenis.scrollTo offset -72 utk header sticky); import lenis.css; dipasang di app/page.tsx. Verified: html dapat class `lenis`, klik "Cara Kerja" smooth-scroll ke section (hash bersih), 0 console error, build `/` tetap static. PREFERENSI: user pilih desain landing-v1 (Figma-based), bukan redesign taste-skill.
+
+Date:
+2026-06-23 (setup Git + GitHub)
+
+Prompt:
+User mau bisa undo / checkpoint desain landing, lalu minta dibuatkan repo + push ke GitHub dengan model branch yang scalable (dev lain bisa join & commit fitur).
+
+Hasil:
+Project di-`git init` (branch main). `.gitignore` dipastikan aman (env/node_modules/.next/.playwright-mcp/.claude settings di-ignore; backend/.env.example tetap tracked). Commit baseline `9dba349` (Phase 0–4.3 + landing) + tag `landing-v1` (restore point) + commit `a5e691a` (CONTRIBUTING.md = GitHub Flow). Repo GitHub **PRIVAT** dibuat via gh: origin = https://github.com/akbarpratama-dev/Edunomad; push main + tag. Branch `redesign/landing` dibuat & di-push (siap untuk redesign; main tetap known-good). Konvensi: GitHub Flow, Conventional Commits, commit+push tiap fase selesai (lihat feedback_git_checkpoint_workflow di auto-memory). Saat ini di branch `main`. Belum: branch protection main (aktifkan saat dev lain join), tambah kolaborator.
+
+---
+
+Date:
 2026-06-23 (lanjutan — sambung landing ke auth)
 
 Prompt:
