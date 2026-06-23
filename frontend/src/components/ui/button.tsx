@@ -10,7 +10,7 @@ const buttonVariants = cva(
       variant: {
         // Primary Button — docs/08-UI_Pages_Specification_v1.0.md Button Styles
         default:
-          "rounded-full bg-primary text-primary-foreground hover:bg-[#5AB946] active:bg-[#4FA835] disabled:bg-neutral-gray-light disabled:opacity-100",
+          "rounded-full bg-primary text-primary-foreground hover:bg-[#cdec5a] active:bg-[#c2e84a] disabled:bg-neutral-gray-light disabled:opacity-100",
         // Secondary Button (White/Border)
         outline:
           "rounded-full border-border bg-card hover:bg-neutral-light aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",

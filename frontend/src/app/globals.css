@@ -135,23 +135,23 @@
   /* Unified brand language (Figma "Buat Akun" / landing): warm off-white,
      near-black ink, lime accent with dark text, soft warm grays, rounded. */
   --background: #faf8f3; /* warm off-white */
-  --foreground: #0f1115; /* near-black ink */
+  --foreground: #0b0b0b; /* near-black ink (Figma) */
   --card: #ffffff;
-  --card-foreground: #0f1115;
+  --card-foreground: #0b0b0b;
   --popover: #ffffff;
-  --popover-foreground: #0f1115;
-  --primary: #96da55; /* lime */
-  --primary-foreground: #0f1115; /* dark text on lime */
-  --secondary: #f1eee7; /* warm light */
-  --secondary-foreground: #0f1115;
+  --popover-foreground: #0b0b0b;
+  --primary: #d8f277; /* chartreuse lime (Figma) */
+  --primary-foreground: #0b0b0b; /* dark text on lime */
+  --secondary: #fafaf8; /* input/surface fill (Figma) */
+  --secondary-foreground: #0b0b0b;
   --muted: #f1eee7;
-  --muted-foreground: #6b6860; /* warm muted */
-  --accent: #eef7e2; /* light lime tint */
-  --accent-foreground: #2f4d12;
+  --muted-foreground: #6b6b6b; /* muted text (Figma) */
+  --accent: #eef7d6; /* light chartreuse tint */
+  --accent-foreground: #3f4d00;
   --destructive: #e5484d;
-  --border: #e7e3da; /* warm hairline */
-  --input: #e7e3da;
-  --ring: #96da55;
+  --border: #e7e3d8; /* warm hairline (Figma) */
+  --input: #e7e3d8;
+  --ring: #a3ce00; /* darker lime for focus contrast (Figma link color) */
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
