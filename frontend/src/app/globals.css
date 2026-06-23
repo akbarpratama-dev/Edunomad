@@ -132,30 +132,32 @@
 
 :root {
   /* Color Palette — docs/08-UI_Pages_Specification_v1.0.md Design System */
-  --background: #F5F5F5; /* Neutral Light */
-  --foreground: #333333; /* Neutral Dark */
-  --card: #FFFFFF;
-  --card-foreground: #333333;
-  --popover: #FFFFFF;
-  --popover-foreground: #333333;
-  --primary: #67C957; /* Primary Green */
-  --primary-foreground: #FFFFFF;
-  --secondary: #F5F5F5;
-  --secondary-foreground: #333333;
-  --muted: #F5F5F5;
-  --muted-foreground: #999999; /* Neutral Gray */
-  --accent: #F5F5F5;
-  --accent-foreground: #333333;
-  --destructive: #FF4444; /* Error */
-  --border: #CCCCCC; /* Neutral Gray */
-  --input: #CCCCCC;
-  --ring: #67C957;
+  /* Unified brand language (Figma "Buat Akun" / landing): warm off-white,
+     near-black ink, lime accent with dark text, soft warm grays, rounded. */
+  --background: #faf8f3; /* warm off-white */
+  --foreground: #0f1115; /* near-black ink */
+  --card: #ffffff;
+  --card-foreground: #0f1115;
+  --popover: #ffffff;
+  --popover-foreground: #0f1115;
+  --primary: #96da55; /* lime */
+  --primary-foreground: #0f1115; /* dark text on lime */
+  --secondary: #f1eee7; /* warm light */
+  --secondary-foreground: #0f1115;
+  --muted: #f1eee7;
+  --muted-foreground: #6b6860; /* warm muted */
+  --accent: #eef7e2; /* light lime tint */
+  --accent-foreground: #2f4d12;
+  --destructive: #e5484d;
+  --border: #e7e3da; /* warm hairline */
+  --input: #e7e3da;
+  --ring: #96da55;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
