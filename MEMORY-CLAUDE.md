@@ -1,7 +1,7 @@
 # MEMORY-CLAUDE.md — EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-06-24 (UI Figma-redesign merged to main; PHASE 5.1 backend done+verified. NEXT = Phase 5.2 frontend, branch feature/phase-5-workspace).
+> Last updated: 2026-06-24 (PHASE 5 DONE — 5.1 backend + 5.2 frontend, branch feature/phase-5-workspace, browser+realtime verified. NEXT = Phase 6 Deliverables & Contributions).
 
 ## ⭐ Landing page (marketing `/`) — ADDED 2026-06-23, verified
 Built from user's Figma ("Premium SaaS Landing Page", file `nMFbzuPNcRcKgFVvMEFfaj`, node 5:2) via Figma MCP (source of truth) + skills impeccable/emil-design-eng/ui-ux-pro-max. 11 sections in `frontend/src/components/landing/` (motion.tsx, primitives.tsx, header.tsx, footer.tsx, sections/{hero,problem,how-it-works,feature-grid,project-showcase,portfolio,impact,testimonials,faq,cta}.tsx); composed in `app/page.tsx` (replaced the old `/`→login redirect). Stack: `motion` ^12.40.0 (NEW frontend dep, frontend/ only), animation library; landing palette scoped as `ln-*` Tailwind tokens in globals.css `@theme` (in-app docs/08 design system untouched); Manrope (via --font-sans, Black weight). [font Inter→Manrope across whole app, 2026-06-24] Motion = hero floating-card cluster + glow + entrance, scroll reveal/stagger (SSR-safe mounted-gate so never ships blank), CountUp stats, FAQ accordion, hover lifts — all `prefers-reduced-motion` aware. Header auth-aware (Masuk/Gabung vs Buka Dashboard). Verified: tsc clean, `npm run build` 0 errors (`/` prerendered STATIC), every section browser-screenshotted faithful to Figma. Decisions D-LP-1..4.
@@ -10,7 +10,10 @@ Built from user's Figma ("Premium SaaS Landing Page", file `nMFbzuPNcRcKgFVvMEFf
 ## Project
 EduNomad — project-collaboration platform (Beginners ↔ Seniors ↔ UMKM via real projects). Modular monolith. Backend: Express 5 + TS 6 + Prisma 7 + Supabase (Postgres). Frontend: Next.js 15.5.19 + React 19 + Tailwind v4 + shadcn/ui (base-ui) + Zustand + RHF + Zod. Supabase ref `sfzzkwckrfwzgcujykff` (ap-south-1).
 
-## Status: PHASE 0–3 ✅. PHASE 4 ✅. UI Figma-redesign ✅ (merged to main 84127ce). **PHASE 5.1 backend ✅ DONE & verified** (discussions + DM + RLS/Realtime, branch `feature/phase-5-workspace`). NEXT = **PHASE 5.2 frontend** (workspace page + Discussion tab + Realtime subscribe + DM page). Notifications = Phase 9 (NOT Phase 5).
+## Status: PHASE 0–3 ✅. PHASE 4 ✅. UI Figma-redesign ✅ (merged to main 84127ce). **PHASE 5 ✅ DONE & verified — 5.1 backend + 5.2 frontend** (discussions + DM + RLS/Realtime + workspace UI, branch `feature/phase-5-workspace`, browser+realtime verified). NEXT = **PHASE 6 Deliverables & Contributions** (task-breakdown §6). Notifications = Phase 9 (NOT now).
+
+### Phase 5.2 frontend done this session (2026-06-24, branch feature/phase-5-workspace)
+discussionApi service; ChatPanel (shared group+DM: Supabase Realtime subscribe postgres_changes INSERT on discussion_messages filter discussion_id → re-pull list [D-P5-4], writes via Express, realtime.setAuth for RLS); DiscussionTab (list/create/select group, create=senior-lead/UMKM-owner seeded w/ active members); DirectMessageDialog (find-or-get 1:1); app/projects/[id]/workspace/page.tsx (tabs Ringkasan|Milestone|Diskusi|Anggota; Overview+Milestones inline; Members reuses ProjectMembersPanel + DM launchers); "Buka Workspace" entry on detail page (ACTIVE/AWAITING). Deliverables/Reviews/Artifacts tabs = later phases. DM conversation-list deferred (no GET /direct-chats in 5.1). Verified browser (p4-senior, project a1a1a1a1-…0005): render, Express send, REALTIME live delivery (beginner API msg → senior tab no refresh), DM find-or-get+history; tsc 0. Decision D-P5-4.
 
 ### Phase 5.1 done this session (2026-06-24, branch feature/phase-5-workspace — branch NOT yet pushed)
 Backend Project Workspace chat (Workflow 6/7), layered + $txn. Endpoints LIVE (auth): GET/POST /projects/:id/discussions, GET/POST /discussions/:id/messages, POST /users/:id/direct-chat, GET/POST /direct-chat/:id/messages. Group create = senior lead/UMKM owner only (senior auto-included); access = discussion_members rows; DM only between users sharing a project context (D-P5-3); `title` NOT persisted (schema has no column, D-P5-1). **RLS (D-P5-2 — FIRST RLS on project):** writes via Express (Prisma role BYPASSES RLS), browser clients read-only live via Realtime; SELECT-only policies via SECURITY DEFINER `public.is_discussion_member()`; auth.uid()==users.id; publication += discussion_messages + discussions. SQL mirror: `backend/db/phase5_discussions_rls_realtime.sql`. New files: constants/discussionType, validators/discussion.validator, repositories/discussion.repository, services/{discussion,directMessage}.service, modules/{discussion,directMessage}/*.controller, routes/{discussion,directChat}.routes. **Verified:** build 0 err; E2E /tmp/p5-e2e.sh 14/14 (stayed 14/14 after RLS = Prisma-bypass proof); RLS client path member 4 / outsider 0 / anon []. Test project ACTIVE `a1a1a1a1-0000-4000-8000-000000000005` (umkm=p4-umkm, senior=p4-senior, members=p4-beginner+p43-b2; p43-b3 outsider). Decisions D-P5-1..3.
@@ -56,34 +59,35 @@ DRAFT → PENDING_REVIEW → RECRUITING (approve) / REJECTED → ACTIVE (senior 
 ## 📌 NEXT-SESSION INIT PROMPT
 
 ```
-Lanjutkan EduNomad ke PHASE 5.2 — FRONTEND Project Workspace (task-breakdown §5.2; Workflow 6/7).
-Phase 0–4 + UI Figma-redesign + PHASE 5.1 BACKEND (discussions group, DM, RLS+Realtime) SUDAH selesai &
-terverifikasi (E2E 14/14) — JANGAN bangun ulang backend. Branch aktif: `feature/phase-5-workspace`
-(cabang dari main; PUSH dulu kalau belum). Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md +
-next-tasks.md blok "⚡ ACTIVE HANDOFF 2026-06-24 #2".
+Lanjutkan EduNomad ke PHASE 6 — Deliverables & Contributions (task-breakdown §6; Workflow terkait).
+Phase 0–5 SEMUA selesai & terverifikasi (Phase 5 = workspace chat backend+frontend+realtime, browser-verified)
+— JANGAN bangun ulang. Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok
+"⚡ ACTIVE HANDOFF 2026-06-24 #3".
+
+Branch: Phase 5 ada di `feature/phase-5-workspace` (sudah push). Sebelum Phase 6: MERGE feature/phase-5-workspace
+→ main dulu (buka PR / merge --no-ff), lalu cabang `feature/phase-6-deliverables` dari main (GitHub Flow,
+CONTRIBUTING.md). Konfirmasi ke user kalau ragu soal merge/PR.
 
 Backend tooling beres: `npm run dev` (:3001) type-check penuh, `npm run build` 0 error. Frontend :3000.
-Kalau node_modules rebuilt & deps tampak tidak lengkap: `npm cache clean --force && rm -rf node_modules
+Kalau node_modules rebuilt & deps tak lengkap: `npm cache clean --force && rm -rf node_modules
 package-lock.json && npm install`.
 
-Backend Phase 5.1 LIVE (auth) — frontend tinggal konsumsi:
-- GET/POST /projects/:id/discussions (group; create=senior lead/UMKM owner), GET/POST /discussions/:id/messages
-- POST /users/:id/direct-chat (find-or-get), GET/POST /direct-chat/:id/messages
-Writes WAJIB lewat Express (apiClient). Live updates lewat Supabase Realtime READ-ONLY (RLS SELECT-only sudah
-aktif: client cuma bisa baca discussion miliknya; auth.uid()==users.id). Subscribe channel ke tabel
-`discussion_messages` filter `discussion_id=eq.<id>` pakai @supabase/supabase-js (cek apakah sudah ke-install
-di frontend; CLAUDE.md: Socket.io dilarang).
+Baca dulu (JANGAN nebak): task-breakdown.md §6 (urutan subtask exact) + docs/03 schema Deliverables Domain +
+Contributions Domain + docs/04 API Deliverables/Contributions Endpoints + docs/06 RBAC (beginner submit
+deliverable/contribution, senior review/approve, request revision) + docs/07 Workflow (deliverable review,
+contribution approval, milestone revision WF 10). Lalu bangun layered (route→controller→service→repository→
+Prisma, $transaction utk aksi multi-step, audit log kalau perlu, verifikasi tiap milestone, update memory
+tiap selesai). Prisma models Deliverable/Contribution dll sudah ada (migrations init_deliverables_domain +
+init_contributions_artifacts_reviews_domain) → cek schema.prisma dulu, kemungkinan NO migration.
+Carry-over (D-P4.3-3): isi completion-readiness gate deliverables/contributions di
+projectLifecycle.service.requestCompletion saat Phase 6 jalan.
 
-Bangun (verifikasi tiap milestone, update memory tiap selesai):
-- 5.2.1 layout /projects/[id]/workspace (tabs Overview|Milestones|Discussion|Members; role-aware).
-- 5.2.4 Discussion tab: list group chat + message input (kirim via Express POST) + Realtime subscribe (live).
-- 5.2.5 Members tab (reuse ProjectMembersPanel dari 4.3). 5.2.2 Overview, 5.2.3 Milestones (reuse milestone API).
-- 5.2.6 DM page (/messages atau dalam workspace): conversation + chat realtime.
-Reuse: AuthGuard/AppShell/apiClient + pola service object (projectApi/applicationApi) → bikin discussionApi.
-Notifications = PHASE 9 (BUKAN Phase 5) — JANGAN bangun sekarang.
+Reuse pola: repository/service/controller + $txn, projectMember.repository, AuthGuard/AppShell/apiClient +
+service object (projectApi/applicationApi/discussionApi). Untuk frontend, tambah tab "Deliverables" di
+workspace (/projects/[id]/workspace) yg tadi di-skip. Notifications = PHASE 9 (BUKAN sekarang).
 
 ⚠️ Test data SIAP: project ACTIVE `a1a1a1a1-0000-4000-8000-000000000005` (umkm=p4-umkm, senior=p4-senior,
-members=p4-beginner+p43-b2; p43-b3=outsider buat tes negatif). Semua user pw TestPass123!. Sudah ada
-1 group discussion + beberapa message + 1 DM dari E2E. anon key + URL via Supabase MCP. E2E script:
-/tmp/p5-e2e.sh (mungkin perlu regen kalau /tmp dibersihkan).
+members=p4-beginner+p43-b2; p43-b3=outsider). Semua user pw TestPass123!. anon key+URL via Supabase MCP.
+Sudah ada group discussion + DM + messages dari Phase 5 (boleh diabaikan/dipakai). Backend & frontend dev
+server mungkin masih jalan background (:3001 / :3000).
 ```
