@@ -41,7 +41,7 @@ export function HowItWorks() {
           <Reveal delay={0.05} className="mt-10">
             <div
               className="relative overflow-hidden rounded-2xl border border-white/10 px-8 py-10"
-              style={{ background: "linear-gradient(120deg, rgba(150,218,85,0.16), rgba(255,255,255,0.02) 55%)" }}
+              style={{ background: "linear-gradient(120deg, rgba(216,242,119,0.18), rgba(255,255,255,0.02) 55%)" }}
             >
               <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-ln-accent/15 blur-3xl" />
               <h3 className="relative text-[1.3rem] font-extrabold tracking-[-0.02em] text-white">

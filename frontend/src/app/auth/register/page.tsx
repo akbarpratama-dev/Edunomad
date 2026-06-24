@@ -109,7 +109,7 @@ export default function RegisterStep1() {
 
         <p className="text-center text-body-sm text-neutral-gray">
           Sudah punya akun?{" "}
-          <Link href="/auth/login" className="text-primary hover:underline">
+          <Link href="/auth/login" className="text-[#5f8c00] font-semibold hover:underline">
             Masuk
           </Link>
         </p>

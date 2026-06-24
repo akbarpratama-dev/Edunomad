@@ -168,7 +168,7 @@ export default function RegisterStep5() {
                 className={cn(
                   "rounded-full border px-3 py-1 text-body-sm transition-colors",
                   interests.includes(it)
-                    ? "border-primary bg-primary/10 text-primary"
+                    ? "border-[#a3ce00] bg-[#eef7d6] text-[#5f8c00]"
                     : "border-border text-neutral-dark hover:bg-neutral-light"
                 )}
               >

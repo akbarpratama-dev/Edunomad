@@ -59,7 +59,7 @@ function ProjectRow({
         <div className="h-1 flex-1 overflow-hidden rounded-full bg-[#ebebeb]">
           <motion.div
             className="h-full rounded-full"
-            style={{ background: lime ? "#96da55" : "#0f1115" }}
+            style={{ background: lime ? "#d8f277" : "#201f31" }}
             initial={reduce ? undefined : { width: 0 }}
             whileInView={reduce ? undefined : { width: `${pct}%` }}
             viewport={{ once: true }}
@@ -89,7 +89,7 @@ export function Hero() {
       <div
         aria-hidden
         className="pointer-events-none absolute -right-40 top-10 size-[640px] rounded-full opacity-60 blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(150,218,85,0.22), transparent 65%)" }}
+        style={{ background: "radial-gradient(circle, rgba(216,242,119,0.30), transparent 65%)" }}
       />
       <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)]">
         {/* ── Copy ── */}
@@ -214,7 +214,7 @@ export function Hero() {
 
           {/* Active projects card (green) */}
           <Floaty rotate={7.5} amplitude={11} duration={7.5} delay={0.3} className="absolute bottom-2 right-6 z-10 w-[168px]">
-            <div className="rounded-[18px] bg-ln-accent p-4 shadow-[0_18px_40px_rgba(142,240,90,0.32)]">
+            <div className="rounded-[18px] bg-ln-accent p-4 shadow-[0_18px_40px_rgba(216,242,119,0.45)]">
               <div className="flex items-center justify-between">
                 <span className="text-[9px] font-bold uppercase tracking-[0.06em] text-black/50">Proyek Aktif</span>
                 <span className="grid size-5 place-items-center rounded-md bg-black/10">

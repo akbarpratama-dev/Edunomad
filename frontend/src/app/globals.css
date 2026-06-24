@@ -99,22 +99,23 @@
   /* ── Landing page palette (marketing only) ──────────────────────────
      Premium SaaS brand from Figma "Premium SaaS Landing Page". Scoped as
      ln-* utilities so the in-app design system (docs/08) stays untouched.
-     bg = warm off-white, ink = near-black, accent = lime green. */
+     bg = warm off-white, ink = deep navy, accent = chartreuse.
+     Exact Figma values (file nMFbzuPNcRcKgFVvMEFfaj, node 5:4). */
   --color-ln-bg: #faf8f3;
   --color-ln-bg-alt: #f3efe6;
-  --color-ln-ink: #0f1115;
+  --color-ln-ink: #201f31;
   --color-ln-ink-soft: #3a3a38;
-  --color-ln-muted: #6b6860;
+  --color-ln-muted: #6b6b6b;
   --color-ln-faint: #78746a;
-  --color-ln-accent: #96da55;
+  --color-ln-accent: #d8f277;
   --color-ln-accent-strong: #87c522;
   --color-ln-accent-ink: #5da316;
   --color-ln-accent-soft: #e1fcdc;
   --color-ln-card: #ffffff;
   --color-ln-surface: #fafafa;
-  --color-ln-line: rgba(15, 17, 21, 0.08);
+  --color-ln-line: rgba(32, 31, 49, 0.08);
 
-  /* Landing display type scale (Inter, weight-driven contrast) */
+  /* Landing display type scale (Manrope via --font-sans, weight-driven contrast) */
   --text-ln-display: clamp(2.75rem, 1.6rem + 5.2vw, 4rem);
   --text-ln-display--line-height: 1.04;
   --text-ln-display--letter-spacing: -0.04em;
@@ -132,30 +133,32 @@
 
 :root {
   /* Color Palette — docs/08-UI_Pages_Specification_v1.0.md Design System */
-  --background: #F5F5F5; /* Neutral Light */
-  --foreground: #333333; /* Neutral Dark */
-  --card: #FFFFFF;
-  --card-foreground: #333333;
-  --popover: #FFFFFF;
-  --popover-foreground: #333333;
-  --primary: #67C957; /* Primary Green */
-  --primary-foreground: #FFFFFF;
-  --secondary: #F5F5F5;
-  --secondary-foreground: #333333;
-  --muted: #F5F5F5;
-  --muted-foreground: #999999; /* Neutral Gray */
-  --accent: #F5F5F5;
-  --accent-foreground: #333333;
-  --destructive: #FF4444; /* Error */
-  --border: #CCCCCC; /* Neutral Gray */
-  --input: #CCCCCC;
-  --ring: #67C957;
+  /* Unified brand language (Figma "Buat Akun" / landing): warm off-white,
+     near-black ink, lime accent with dark text, soft warm grays, rounded. */
+  --background: #faf8f3; /* warm off-white */
+  --foreground: #0b0b0b; /* near-black ink (Figma) */
+  --card: #ffffff;
+  --card-foreground: #0b0b0b;
+  --popover: #ffffff;
+  --popover-foreground: #0b0b0b;
+  --primary: #d8f277; /* chartreuse lime (Figma) */
+  --primary-foreground: #0b0b0b; /* dark text on lime */
+  --secondary: #fafaf8; /* input/surface fill (Figma) */
+  --secondary-foreground: #0b0b0b;
+  --muted: #f1eee7;
+  --muted-foreground: #6b6b6b; /* muted text (Figma) */
+  --accent: #eef7d6; /* light chartreuse tint */
+  --accent-foreground: #3f4d00;
+  --destructive: #e5484d;
+  --border: #e7e3d8; /* warm hairline (Figma) */
+  --input: #e7e3d8;
+  --ring: #a3ce00; /* darker lime for focus contrast (Figma link color) */
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -170,10 +173,10 @@
   --warning: #FFA500;
   --error: #FF4444;
   --info-dark: #1A1A1A; /* alert/info card background, not a global dark theme */
-  --neutral-light: #F5F5F5;
-  --neutral-gray: #999999;
-  --neutral-gray-light: #CCCCCC;
-  --neutral-dark: #333333;
+  --neutral-light: #f1eee7; /* warm light surface/hover */
+  --neutral-gray: #6b6b6b; /* muted text */
+  --neutral-gray-light: #e7e3d8; /* warm hairline */
+  --neutral-dark: #0b0b0b; /* ink */
 }
 
 .dark {

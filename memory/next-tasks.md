@@ -1,3 +1,27 @@
+============================================================
+⚡ ACTIVE HANDOFF (2026-06-24) — UI REDESIGN, branch `redesign/app-ui` (pushed to GitHub origin)
+============================================================
+Goal: samakan SELURUH frontend ke desain Figma (file nMFbzuPNcRcKgFVvMEFfaj; node auth 11-3478=card, 11-3463=page).
+`main` = landing-v1 + Lenis smooth scroll (commit bd84b7b). Branch `redesign/app-ui` dibuat dari main.
+
+DONE on `redesign/app-ui` (commits d674053, f80af84, 834ecc2, e7cc1d3, ac218a3 — semua pushed):
+- Font Inter → **Manrope** semua page (layout.tsx, var --font-sans).
+- App tokens (globals.css :root) = palet Figma EKSAK: --primary #d8f277 (chartreuse) + --primary-foreground #0b0b0b (teks gelap); --foreground #0b0b0b; --secondary #fafaf8 (fill input); --border/--input #e7e3d8; --muted-foreground #6b6b6b; --ring #a3ce00; --radius 0.75rem. Legacy --neutral-* di-remap (light #f1eee7, gray #6b6b6b, gray-light #e7e3d8, dark #0b0b0b).
+- Button (ui/button.tsx): sudah rounded-full; hover/active diperbaiki dari hijau lama → chartreuse #cdec5a/#c2e84a.
+- Input (ui/input.tsx): fill #fafaf8, border #e7e3d8 1.5px, rounded-[10px], h-11.
+- AuthCard: bg-background (warm), card putih border #e7e3d8 + radius 20px + soft shadow berlapis, heading **32px** Manrope, wordmark EduNomad DIHAPUS → berlaku ke login/register/role/about/skills/portfolio.
+- Auth pages: link `text-primary` (chartreuse pucat tak terbaca) → `text-[#5f8c00]` readable; skills chip terpilih → border-[#a3ce00] bg-[#eef7d6] text-[#5f8c00].
+- Landing CTA (sections/cta.tsx): 3 tombol role → 1 tombol "Gabung EduNomad" pill (→/auth/register).
+
+BELUM — kerjakan di sesi baru (urut):
+1. ✅ DONE (2026-06-24, commit fa3f065 pushed) — **WARNA LANDING ke palet Figma** node 5:4. Hex diambil EKSAK via Figma MCP get_design_context (bukan tebakan). Hasil di globals.css ln-*: ln-accent #96da55→**#d8f277** (chartreuse, = auth --primary); ln-ink #0f1115→**#201f31** (navy; dipakai teks + bg dark section); ln-muted #6b6860→#6b6b6b; ln-line → rgba(32,31,49,0.08). **KOREKSI tebakan lama**: accent-strong TETAP **#87c522** (Figma pakai itu untuk "UMKM." & label kecil — JANGAN ubah ke #a3ce00); accent-soft TETAP #e1fcdc; accent-ink TETAP #5da316. Glow hardcoded lama (rgba 150,218,85 / 142,240,90) di hero.tsx (ln62 dot, ln92 radial glow, ln217 green-card shadow) + how-it-works.tsx ln44 → diganti rgb(216,242,119). Semua text-ln-accent terverifikasi di atas card DARK (bg-ln-ink) → chartreuse pucat tetap terbaca; accent hanya jadi FILL di bg terang. tsc 0 error; :root token terverifikasi render nilai Figma eksak di browser.
+1b. ✅ DONE (2026-06-24) — **docs/08-UI_Pages_Specification §Design System di-align ke Figma** (decision D-UI-1). Tujuan: future frontend baca spec → pakai desain Figma, bukan palet lama. Sekarang docs/08 = "SOURCE OF TRUTH = Figma", dua palet terdokumentasi (in-app :root + landing ln-*), font Inter→Manrope, radius/button/progress/color-usage di-update, palet lama #67C957 ditandai DEPRECATED (tinggal jadi --success + catatan). Nilai mirror globals.css EKSAK. Doc adalah referensi UI terkunci (CLAUDE.md), jadi ini bikin Figma jadi sumber kebenaran durable.
+2. (opsional) Tambah tombol **Google + divider "atau"** di /auth/register (Figma 11-3478); login sudah punya tombol Google (disabled).
+3. Cek visual page **non-auth** (dashboard/projects/admin/my-projects/applications) dgn token baru; perbaiki sisa warna lama (grep `neutral-`/`text-primary`/`#67C957` di src/app + src/components).
+4. Kalau cocok → **merge `redesign/app-ui` → main**.
+Catatan: tool screenshot Playwright sering hang di dev server → verifikasi via `browser_evaluate` (computed styles). Backend perlu nyala utk authed-redirect. Commit+push tiap selesai (Conventional Commits + `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`).
+============================================================
+
 High Priority:
 
 - **DIRECTIVE (user, 2026-06-23): the landing page `/` is the SINGLE ENTRY POINT for ALL users — login + registration. It must connect to auth and every other flow.** Status of landing→app wiring:

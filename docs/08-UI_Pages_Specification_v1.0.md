@@ -20,31 +20,75 @@
 
 ## Design System
 
-### Color Palette
+> **SOURCE OF TRUTH = Figma** (file `nMFbzuPNcRcKgFVvMEFfaj`: app/auth nodes 11-3478 / 11-3463, landing node 5:4).
+> This section was re-aligned to the Figma brand on **2026-06-24** and now mirrors the values actually shipped
+> in `frontend/src/app/globals.css`. The earlier "Primary Green #67C957" palette is **deprecated** — do not use it.
+> Future frontend work MUST consume these tokens (CSS variables), never the old hexes.
 
-| Color | Usage | Hex/Value |
-|-------|-------|-----------|
-| **Primary Green** | Primary CTA, Active states, Success | #67C957 (dari design) |
-| **Neutral Light** | Background, Cards | #F5F5F5 |
-| **Neutral Gray** | Text secondary, Borders | #999999, #CCCCCC |
-| **Neutral Dark** | Text primary, Headings | #333333, #000000 |
-| **Dark Background** | Info cards (alerts) | #1A1A1A |
-| **Success** | Positive messages, Badges | #67C957 |
-| **Warning** | Alerts, Status | #FFA500 |
-| **Error** | Errors, Rejections | #FF4444 |
+### Brand language
+
+Warm off-white canvas · near-black ink · **chartreuse lime** accent with **dark** text on it · soft warm-gray
+hairlines · generously rounded corners. Font = **Manrope** (was Inter). Two scoped palettes share the same brand:
+the **in-app** palette (auth + dashboard + all authed pages) and the **landing** palette (marketing `/` only).
+
+### Color Palette — In-app (`:root` tokens, `globals.css`)
+
+| Token | Usage | Hex |
+|-------|-------|-----|
+| `--background` | Page background (warm off-white) | `#faf8f3` |
+| `--foreground` | Primary text / headings (near-black ink) | `#0b0b0b` |
+| `--card` / `--popover` | Card & popover surfaces | `#ffffff` |
+| `--primary` | **Primary CTA, active states** (chartreuse lime) | `#d8f277` |
+| `--primary-foreground` | Text **on** primary (dark, not white) | `#0b0b0b` |
+| `--secondary` | Input / surface fill | `#fafaf8` |
+| `--muted` | Muted surface / hover | `#f1eee7` |
+| `--muted-foreground` | Secondary text | `#6b6b6b` |
+| `--accent` | Light chartreuse tint (selected chips) | `#eef7d6` |
+| `--accent-foreground` | Text on accent tint | `#3f4d00` |
+| `--border` / `--input` | Warm hairline border | `#e7e3d8` |
+| `--ring` | Focus ring / readable link green | `#a3ce00` |
+| `--destructive` / `--error` | Errors, rejections | `#e5484d` / `#FF4444` |
+| `--success` | Positive badges/messages | `#67C957` |
+| `--warning` | Alerts, status | `#FFA500` |
+| `--info-dark` | Dark info/alert card bg only (not a dark theme) | `#1A1A1A` |
+
+> ⚠️ Primary is **chartreuse `#d8f277`** and always pairs with **dark `#0b0b0b`** text (never white) — it is a
+> light fill, so white text on it is illegible. Link/inline-green that must stay readable on light uses `#5f8c00`
+> (auth links) or the `--ring` green `#a3ce00`.
+
+### Color Palette — Landing (`ln-*` tokens, marketing `/` only)
+
+Scoped separately so the in-app system stays untouched. Exact Figma node 5:4 values:
+
+| Token | Usage | Hex |
+|-------|-------|-----|
+| `--color-ln-bg` | Landing canvas | `#faf8f3` |
+| `--color-ln-ink` | Text **and** dark-section background (deep navy) | `#201f31` |
+| `--color-ln-muted` | Body / secondary text | `#6b6b6b` |
+| `--color-ln-accent` | Accent fill + accent text on dark (chartreuse) | `#d8f277` |
+| `--color-ln-accent-strong` | Green text/labels on **light** (e.g. hero "UMKM.") | `#87c522` |
+| `--color-ln-accent-ink` | Green icon/text on light cards (darkest) | `#5da316` |
+| `--color-ln-accent-soft` | Light green chip background | `#e1fcdc` |
+| `--color-ln-card` / `--color-ln-surface` | Card / inset surface | `#ffffff` / `#fafafa` |
+
+> Accent `#d8f277` is pale: legible as **text only on dark** (navy `#201f31`). On light backgrounds it appears
+> only as a **fill** (with dark text) — green text on light uses `accent-strong`/`accent-ink`.
 
 ### Typography
 
+Font family: **Manrope** (`--font-sans`), loaded in `app/layout.tsx`. Weights through Black (800/900) for display.
+
 | Element | Font | Size | Weight |
 |---------|------|------|--------|
-| **H1 (Page Title)** | Inter/System | 28-32px | Bold (700) |
-| **H2 (Section)** | Inter/System | 20-24px | Bold (700) |
-| **H3 (Subsection)** | Inter/System | 16-18px | Semibold (600) |
-| **Body Large** | Inter/System | 16px | Regular (400) |
-| **Body Normal** | Inter/System | 14px | Regular (400) |
-| **Body Small** | Inter/System | 12px | Regular (400) |
-| **Label** | Inter/System | 14px | Semibold (600) |
-| **Button** | Inter/System | 14px | Semibold (600) |
+| **H1 (Page Title)** | Manrope | 28-32px | Bold (700) |
+| **H2 (Section)** | Manrope | 20-24px | Bold (700) |
+| **H3 (Subsection)** | Manrope | 16-18px | Semibold (600) |
+| **Body Large** | Manrope | 16px | Regular (400) |
+| **Body Normal** | Manrope | 14px | Regular (400) |
+| **Body Small** | Manrope | 12px | Regular (400) |
+| **Label** | Manrope | 14px | Semibold (600) |
+| **Button** | Manrope | 14px | Semibold (600) |
+| **Auth heading** | Manrope | 32px | Bold (700) |
 
 ### Spacing
 
@@ -58,11 +102,15 @@
 
 ### Border Radius
 
+Base token `--radius: 0.75rem` (12px). Inputs use `10px`; auth/feature cards `20px`.
+
 - **None:** 0px
 - **sm:** 4px
 - **md:** 8px
-- **lg:** 12px
-- **full:** 9999px (buttons, badges)
+- **input:** 10px
+- **lg / base (`--radius`):** 12px
+- **card:** 20px (auth card, feature cards)
+- **full:** 9999px (buttons, badges, pills)
 
 ### Shadows
 
@@ -148,41 +196,41 @@ Example: Email input with envelope icon
 
 #### Button Styles
 
-**Primary Button (Green)**
+**Primary Button (Chartreuse)** — `--primary`
 ```
-Background: #67C957
-Text: White
+Background: #d8f277 (chartreuse lime)
+Text: #0b0b0b (DARK — never white; the fill is light)
 Padding: 12px 24px
-Border Radius: Full (9999px)
+Border Radius: Full (9999px) — implemented as rounded-full
 States:
-  - Normal: #67C957
-  - Hover: #5AB946
-  - Active: #4FA835
-  - Disabled: #CCCCCC
+  - Normal: #d8f277
+  - Hover:  #cdec5a
+  - Active: #c2e84a
+  - Disabled: muted (#e7e3d8 fill / reduced opacity)
 ```
 
 **Secondary Button (White/Border)**
 ```
 Background: White
-Border: 1px #CCCCCC
-Text: #333333
+Border: 1px #e7e3d8 (warm hairline)
+Text: #0b0b0b
 Padding: 12px 24px
 Border Radius: Full
 States:
-  - Normal: white border
-  - Hover: light gray background
+  - Normal: white + warm border
+  - Hover: light warm-gray background (#f1eee7)
   - Active: darker border
 ```
 
-**Tertiary Button (Text Only)**
+**Tertiary Button / Link (Text Only)**
 ```
 Background: Transparent
-Text: #67C957
+Text: #5f8c00 (readable green on light) — not #d8f277 (illegible on light)
 No border
 States:
-  - Normal: #67C957
+  - Normal: #5f8c00
   - Hover: Underline
-  - Active: #5AB946
+  - Active: #a3ce00 (ring green)
 ```
 
 ### Layout Components
@@ -219,8 +267,8 @@ States:
 
 #### Progress Bar
 ```
-- Background track (#EEEEEE)
-- Filled portion (#67C957)
+- Background track (#ebebeb)
+- Filled portion (#d8f277 chartreuse; in-app may use --primary)
 - Percentage label
 - Status indicator
 ```
@@ -1297,9 +1345,12 @@ Column headers (sortable)
 ## Notes for Implementation
 
 ### Color Usage
-- Use the green (#67C957) as primary color for all CTAs
-- Use neutral grays for secondary actions and disabled states
-- Use dark background (#1A1A1A) for alert/info cards only
+- Use **chartreuse `#d8f277`** (`--primary`) as the primary color for all CTAs — always with **dark `#0b0b0b`** text on it (never white; the fill is light).
+- For green **text/links on light** backgrounds use the readable green `#5f8c00` or `--ring` `#a3ce00` — never `#d8f277` (invisible on light).
+- Use warm neutral grays (`--muted` `#f1eee7`, `--muted-foreground` `#6b6b6b`, border `#e7e3d8`) for secondary actions, hairlines, and disabled states.
+- Use dark background (`#1A1A1A`, `--info-dark`) for alert/info cards only — it is not a global dark theme.
+- Landing dark sections use navy `#201f31` (`--color-ln-ink`), where chartreuse text **is** legible.
+- The old `#67C957` green palette is **deprecated** — do not introduce it in new work.
 
 ### Typography
 - Keep hierarchy clear (H1 > H2 > H3 > body)
