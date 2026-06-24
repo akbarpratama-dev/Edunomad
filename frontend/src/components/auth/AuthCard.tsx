@@ -1,7 +1,6 @@
-import Link from "next/link";
-
-// Centered card shell for all auth/registration pages (docs/08 Auth Pages:
-// "Centered card on light background").
+// Centered card shell for all auth/registration pages. Matches Figma node
+// 11-3463/11-3478: warm page bg, white card with a warm hairline border, soft
+// layered shadow, 20px radius, and a large 32px heading.
 export function AuthCard({
   title,
   subtitle,
@@ -14,15 +13,14 @@ export function AuthCard({
   wide?: boolean;
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-neutral-light px-4 py-10">
-      <Link href="/" className="mb-6 text-h2 font-bold text-primary">
-        EduNomad
-      </Link>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-10">
       <div
-        className={`w-full ${wide ? "max-w-2xl" : "max-w-md"} rounded-lg bg-card p-8 shadow-md`}
+        className={`w-full ${wide ? "max-w-2xl" : "max-w-md"} rounded-[20px] border border-[#e7e3d8] bg-card p-8 shadow-[0_4px_3px_rgba(0,0,0,0.05),0_10px_20px_rgba(0,0,0,0.08)]`}
       >
-        <h1 className="text-h2 font-bold text-neutral-dark">{title}</h1>
-        {subtitle && <p className="mt-2 text-body text-neutral-gray">{subtitle}</p>}
+        <h1 className="text-[2rem] font-bold leading-[1.2] tracking-[-0.01em] text-foreground">
+          {title}
+        </h1>
+        {subtitle && <p className="mt-2 text-body text-muted-foreground">{subtitle}</p>}
         <div className="mt-6">{children}</div>
       </div>
     </div>
