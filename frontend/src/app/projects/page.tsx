@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { EmptyState } from "@/components/common/EmptyState";
+import { PageHeader } from "@/components/common/PageHeader";
 import { ProjectStatusBadge } from "@/components/project/ProjectDetailView";
 import {
   projectApi,
@@ -92,17 +93,15 @@ function Content() {
   return (
     <AppShell breadcrumbs={[{ label: "Telusuri Proyek" }]}>
       <div className="flex flex-col gap-5">
-        <div>
-          <h1 className="text-h1 text-neutral-dark">Telusuri Proyek</h1>
-          <p className="text-body text-neutral-gray">
-            Temukan proyek nyata untuk berkolaborasi dan membangun portofolio.
-          </p>
-        </div>
+        <PageHeader
+          title="Telusuri Proyek"
+          subtitle="Temukan proyek nyata untuk berkolaborasi dan membangun portofolio."
+        />
 
         {/* Filters */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="relative sm:col-span-2 lg:col-span-2">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-gray" />
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               className="pl-9"
               placeholder="Cari proyek..."
@@ -157,22 +156,26 @@ function Content() {
         ) : (
           <>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {items.map((p) => (
-                <Link key={p.id} href={`/projects/${p.id}`} className="group">
-                  <Card className="h-full transition-colors group-hover:border-primary">
+              {items.map((p, i) => (
+                <Link
+                  key={p.id}
+                  href={`/projects/${p.id}`}
+                  style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+                  className="app-reveal group rounded-[20px]"
+                >
+                  <Card className="h-full transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-0.5 group-hover:shadow-[0_14px_30px_rgba(32,31,49,0.08)]">
                     <CardContent className="flex h-full flex-col gap-3 pt-2">
                       <div className="flex items-center justify-between gap-2">
                         <Badge variant="secondary">{p.category.name}</Badge>
                         <ProjectStatusBadge status={p.status} />
                       </div>
-                      <h3 className="text-h3 text-neutral-dark line-clamp-2">{p.title}</h3>
-                      <p className="text-body-sm text-neutral-gray line-clamp-2">
-                        {p.description}
-                      </p>
+                      <h3 className="line-clamp-2 text-base font-semibold text-foreground">{p.title}</h3>
+                      <p className="line-clamp-2 text-sm text-muted-foreground">{p.description}</p>
                       <div className="mt-auto flex items-center justify-between pt-2">
-                        <span className="text-body-sm text-neutral-gray">{p.umkm.name}</span>
-                        <span className="text-body-sm font-medium text-primary">
-                          Lihat Detail →
+                        <span className="text-sm text-muted-foreground">{p.umkm.name}</span>
+                        <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#5f8c00]">
+                          Lihat Detail
+                          <span className="transition-transform group-hover:translate-x-0.5">→</span>
                         </span>
                       </div>
                     </CardContent>
@@ -191,7 +194,7 @@ function Content() {
                 >
                   Sebelumnya
                 </Button>
-                <span className="text-body-sm text-neutral-gray">
+                <span className="text-sm text-muted-foreground">
                   Halaman {page} dari {meta.lastPage}
                 </span>
                 <Button

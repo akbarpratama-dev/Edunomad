@@ -21,7 +21,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         // Tertiary Button (Text Only)
-        link: "text-primary underline-offset-4 hover:underline active:text-[#5AB946]",
+        link: "text-[#5f8c00] underline-offset-4 hover:underline active:text-[#a3ce00]",
       },
       size: {
         // Padding: 12px 24px — docs/08-UI_Pages_Specification_v1.0.md Button Styles

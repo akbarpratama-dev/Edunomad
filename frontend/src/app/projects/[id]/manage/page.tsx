@@ -147,7 +147,7 @@ function Content() {
                       href={app.senior.profile.linkedinUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-body-sm text-primary hover:underline"
+                      className="text-body-sm text-[#5f8c00] hover:underline"
                     >
                       LinkedIn
                     </a>

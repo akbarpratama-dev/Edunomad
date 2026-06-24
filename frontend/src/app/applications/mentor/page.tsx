@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Inbox } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -74,7 +75,7 @@ function Content() {
   return (
     <AppShell breadcrumbs={[{ label: "Lamaran Mentor" }]}>
       <div className="flex flex-col gap-4">
-        <h1 className="text-h1 text-neutral-dark">Lamaran Mentor</h1>
+        <PageHeader title="Lamaran Mentor" subtitle="Kelola lamaran mentoring yang kamu ajukan ke proyek." />
 
         <div className="flex gap-2 overflow-x-auto border-b border-border">
           {TABS.map((t) => (
@@ -84,7 +85,7 @@ function Content() {
               className={cn(
                 "whitespace-nowrap px-4 py-2 text-body font-medium",
                 tab === t.key
-                  ? "border-b-2 border-primary text-primary"
+                  ? "border-b-2 border-[#a3ce00] text-foreground"
                   : "text-neutral-gray hover:text-neutral-dark"
               )}
             >

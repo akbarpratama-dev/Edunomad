@@ -115,7 +115,7 @@ function Content() {
               className={cn(
                 "px-4 py-2 text-body font-medium",
                 tab === t.key
-                  ? "border-b-2 border-primary text-primary"
+                  ? "border-b-2 border-[#a3ce00] text-foreground"
                   : "text-neutral-gray hover:text-neutral-dark"
               )}
             >

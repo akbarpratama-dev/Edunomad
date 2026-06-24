@@ -66,7 +66,7 @@ function Stepper({ step }: { step: number }) {
                 active
                   ? "bg-primary text-primary-foreground"
                   : done
-                    ? "bg-primary/15 text-primary"
+                    ? "bg-accent text-accent-foreground"
                     : "bg-neutral-light text-neutral-gray"
               )}
             >
