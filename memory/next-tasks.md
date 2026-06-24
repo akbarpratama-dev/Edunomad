@@ -1,6 +1,21 @@
 ============================================================
-⚡ ACTIVE HANDOFF (2026-06-24) — UI REDESIGN, branch `redesign/app-ui` (pushed to GitHub origin)
+⚡ ACTIVE HANDOFF (2026-06-24 #2) — PHASE 5 WORKSPACE, branch `feature/phase-5-workspace` (cabang dari main, BELUM push)
 ============================================================
+redesign/app-ui SUDAH di-merge ke `main` (--no-ff, commit 84127ce, pushed) — UI Figma alignment kelar. Lalu cabang `feature/phase-5-workspace` dari main untuk Phase 5.
+
+✅ DONE & VERIFIED — Phase 5.1 backend (Project Workspace chat, Workflow 6/7), commit 1 sudah ada di branch (REST), + RLS/Realtime DB-side:
+- 5.1.1/5.1.2 services: discussion.service (group) + directMessage.service (DM). 5.1.3 controllers+routes. 5.1.4 RLS+Realtime.
+- Endpoints LIVE (semua auth): GET/POST /projects/:id/discussions; GET/POST /discussions/:id/messages; POST /users/:id/direct-chat; GET/POST /direct-chat/:id/messages.
+- Files baru: constants/discussionType.ts, validators/discussion.validator.ts, repositories/discussion.repository.ts, services/discussion.service.ts, services/directMessage.service.ts, modules/discussion/discussion.controller.ts, modules/directMessage/directMessage.controller.ts, routes/discussion.routes.ts, routes/directChat.routes.ts; wired ke routes/index.ts + project.routes.ts (+/:id/discussions) + user.routes.ts (+/:id/direct-chat). RLS SQL di backend/db/phase5_discussions_rls_realtime.sql.
+- Aturan: group create = senior lead / UMKM owner saja (beginner "join"), senior auto-include; akses discussion = baris discussion_members; DM = hanya antar user yg share project context (D-P5-3); title TIDAK dipersist (D-P5-1, schema menang).
+- RLS (D-P5-2, RLS PERTAMA di project): writes lewat Express (Prisma bypass RLS), client baca live read-only via Realtime, policy SELECT-only via SECURITY DEFINER is_discussion_member(). auth.uid()==users.id.
+- VERIFIED: backend build 0 err; E2E /tmp/p5-e2e.sh = **14/14 PASS** (group+DM, semua gate 403/422, pagination) — tetap 14/14 SETELAH RLS aktif (bukti Prisma bypass). RLS client path: member lihat 4 baris, outsider 0, anon []. Test fixtures: project ACTIVE `a1a1a1a1-0000-4000-8000-000000000005` (umkm=p4-umkm, senior=p4-senior, members=p4-beginner+p43-b2; p43-b3=outsider).
+
+BELUM — Phase 5.2 Frontend (sesi berikut): workspace page `/projects/[id]/workspace` (tabs Overview|Milestones|Discussion|Members; +DM page). 5.2.4 Discussion tab = chat group + Supabase Realtime subscribe (read live, kirim via Express). 5.2.6 DM page. Reuse AppShell/AuthGuard/apiClient + service object. Pakai @supabase/supabase-js client subscribe channel `discussion_messages` filter discussion_id. Note: backend dev server jalan di :3001 (background), frontend :3000.
+⚠️ Commit REST sudah ada tapi branch BELUM di-push — push `feature/phase-5-workspace` + memory commit.
+
+--- handoff lama (UI redesign, SUDAH SELESAI & merged) di bawah utk arsip ---
+
 Goal: samakan SELURUH frontend ke desain Figma (file nMFbzuPNcRcKgFVvMEFfaj; node auth 11-3478=card, 11-3463=page).
 `main` = landing-v1 + Lenis smooth scroll (commit bd84b7b). Branch `redesign/app-ui` dibuat dari main.
 

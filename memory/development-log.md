@@ -588,3 +588,12 @@ API Changes:
 
 Summary:
 Phase 3 fully complete (backend + frontend). Project lifecycle DRAFT→PENDING_REVIEW→RECRUITING is end-to-end usable in the UI for UMKM (create/submit), Admin (review/approve/reject), and all roles (browse/detail). Next: Phase 4 recruitment.
+
+## 2026-06-24 — PHASE 5.1 Project Workspace backend (discussions + DM + RLS/Realtime)
+Branch: redesign/app-ui merged → main (--no-ff 84127ce, pushed); new branch feature/phase-5-workspace from main.
+Built layered (route→controller→service→repository→Prisma), $transaction for multi-step:
+- discussion.repository: isActiveProjectMember, listGroupForUser, findById(+members), isMember, createGroup($txn disc+members), findDirectBetween (exactly-2-member 1:1), createDirect($txn), userProjectIds (senior/owner/ACTIVE-member set), countMessages, listMessages (paginated, desc), createMessage ($txn insert + bump discussion.updatedAt).
+- discussion.service: participant gate (senior/UMKM/ACTIVE member); create restricted to senior lead OR UMKM owner, validates requested members are participants, senior auto-included; getMessages/sendMessage gated by discussion membership (rejects DIRECT). directMessage.service: assertCanDirectMessage (shared project context), self-block 422, createOrGet 1:1, message gates (rejects GROUP).
+- controllers + routes wired: GET/POST /projects/:id/discussions, GET/POST /discussions/:id/messages, POST /users/:id/direct-chat, GET/POST /direct-chat/:id/messages. requireVerified on writes.
+- 5.1.4 RLS+Realtime (Supabase MCP migration phase5_discussions_rls_realtime; mirrored backend/db/*.sql): RLS enabled on 3 discussion tables, SELECT-only policies via SECURITY DEFINER public.is_discussion_member(uuid); realtime publication += discussion_messages + discussions; replica identity full. FIRST RLS on the project.
+Verified: build 0 err; /tmp/p5-e2e.sh 14/14 PASS (group create/list/msg + DM create/dedupe/msg + 403/422 gates + pagination meta); stayed 14/14 after RLS (Prisma bypass proof); PostgREST RLS: member 4 rows / outsider 0 / anon []. Test project ACTIVE a1a1a1a1-…0005 seeded (p4-umkm/p4-senior/p4-beginner/p43-b2; p43-b3 outsider). Decisions D-P5-1..3.
