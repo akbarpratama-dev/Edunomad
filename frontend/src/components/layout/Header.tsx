@@ -30,7 +30,7 @@ export function Header({ breadcrumbs }: HeaderProps) {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-border bg-card px-4">
+    <header className="flex h-14 items-center justify-between border-b border-border/70 bg-background/80 px-4 backdrop-blur-sm">
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
