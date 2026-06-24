@@ -10,6 +10,7 @@ import { seniorApplicationController } from "../modules/seniorApplication/senior
 import { projectApplicationController } from "../modules/projectApplication/projectApplication.controller";
 import { projectMemberController } from "../modules/projectMember/projectMember.controller";
 import { projectLifecycleController } from "../modules/projectLifecycle/projectLifecycle.controller";
+import { discussionController } from "../modules/discussion/discussion.controller";
 import {
   createProjectSchema,
   updateProjectSchema,
@@ -20,6 +21,7 @@ import { createMilestoneSchema } from "../validators/milestone.validator";
 import { createRoleSchema } from "../validators/projectRole.validator";
 import { applyAsMentorSchema } from "../validators/seniorApplication.validator";
 import { applyToRoleSchema } from "../validators/projectApplication.validator";
+import { createGroupDiscussionSchema } from "../validators/discussion.validator";
 
 const router = Router();
 const umkm = [roleMiddleware(["UMKM"])];
@@ -128,6 +130,22 @@ router.get(
   authMiddleware,
   validateRequest({ params: projectIdParamSchema }),
   projectMemberController.listForProject
+);
+
+// Group discussions (Workflow 7) — list: participants; create: senior/UMKM owner.
+// Access enforced in the service.
+router.get(
+  "/:id/discussions",
+  authMiddleware,
+  validateRequest({ params: projectIdParamSchema }),
+  discussionController.listForProject
+);
+router.post(
+  "/:id/discussions",
+  authMiddleware,
+  requireVerified,
+  validateRequest({ params: projectIdParamSchema, body: createGroupDiscussionSchema }),
+  discussionController.create
 );
 
 // Project lifecycle (Workflow 5/11/15) — ownership/lead enforced in service.
