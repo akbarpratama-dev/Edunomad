@@ -9,7 +9,7 @@ interface AppShellProps {
 
 export function AppShell({ children, breadcrumbs }: AppShellProps) {
   return (
-    <div className="flex h-dvh bg-background">
+    <div data-app className="flex h-dvh bg-background">
       <div className="hidden md:block">
         <Sidebar />
       </div>

@@ -103,7 +103,7 @@ function DashboardContent() {
     <AppShell breadcrumbs={[{ label: "Dashboard" }]}>
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
         {/* Greeting hero */}
-        <section className="overflow-hidden rounded-3xl border border-border bg-[#201f31] p-8 text-white">
+        <section className="app-dark app-reveal overflow-hidden rounded-3xl border border-border bg-[#201f31] p-8 text-white">
           <p className="text-[13px] font-medium text-[#9b9ba6]">{ROLE_LABEL[appUser.role]}</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight">
             Halo, {appUser.name} <span className="align-middle">👋</span>
@@ -128,13 +128,14 @@ function DashboardContent() {
           <section>
             <h2 className="mb-3 text-sm font-semibold text-muted-foreground">Aksi Cepat</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {actions.map((a) => {
+              {actions.map((a, i) => {
                 const ActionIcon = a.icon;
                 return (
                   <Link
                     key={a.href + a.label}
                     href={a.href}
-                    className="group flex flex-col rounded-2xl border border-border bg-card p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(32,31,49,0.08)]"
+                    style={{ animationDelay: `${i * 70}ms` }}
+                    className="app-reveal group flex flex-col rounded-2xl border border-border bg-card p-5 transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(32,31,49,0.08)] active:translate-y-0"
                   >
                     <span className="grid size-11 place-items-center rounded-xl bg-accent text-accent-foreground">
                       <ActionIcon className="size-5" />

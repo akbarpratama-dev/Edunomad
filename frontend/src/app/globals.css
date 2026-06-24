@@ -262,3 +262,44 @@
     color: var(--color-ln-ink);
   }
 }
+
+/* ── Authed app interaction & a11y layer (scoped to [data-app]) ──────────
+   Visible keyboard focus, tactile taps, and a single reduced-motion-aware
+   reveal. Custom interactive elements (nav, tabs, chips, card-links) don't
+   inherit the Button component's focus ring, so we provide one here. */
+@layer base {
+  [data-app] :is(a, button, [role="button"], [role="tab"]) {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Darker-lime ring reads on the warm/white surfaces. */
+  [data-app] :is(a, button, [role="button"], [role="tab"]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
+  /* Chartreuse ring on navy surfaces (sidebar, hero, active chips). */
+  [data-app] .app-dark :is(a, button, [role="button"], [role="tab"]):focus-visible,
+  [data-app] .app-on-dark:focus-visible {
+    outline-color: var(--primary);
+  }
+
+  /* Entrance reveal — enhances an already-visible default; only runs when the
+     user hasn't asked to reduce motion (reduced users see content instantly). */
+  @media (prefers-reduced-motion: no-preference) {
+    .app-reveal {
+      animation: app-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+  }
+  @keyframes app-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

@@ -121,14 +121,15 @@ export function DiscussionFeed({ channelId }: { channelId: string }) {
           Belum ada pesan. Mulai percakapan dengan tim.
         </p>
       ) : (
-        messages.map((m) => {
+        messages.map((m, i) => {
           const badge = ROLE_BADGE[m.sender.role];
           const mine = m.sender.id === myId;
           return (
             <article
               key={m.id}
+              style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
               className={cn(
-                "rounded-2xl border bg-card p-5",
+                "app-reveal rounded-2xl border bg-card p-5",
                 mine ? "border-ring/40" : "border-border"
               )}
             >

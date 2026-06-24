@@ -129,11 +129,12 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
                   <button
                     key={d.id}
                     onClick={() => setActiveId(d.id)}
+                    aria-pressed={d.id === activeId}
                     className={cn(
-                      "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+                      "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors duration-200",
                       d.id === activeId
-                        ? "border-transparent bg-[#201f31] text-white"
-                        : "border-border bg-card text-muted-foreground hover:text-foreground"
+                        ? "app-on-dark border-transparent bg-[#201f31] text-white"
+                        : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
                     )}
                   >
                     Diskusi {i + 1}

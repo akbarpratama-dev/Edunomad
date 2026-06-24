@@ -29,7 +29,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   return (
-    <div className="flex h-full w-64 flex-col bg-[#201f31] text-[#e8e8ec]">
+    <div className="app-dark flex h-full w-64 flex-col bg-[#201f31] text-[#e8e8ec]">
       {/* Brand */}
       <Link
         href="/dashboard"
@@ -45,7 +45,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </span>
       </Link>
 
-      <p className="px-5 pb-2 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#6c6c79]">
+      <p className="px-5 pb-2 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8f8f9b]">
         Menu
       </p>
 
@@ -59,8 +59,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               key={item.href}
               href={item.href}
               onClick={onNavigate}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition-colors duration-200",
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "text-[#b6b6c0] hover:bg-white/5 hover:text-white"
@@ -92,7 +93,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               key={item.href}
               href={item.href}
               onClick={onNavigate}
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-[#7e7e8a] transition-colors hover:bg-white/5 hover:text-[#b6b6c0]"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-[#9595a1] transition-colors duration-200 hover:bg-white/5 hover:text-white"
             >
               <Icon className="size-4 shrink-0" />
               {item.label}
