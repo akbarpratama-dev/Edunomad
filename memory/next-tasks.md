@@ -1,3 +1,26 @@
+============================================================
+⚡ ACTIVE HANDOFF (2026-06-24) — UI REDESIGN, branch `redesign/app-ui` (pushed to GitHub origin)
+============================================================
+Goal: samakan SELURUH frontend ke desain Figma (file nMFbzuPNcRcKgFVvMEFfaj; node auth 11-3478=card, 11-3463=page).
+`main` = landing-v1 + Lenis smooth scroll (commit bd84b7b). Branch `redesign/app-ui` dibuat dari main.
+
+DONE on `redesign/app-ui` (commits d674053, f80af84, 834ecc2, e7cc1d3, ac218a3 — semua pushed):
+- Font Inter → **Manrope** semua page (layout.tsx, var --font-sans).
+- App tokens (globals.css :root) = palet Figma EKSAK: --primary #d8f277 (chartreuse) + --primary-foreground #0b0b0b (teks gelap); --foreground #0b0b0b; --secondary #fafaf8 (fill input); --border/--input #e7e3d8; --muted-foreground #6b6b6b; --ring #a3ce00; --radius 0.75rem. Legacy --neutral-* di-remap (light #f1eee7, gray #6b6b6b, gray-light #e7e3d8, dark #0b0b0b).
+- Button (ui/button.tsx): sudah rounded-full; hover/active diperbaiki dari hijau lama → chartreuse #cdec5a/#c2e84a.
+- Input (ui/input.tsx): fill #fafaf8, border #e7e3d8 1.5px, rounded-[10px], h-11.
+- AuthCard: bg-background (warm), card putih border #e7e3d8 + radius 20px + soft shadow berlapis, heading **32px** Manrope, wordmark EduNomad DIHAPUS → berlaku ke login/register/role/about/skills/portfolio.
+- Auth pages: link `text-primary` (chartreuse pucat tak terbaca) → `text-[#5f8c00]` readable; skills chip terpilih → border-[#a3ce00] bg-[#eef7d6] text-[#5f8c00].
+- Landing CTA (sections/cta.tsx): 3 tombol role → 1 tombol "Gabung EduNomad" pill (→/auth/register).
+
+BELUM — kerjakan di sesi baru (urut):
+1. **WARNA LANDING ke palet Figma** (globals.css token ln-*): ln-ink #0f1115→#0b0b0b; ln-accent #96da55→#d8f277; ln-accent-strong #87c522→#a3ce00; ln-accent-soft→#eef7d6. ⚠️ HATI-HATI kontras: teks besar "UMKM." di hero pakai ln-accent-strong — #a3ce00 di bg #faf8f3 ≈2.4:1 (rendah); cek keterbacaan, mungkin perlu dipertahankan #87c522 atau dibikin lebih gelap khusus teks. Glow hero pakai rgba(150,218,85) hardcoded (sections/hero.tsx) — selaraskan bila perlu.
+2. (opsional) Tambah tombol **Google + divider "atau"** di /auth/register (Figma 11-3478); login sudah punya tombol Google (disabled).
+3. Cek visual page **non-auth** (dashboard/projects/admin/my-projects/applications) dgn token baru; perbaiki sisa warna lama (grep `neutral-`/`text-primary`/`#67C957` di src/app + src/components).
+4. Kalau cocok → **merge `redesign/app-ui` → main**.
+Catatan: tool screenshot Playwright sering hang di dev server → verifikasi via `browser_evaluate` (computed styles). Backend perlu nyala utk authed-redirect. Commit+push tiap selesai (Conventional Commits + `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`).
+============================================================
+
 High Priority:
 
 - **DIRECTIVE (user, 2026-06-23): the landing page `/` is the SINGLE ENTRY POINT for ALL users — login + registration. It must connect to auth and every other flow.** Status of landing→app wiring:
