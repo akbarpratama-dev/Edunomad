@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, GraduationCap, UserCheck, Building2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/landing/primitives";
 import { Reveal } from "@/components/landing/motion";
 
@@ -24,25 +24,13 @@ export function Cta() {
                 Bangun pengalaman, portofolio, dan koneksi profesional melalui proyek yang benar-benar dibutuhkan UMKM.
               </p>
 
-              <div className="mt-9 flex flex-wrap justify-center gap-3">
+              <div className="mt-9 flex justify-center">
                 <Link
-                  href="/auth/register?role=BEGINNER"
-                  className="group inline-flex items-center gap-2 rounded-[14px] bg-ln-ink px-6 py-3.5 text-[15px] font-bold text-white transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.97]"
+                  href="/auth/register"
+                  className="group inline-flex items-center gap-2 rounded-full bg-ln-ink px-8 py-4 text-[15px] font-bold text-white transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(15,17,21,0.24)] active:scale-[0.97]"
                 >
-                  <GraduationCap className="size-4" aria-hidden /> Saya Mahasiswa
+                  Gabung EduNomad
                   <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
-                </Link>
-                <Link
-                  href="/auth/register?role=SENIOR"
-                  className="inline-flex items-center gap-2 rounded-[14px] border-[1.5px] border-ln-ink/25 px-6 py-3.5 text-[15px] font-semibold text-ln-ink transition-[transform,background-color] duration-300 hover:bg-ln-ink/[0.06] active:scale-[0.97]"
-                >
-                  <UserCheck className="size-4" aria-hidden /> Saya Mentor
-                </Link>
-                <Link
-                  href="/auth/register?role=UMKM"
-                  className="inline-flex items-center gap-2 rounded-[14px] border-[1.5px] border-ln-ink/25 px-6 py-3.5 text-[15px] font-semibold text-ln-ink transition-[transform,background-color] duration-300 hover:bg-ln-ink/[0.06] active:scale-[0.97]"
-                >
-                  <Building2 className="size-4" aria-hidden /> Saya UMKM
                 </Link>
               </div>
             </div>
