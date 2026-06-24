@@ -172,10 +172,10 @@
   --warning: #FFA500;
   --error: #FF4444;
   --info-dark: #1A1A1A; /* alert/info card background, not a global dark theme */
-  --neutral-light: #F5F5F5;
-  --neutral-gray: #999999;
-  --neutral-gray-light: #CCCCCC;
-  --neutral-dark: #333333;
+  --neutral-light: #f1eee7; /* warm light surface/hover */
+  --neutral-gray: #6b6b6b; /* muted text */
+  --neutral-gray-light: #e7e3d8; /* warm hairline */
+  --neutral-dark: #0b0b0b; /* ink */
 }
 
 .dark {

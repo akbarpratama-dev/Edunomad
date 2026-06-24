@@ -67,7 +67,7 @@ export default function LoginPage() {
             <Checkbox onCheckedChange={(c) => setValue("remember", c === true)} />
             Ingat Saya
           </label>
-          <Link href="/auth/forgot-password" className="text-body-sm text-primary hover:underline">
+          <Link href="/auth/forgot-password" className="text-body-sm text-[#5f8c00] font-semibold hover:underline">
             Lupa Password?
           </Link>
         </div>
@@ -88,7 +88,7 @@ export default function LoginPage() {
 
         <p className="text-center text-body-sm text-neutral-gray">
           Belum punya akun?{" "}
-          <Link href="/auth/register" className="text-primary hover:underline">
+          <Link href="/auth/register" className="text-[#5f8c00] font-semibold hover:underline">
             Daftar Sekarang
           </Link>
         </p>
