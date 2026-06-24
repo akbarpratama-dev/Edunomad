@@ -1,6 +1,31 @@
 ============================================================
-⚡ ACTIVE HANDOFF (2026-06-24) — UI REDESIGN, branch `redesign/app-ui` (pushed to GitHub origin)
+⚡ ACTIVE HANDOFF (2026-06-24 #3) — PHASE 5 SELESAI (5.1 backend + 5.2 frontend), branch `feature/phase-5-workspace`
 ============================================================
+redesign/app-ui merged ke main (84127ce). Branch feature/phase-5-workspace = Phase 5 lengkap & VERIFIED.
+
+✅ DONE & VERIFIED — **Phase 5.2 FRONTEND** (commit terbaru):
+- services/discussionApi.ts; components/workspace/{ChatPanel,DiscussionTab,DirectMessageDialog}.tsx; app/projects/[id]/workspace/page.tsx (tabs Ringkasan|Milestone|Diskusi|Anggota); "Buka Workspace" entry di detail page (ACTIVE/AWAITING).
+- ChatPanel: Supabase Realtime subscribe (postgres_changes INSERT, filter discussion_id) → re-pull list (D-P5-4); kirim via Express; realtime.setAuth utk RLS. Dipakai group + DM.
+- DM via Members tab launcher (find-or-get); conversation-list ditunda (belum ada GET /direct-chats di 5.1).
+- Deliverables/Reviews/Artifacts tab TIDAK dibangun (Phase 6/7/8). Notifications TIDAK (Phase 9).
+- VERIFIED browser (login p4-senior, project a1a1a1a1-…0005): workspace render, kirim via Express jalan, REALTIME live (pesan beginner via API muncul di tab senior tanpa refresh), DM dialog find-or-get + history. tsc 0 err.
+
+➡️ NEXT = **PHASE 6 — Deliverables & Contributions** (task-breakdown §6). Cabang baru `feature/phase-6-*` dari main SETELAH feature/phase-5-workspace di-merge ke main (atau lanjut sesuai preferensi). Catatan carry-over Phase 4.3: completion-readiness gates (deliverables/contributions/reviews/artifacts, Workflow 15) nyusul di phase pemiliknya — Phase 6 mulai isi gate deliverables/contributions di projectLifecycle.service.requestCompletion (D-P4.3-3).
+⚠️ Branch feature/phase-5-workspace SUDAH di-push (5.1). Push lagi commit 5.2 + memory. Pertimbangkan merge → main + buka PR.
+
+--- arsip: Phase 5.1 backend (DONE & VERIFIED) ---
+- 5.1.1/5.1.2 services: discussion.service (group) + directMessage.service (DM). 5.1.3 controllers+routes. 5.1.4 RLS+Realtime.
+- 5.1.1/5.1.2 services: discussion.service (group) + directMessage.service (DM). 5.1.3 controllers+routes. 5.1.4 RLS+Realtime.
+- Endpoints LIVE (semua auth): GET/POST /projects/:id/discussions; GET/POST /discussions/:id/messages; POST /users/:id/direct-chat; GET/POST /direct-chat/:id/messages.
+- Files baru: constants/discussionType.ts, validators/discussion.validator.ts, repositories/discussion.repository.ts, services/discussion.service.ts, services/directMessage.service.ts, modules/discussion/discussion.controller.ts, modules/directMessage/directMessage.controller.ts, routes/discussion.routes.ts, routes/directChat.routes.ts; wired ke routes/index.ts + project.routes.ts (+/:id/discussions) + user.routes.ts (+/:id/direct-chat). RLS SQL di backend/db/phase5_discussions_rls_realtime.sql.
+- Aturan: group create = senior lead / UMKM owner saja (beginner "join"), senior auto-include; akses discussion = baris discussion_members; DM = hanya antar user yg share project context (D-P5-3); title TIDAK dipersist (D-P5-1, schema menang).
+- RLS (D-P5-2, RLS PERTAMA di project): writes lewat Express (Prisma bypass RLS), client baca live read-only via Realtime, policy SELECT-only via SECURITY DEFINER is_discussion_member(). auth.uid()==users.id.
+- VERIFIED: backend build 0 err; E2E /tmp/p5-e2e.sh = **14/14 PASS** (group+DM, semua gate 403/422, pagination) — tetap 14/14 SETELAH RLS aktif (bukti Prisma bypass). RLS client path: member lihat 4 baris, outsider 0, anon []. Test fixtures: project ACTIVE `a1a1a1a1-0000-4000-8000-000000000005` (umkm=p4-umkm, senior=p4-senior, members=p4-beginner+p43-b2; p43-b3=outsider).
+
+(Phase 5.2 frontend SUDAH selesai — lihat blok #3 di atas.)
+
+--- handoff lama (UI redesign, SUDAH SELESAI & merged) di bawah utk arsip ---
+
 Goal: samakan SELURUH frontend ke desain Figma (file nMFbzuPNcRcKgFVvMEFfaj; node auth 11-3478=card, 11-3463=page).
 `main` = landing-v1 + Lenis smooth scroll (commit bd84b7b). Branch `redesign/app-ui` dibuat dari main.
 

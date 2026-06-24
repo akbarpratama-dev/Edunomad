@@ -375,6 +375,11 @@ function Content() {
           <div className="flex flex-col gap-4">
             <ProjectDetailView project={project} />
             <ActionPanel project={project} reload={load} />
+            {(project.status === "ACTIVE" || project.status === "AWAITING_COMPLETION") && (
+              <Button render={<Link href={`/projects/${project.id}/workspace`} />}>
+                Buka Workspace
+              </Button>
+            )}
             <ProjectMembersPanel key={project.status} project={project} />
           </div>
         ) : null}

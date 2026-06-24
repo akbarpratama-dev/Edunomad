@@ -16,6 +16,8 @@ import roleRoutes from "./role.routes";
 import seniorApplicationRoutes from "./seniorApplication.routes";
 import applicationRoutes from "./application.routes";
 import memberRoutes from "./member.routes";
+import discussionRoutes from "./discussion.routes";
+import directChatRoutes from "./directChat.routes";
 
 // Aggregates all feature routes under the /api/v1 base path (API spec).
 const router = Router();
@@ -30,6 +32,8 @@ router.use("/roles", roleRoutes);
 router.use("/senior-applications", seniorApplicationRoutes);
 router.use("/applications", applicationRoutes);
 router.use("/members", memberRoutes);
+router.use("/discussions", discussionRoutes);
+router.use("/direct-chat", directChatRoutes);
 router.use("/admin", adminRoutes);
 
 // Absolute-path routes
