@@ -1,6 +1,20 @@
 ============================================================
-⚡ ACTIVE HANDOFF (2026-06-24 #3) — PHASE 5 SELESAI (5.1 backend + 5.2 frontend), branch `feature/phase-5-workspace`
+⚡ ACTIVE HANDOFF (2026-06-25 #4) — PHASE 6 backend SELESAI, branch `feature/phase-6-deliverables`
 ============================================================
+main = db743b8 (Phase 0–5 + UI redesign semua merged). Tag restore `ui-restore-2026-06-25`.
+
+✅ DONE & VERIFIED — **PHASE 6.1+6.2 BACKEND** (Deliverables & Contributions, WF8/9), pushed:
+- Endpoints LIVE: GET/POST /projects/:id/deliverables; PUT /deliverables/:id; POST /deliverables/:id/{submit,approve,request-revision}; GET/POST /projects/:id/contributions; PUT /contributions/:id; POST /contributions/:id/approve.
+- Deliverable WF8: create=BEGINNER active member+project ACTIVE→DRAFT; submit (DRAFT|REVISION_REQUESTED→SUBMITTED, evidences LINK url/FILE file_path, replace tiap submit); senior lead approve/request-revision (hanya dari SUBMITTED). Feedback revisi → audit log (no schema column, D-P6-1) + di-surface sbg `revisionFeedback` di GET list.
+- Contribution WF9: submit=BEGINNER active member+ACTIVE, ONE per beginner→PENDING+skills; senior lead approve→APPROVED+reviewedBy.
+- Files: constants/deliverableStatus, validators/{deliverable,contribution}.validator, repositories/{deliverable,contribution}.repository, services/{...}.service, modules/{...}/controller, routes/{deliverable,contribution}.routes. auditActions += 3 action + 2 entity. projectMember.repo += isActiveMember.
+- VERIFIED: build 0 err; E2E /tmp/p6-e2e.sh **24/24** (lifecycle penuh + gate 403/422/400 + feedback + evidences/skills). No migration (model udah ada).
+
+➡️ BELUM — **PHASE 6.3 FRONTEND** (sesi berikut): tab Deliverables di workspace (beginner: create/submit+evidence link, lihat feedback, resubmit), Deliverable Review page senior (/projects/:id/deliverables/:did/review approve/request-revision), Contribution report page (beginner) + review (senior). Reuse AppShell/AuthGuard/apiClient + service object → bikin deliverableApi + contributionApi. Tambah tab "Deliverables" + "Kontribusi" di workspace (/projects/[id]/workspace) yg tadi di-skip. File upload evidence (Supabase Storage) bisa ditunda — mulai dgn evidence LINK dulu. Ikut DESIGN.md (PageHeader, card, semantic token, app-reveal, contrast-law: chartreuse fill only, link hijau #5f8c00).
+Catatan: completion-readiness gate (D-P4.3-3) masih TODO — bisa diisi (all deliverables+contributions APPROVED) di projectLifecycle.service.requestCompletion. NEXT phase setelah 6.3 = Phase 7 Reviews & Ratings.
+⚠️ Test project a1a1a1a1-…0005 ACTIVE (beginner p4-beginner+p43-b2 members, b3 nonmember, senior p4-senior, umkm p4-umkm), pw TestPass123!. Sudah ada 1 deliverable APPROVED + 1 contribution APPROVED dari E2E.
+
+--- arsip handoff #3 (Phase 5, DONE & merged) ---
 redesign/app-ui merged ke main (84127ce). Branch feature/phase-5-workspace = Phase 5 lengkap & VERIFIED.
 
 ✅ DONE & VERIFIED — **Phase 5.2 FRONTEND** (commit terbaru):
