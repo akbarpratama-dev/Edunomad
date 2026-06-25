@@ -27,22 +27,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!active) return;
-      setSession(data.session);
-      if (data.session) await loadAppUser();
-      setLoading(false);
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    // Single source of truth: onAuthStateChange fires INITIAL_SESSION immediately
+    // on subscribe (with the stored session, or null). A separate getSession() call
+    // would just duplicate the /auth/me fetch on load, so we drop it. The async work
+    // is deferred out of the callback (setTimeout 0) because awaiting other supabase
+    // calls inside an onAuthStateChange handler can deadlock the auth client.
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!active) return;
       setSession(session);
       if (session) {
-        await loadAppUser();
+        setTimeout(async () => {
+          if (!active) return;
+          await loadAppUser();
+          setLoading(false);
+        }, 0);
       } else {
         clear();
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
