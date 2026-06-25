@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { FolderKanban, Plus } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -88,12 +89,15 @@ function Content() {
   return (
     <AppShell breadcrumbs={[{ label: "Proyek Saya" }]}>
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-h1 text-neutral-dark">Proyek Saya</h1>
-          <Button render={<Link href="/projects/create" />}>
-            <Plus className="size-4" /> Buat Proyek
-          </Button>
-        </div>
+        <PageHeader
+          title="Proyek Saya"
+          subtitle="Kelola proyek yang kamu publikasikan dan rekrutmen timnya."
+          action={
+            <Button render={<Link href="/projects/create" />}>
+              <Plus className="size-4" /> Buat Proyek
+            </Button>
+          }
+        />
 
         <div className="flex gap-2 overflow-x-auto border-b border-border">
           {TABS.map((t) => (
@@ -101,10 +105,10 @@ function Content() {
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                "whitespace-nowrap px-4 py-2 text-body font-medium",
+                "whitespace-nowrap px-4 py-2 text-sm font-medium",
                 tab === t.key
-                  ? "border-b-2 border-primary text-primary"
-                  : "text-neutral-gray hover:text-neutral-dark"
+                  ? "border-b-2 border-[#a3ce00] text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               {t.label}
@@ -127,12 +131,12 @@ function Content() {
                 <CardContent className="flex flex-col gap-2 pt-2">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-body font-semibold text-neutral-dark">{item.title}</p>
-                      <p className="text-body-sm text-neutral-gray">{item.category.name}</p>
+                      <p className="text-sm font-semibold text-foreground">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">{item.category.name}</p>
                     </div>
                     <StatusBadge status={item.status} />
                   </div>
-                  <p className="text-body-sm text-neutral-gray">
+                  <p className="text-sm text-muted-foreground">
                     Deadline: {new Date(item.deadline).toLocaleDateString("id-ID")}
                   </p>
                   <div className="flex flex-wrap gap-2">

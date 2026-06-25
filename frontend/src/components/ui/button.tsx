@@ -13,7 +13,7 @@ const buttonVariants = cva(
           "rounded-full bg-primary text-primary-foreground hover:bg-[#cdec5a] active:bg-[#c2e84a] disabled:bg-neutral-gray-light disabled:opacity-100",
         // Secondary Button (White/Border)
         outline:
-          "rounded-full border-border bg-card hover:bg-neutral-light aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "rounded-full border-border bg-card hover:bg-muted aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
@@ -21,7 +21,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         // Tertiary Button (Text Only)
-        link: "text-primary underline-offset-4 hover:underline active:text-[#5AB946]",
+        link: "text-[#5f8c00] underline-offset-4 hover:underline active:text-[#a3ce00]",
       },
       size: {
         // Padding: 12px 24px — docs/08-UI_Pages_Specification_v1.0.md Button Styles

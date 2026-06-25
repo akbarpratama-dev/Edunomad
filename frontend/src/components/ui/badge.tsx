@@ -12,14 +12,14 @@ const badgeVariants = cva(
         // Badge/Tag — docs/08-UI_Pages_Specification_v1.0.md: green for active, gray for inactive
         default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
         secondary:
-          "bg-neutral-gray-light text-neutral-dark [a]:hover:bg-neutral-gray",
+          "bg-neutral-gray-light text-foreground [a]:hover:bg-neutral-gray",
         destructive:
           "bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
         outline:
           "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-[#5f8c00] underline-offset-4 hover:underline",
       },
     },
     defaultVariants: {

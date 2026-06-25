@@ -39,7 +39,7 @@ function Field({
     <div className="flex flex-col gap-1.5">
       <Label>{label}</Label>
       {children}
-      {helper && <p className="text-body-sm text-neutral-gray">{helper}</p>}
+      {helper && <p className="text-sm text-muted-foreground">{helper}</p>}
     </div>
   );
 }

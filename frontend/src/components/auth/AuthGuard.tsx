@@ -39,7 +39,7 @@ export function AuthGuard({
 
   if (isLoading || !isAuthenticated || !appUser) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-neutral-gray">
+      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
         Memuat...
       </div>
     );

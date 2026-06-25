@@ -20,7 +20,7 @@ export function AuthCard({
         <h1 className="text-[2rem] font-bold leading-[1.2] tracking-[-0.01em] text-foreground">
           {title}
         </h1>
-        {subtitle && <p className="mt-2 text-body text-muted-foreground">{subtitle}</p>}
+        {subtitle && <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>}
         <div className="mt-6">{children}</div>
       </div>
     </div>

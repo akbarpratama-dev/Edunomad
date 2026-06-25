@@ -79,11 +79,12 @@ function WorkspaceInner() {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
+            aria-current={tab === t.key ? "page" : undefined}
             className={cn(
-              "-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors",
+              "-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors duration-200",
               tab === t.key
-                ? "border-ring text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "border-primary text-foreground"
+                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
             )}
           >
             {t.label}

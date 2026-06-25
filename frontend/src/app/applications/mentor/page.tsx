@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Inbox } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -74,7 +75,7 @@ function Content() {
   return (
     <AppShell breadcrumbs={[{ label: "Lamaran Mentor" }]}>
       <div className="flex flex-col gap-4">
-        <h1 className="text-h1 text-neutral-dark">Lamaran Mentor</h1>
+        <PageHeader title="Lamaran Mentor" subtitle="Kelola lamaran mentoring yang kamu ajukan ke proyek." />
 
         <div className="flex gap-2 overflow-x-auto border-b border-border">
           {TABS.map((t) => (
@@ -82,10 +83,10 @@ function Content() {
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                "whitespace-nowrap px-4 py-2 text-body font-medium",
+                "whitespace-nowrap px-4 py-2 text-sm font-medium",
                 tab === t.key
-                  ? "border-b-2 border-primary text-primary"
-                  : "text-neutral-gray hover:text-neutral-dark"
+                  ? "border-b-2 border-[#a3ce00] text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               {t.label}
@@ -108,21 +109,21 @@ function Content() {
                 <CardContent className="flex flex-col gap-2 pt-2">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-body font-semibold text-neutral-dark">
+                      <p className="text-sm font-semibold text-foreground">
                         {a.project.title}
                       </p>
-                      <p className="text-body-sm text-neutral-gray">
+                      <p className="text-sm text-muted-foreground">
                         {a.project.umkm.name} · {a.project.category.name}
                       </p>
                     </div>
                     <StatusBadge status={a.status} />
                   </div>
                   {a.message && (
-                    <p className="text-body-sm text-neutral-gray whitespace-pre-wrap">
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                       &ldquo;{a.message}&rdquo;
                     </p>
                   )}
-                  <p className="text-body-sm text-neutral-gray">
+                  <p className="text-sm text-muted-foreground">
                     Dilamar: {new Date(a.createdAt).toLocaleDateString("id-ID")}
                   </p>
                   <div className="flex flex-wrap gap-2">

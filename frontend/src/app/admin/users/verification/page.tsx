@@ -80,7 +80,7 @@ function Content() {
   return (
     <AppShell breadcrumbs={[{ label: "Admin" }, { label: "Verifikasi Pengguna" }]}>
       <div className="flex flex-col gap-4">
-        <h1 className="text-h1 text-neutral-dark">Verifikasi Pengguna</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Verifikasi Pengguna</h1>
 
         <div className="flex gap-2 border-b border-border">
           {TABS.map((t) => (
@@ -88,10 +88,10 @@ function Content() {
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                "px-4 py-2 text-body font-medium",
+                "px-4 py-2 text-sm font-medium",
                 tab === t.key
-                  ? "border-b-2 border-primary text-primary"
-                  : "text-neutral-gray hover:text-neutral-dark"
+                  ? "border-b-2 border-[#a3ce00] text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               {t.label}
@@ -110,23 +110,23 @@ function Content() {
                 <CardContent className="flex flex-col gap-2 pt-2">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-body font-semibold text-neutral-dark">
+                      <p className="text-sm font-semibold text-foreground">
                         {item.user.name}{" "}
                         <Badge variant="secondary" className="ml-1">
                           {item.user.role}
                         </Badge>
                       </p>
-                      <p className="text-body-sm text-neutral-gray">{item.user.email}</p>
+                      <p className="text-sm text-muted-foreground">{item.user.email}</p>
                       {item.user.profile?.headline && (
-                        <p className="text-body-sm text-neutral-dark">{item.user.profile.headline}</p>
+                        <p className="text-sm text-foreground">{item.user.profile.headline}</p>
                       )}
                     </div>
-                    <span className="text-body-sm text-neutral-gray">
+                    <span className="text-sm text-muted-foreground">
                       {new Date(item.createdAt).toLocaleDateString("id-ID")}
                     </span>
                   </div>
                   {item.notes && (
-                    <pre className="whitespace-pre-wrap rounded-md bg-neutral-light p-2 text-body-sm text-neutral-dark">
+                    <pre className="whitespace-pre-wrap rounded-md bg-muted p-2 text-sm text-foreground">
                       {item.notes}
                     </pre>
                   )}

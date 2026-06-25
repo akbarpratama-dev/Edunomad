@@ -65,20 +65,20 @@ export default function RegisterStep2() {
               "flex items-start gap-4 rounded-lg border p-4 text-left transition-colors",
               selected === role
                 ? "border-primary bg-primary/5"
-                : "border-border hover:bg-neutral-light"
+                : "border-border hover:bg-muted"
             )}
           >
             <span
               className={cn(
                 "flex size-10 shrink-0 items-center justify-center rounded-md",
-                selected === role ? "bg-primary text-primary-foreground" : "bg-neutral-light text-neutral-gray"
+                selected === role ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
               )}
             >
               <Icon className="size-5" />
             </span>
             <span className="flex flex-col">
-              <span className="text-body font-semibold text-neutral-dark">{title}</span>
-              <span className="text-body-sm text-neutral-gray">{desc}</span>
+              <span className="text-sm font-semibold text-foreground">{title}</span>
+              <span className="text-sm text-muted-foreground">{desc}</span>
             </span>
           </button>
         ))}

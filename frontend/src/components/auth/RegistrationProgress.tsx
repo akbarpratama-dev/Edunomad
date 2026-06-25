@@ -5,7 +5,7 @@ const STEPS = ["Akun", "Peran", "Tentang", "Portofolio", "Keahlian"];
 export function RegistrationProgress({ current }: { current: number }) {
   return (
     <div className="mb-6">
-      <p className="mb-2 text-body-sm text-neutral-gray">
+      <p className="mb-2 text-sm text-muted-foreground">
         Langkah {current} dari {STEPS.length}
       </p>
       <div className="flex gap-1.5">

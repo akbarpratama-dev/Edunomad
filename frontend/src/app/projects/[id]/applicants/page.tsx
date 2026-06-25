@@ -90,8 +90,8 @@ function Content() {
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
         <div>
-          <h1 className="text-h1 text-neutral-dark">Pelamar Beginner</h1>
-          {project && <p className="text-body-sm text-neutral-gray">{project.title}</p>}
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Pelamar Beginner</h1>
+          {project && <p className="text-sm text-muted-foreground">{project.title}</p>}
         </div>
 
         <div className="flex gap-2 overflow-x-auto border-b border-border">
@@ -100,10 +100,10 @@ function Content() {
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                "whitespace-nowrap px-4 py-2 text-body font-medium",
+                "whitespace-nowrap px-4 py-2 text-sm font-medium",
                 tab === t.key
-                  ? "border-b-2 border-primary text-primary"
-                  : "text-neutral-gray hover:text-neutral-dark"
+                  ? "border-b-2 border-[#a3ce00] text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               {t.label}
@@ -128,10 +128,10 @@ function Content() {
                 <CardContent className="flex flex-col gap-2 pt-2">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-body font-semibold text-neutral-dark">
+                      <p className="text-sm font-semibold text-foreground">
                         {app.beginner.name}
                       </p>
-                      <p className="text-body-sm text-neutral-gray">
+                      <p className="text-sm text-muted-foreground">
                         Peran: {app.projectRole.roleName}
                         {app.beginner.profile?.headline
                           ? ` · ${app.beginner.profile.headline}`
@@ -150,7 +150,7 @@ function Content() {
                     </div>
                   )}
                   {app.motivation && (
-                    <p className="text-body-sm text-neutral-dark whitespace-pre-wrap">
+                    <p className="text-sm text-foreground whitespace-pre-wrap">
                       &ldquo;{app.motivation}&rdquo;
                     </p>
                   )}

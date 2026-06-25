@@ -16,12 +16,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let active = true;
 
+    // Load the app user; a stale/expired session token makes /auth/me 401 — sign
+    // out so it doesn't error-loop and the guard redirects cleanly to login.
+    const loadAppUser = async () => {
+      try {
+        setAppUser(await fetchMe());
+      } catch {
+        await supabase.auth.signOut();
+        clear();
+      }
+    };
+
     supabase.auth.getSession().then(async ({ data }) => {
       if (!active) return;
       setSession(data.session);
-      if (data.session) {
-        setAppUser(await fetchMe());
-      }
+      if (data.session) await loadAppUser();
       setLoading(false);
     });
 
@@ -29,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!active) return;
       setSession(session);
       if (session) {
-        setAppUser(await fetchMe());
+        await loadAppUser();
       } else {
         clear();
       }

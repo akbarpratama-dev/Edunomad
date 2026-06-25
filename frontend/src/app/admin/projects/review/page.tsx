@@ -105,7 +105,7 @@ function Content() {
   return (
     <AppShell breadcrumbs={[{ label: "Admin" }, { label: "Tinjau Proyek" }]}>
       <div className="flex flex-col gap-4">
-        <h1 className="text-h1 text-neutral-dark">Tinjau Proyek</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Tinjau Proyek</h1>
 
         <div className="flex gap-2 border-b border-border">
           {TABS.map((t) => (
@@ -113,10 +113,10 @@ function Content() {
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                "px-4 py-2 text-body font-medium",
+                "px-4 py-2 text-sm font-medium",
                 tab === t.key
-                  ? "border-b-2 border-primary text-primary"
-                  : "text-neutral-gray hover:text-neutral-dark"
+                  ? "border-b-2 border-[#a3ce00] text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               {t.label}
@@ -149,12 +149,12 @@ function Content() {
                 <CardContent className="flex flex-col gap-2 pt-2">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-body font-semibold text-neutral-dark">{item.title}</p>
-                      <p className="text-body-sm text-neutral-gray">
+                      <p className="text-sm font-semibold text-foreground">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">
                         {item.umkm.name} · {item.category.name}
                       </p>
                     </div>
-                    <span className="shrink-0 text-body-sm text-neutral-gray">
+                    <span className="shrink-0 text-sm text-muted-foreground">
                       {new Date(item.createdAt).toLocaleDateString("id-ID")}
                     </span>
                   </div>

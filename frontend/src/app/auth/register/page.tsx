@@ -79,17 +79,17 @@ export default function RegisterStep1() {
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="name">Nama Lengkap</Label>
           <Input id="name" placeholder="Masukkan nama lengkap" {...register("name")} />
-          {errors.name && <p className="text-body-sm text-error">{errors.name.message}</p>}
+          {errors.name && <p className="text-sm text-error">{errors.name.message}</p>}
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Alamat Email</Label>
           <Input id="email" type="email" placeholder="nama@email.com" {...register("email")} />
-          {errors.email && <p className="text-body-sm text-error">{errors.email.message}</p>}
+          {errors.email && <p className="text-sm text-error">{errors.email.message}</p>}
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="password">Kata Sandi</Label>
           <PasswordInput id="password" placeholder="Minimal 8 karakter" {...register("password")} />
-          {errors.password && <p className="text-body-sm text-error">{errors.password.message}</p>}
+          {errors.password && <p className="text-sm text-error">{errors.password.message}</p>}
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="confirmPassword">Konfirmasi Kata Sandi</Label>
@@ -99,7 +99,7 @@ export default function RegisterStep1() {
             {...register("confirmPassword")}
           />
           {errors.confirmPassword && (
-            <p className="text-body-sm text-error">{errors.confirmPassword.message}</p>
+            <p className="text-sm text-error">{errors.confirmPassword.message}</p>
           )}
         </div>
 
@@ -107,7 +107,7 @@ export default function RegisterStep1() {
           {submitting ? "Memproses..." : "Buat Akun →"}
         </Button>
 
-        <p className="text-center text-body-sm text-neutral-gray">
+        <p className="text-center text-sm text-muted-foreground">
           Sudah punya akun?{" "}
           <Link href="/auth/login" className="text-[#5f8c00] font-semibold hover:underline">
             Masuk

@@ -40,11 +40,11 @@ function Content() {
   return (
     <AppShell breadcrumbs={[{ label: "Admin" }, { label: "Audit Logs" }]}>
       <div className="flex flex-col gap-4">
-        <h1 className="text-h1 text-neutral-dark">Audit Logs</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Audit Logs</h1>
 
         <div className="flex flex-wrap items-end gap-2">
           <div className="flex flex-col gap-1">
-            <label className="text-body-sm text-neutral-gray">Action</label>
+            <label className="text-sm text-muted-foreground">Action</label>
             <Input
               placeholder="cth. VERIFICATION_APPROVED"
               value={action}
@@ -53,7 +53,7 @@ function Content() {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-body-sm text-neutral-gray">Entity Type</label>
+            <label className="text-sm text-muted-foreground">Entity Type</label>
             <Input
               placeholder="cth. verification_request"
               value={entityType}
@@ -78,8 +78,8 @@ function Content() {
         ) : (
           <>
             <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full text-left text-body-sm">
-                <thead className="bg-neutral-light text-neutral-gray">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-muted text-muted-foreground">
                   <tr>
                     <th className="p-2">Waktu</th>
                     <th className="p-2">Aktor</th>
@@ -91,13 +91,13 @@ function Content() {
                 <tbody>
                   {items.map((log) => (
                     <tr key={log.id} className="border-t border-border">
-                      <td className="p-2 text-neutral-gray">
+                      <td className="p-2 text-muted-foreground">
                         {new Date(log.createdAt).toLocaleString("id-ID")}
                       </td>
-                      <td className="p-2 text-neutral-dark">{log.user?.name ?? "—"}</td>
-                      <td className="p-2 font-medium text-neutral-dark">{log.action}</td>
-                      <td className="p-2 text-neutral-gray">{log.entityType}</td>
-                      <td className="p-2 text-neutral-gray">
+                      <td className="p-2 text-foreground">{log.user?.name ?? "—"}</td>
+                      <td className="p-2 font-medium text-foreground">{log.action}</td>
+                      <td className="p-2 text-muted-foreground">{log.entityType}</td>
+                      <td className="p-2 text-muted-foreground">
                         {log.metadata ? JSON.stringify(log.metadata) : "—"}
                       </td>
                     </tr>
@@ -110,7 +110,7 @@ function Content() {
               <Button variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
                 Sebelumnya
               </Button>
-              <span className="text-body-sm text-neutral-gray">
+              <span className="text-sm text-muted-foreground">
                 Hal {page} / {lastPage}
               </span>
               <Button
