@@ -1,7 +1,14 @@
 ============================================================
-⚡ ACTIVE HANDOFF (2026-06-25 #4) — PHASE 6 backend SELESAI, branch `feature/phase-6-deliverables`
+⚡ ACTIVE HANDOFF (2026-06-25 #5) — PHASE 6 SELESAI (backend + frontend), branch `feature/phase-6-deliverables`
 ============================================================
-main = db743b8 (Phase 0–5 + UI redesign semua merged). Tag restore `ui-restore-2026-06-25`.
+main = db743b8 (Phase 0–5 + UI redesign merged). Tag restore `ui-restore-2026-06-25`.
+
+✅ DONE & VERIFIED — **PHASE 6.3 FRONTEND** (ca8ee8d): deliverableApi + contributionApi; DeliverablesTab (beginner create/edit DRAFT, submit/resubmit evidence LINK dynamic inputs, feedback callout; senior lead review INLINE Setujui/Minta Revisi+feedback — D-P6-3, bukan page terpisah); ContributionTab (beginner own report summary+skill chips one-per-project; senior list+approve); tab "Deliverables"+"Kontribusi" di /projects/[id]/workspace. File-upload evidence (Supabase Storage) DITUNDA — LINK dulu (FILE backend ready). tsc 0; browser full loop verified (create→submit→request-revision→feedback tampil; contribution+skills).
+
+➡️ NEXT = **PHASE 7 Reviews & Ratings** (task-breakdown §7). Cabang `feature/phase-7-reviews` SETELAH merge feature/phase-6-deliverables→main. Baca task-breakdown §7 + schema reviews + API + RBAC + Workflow. Carry-over (D-P4.3-3): completion-readiness gate (all deliverables+contributions+reviews+artifacts APPROVED) bisa diisi di projectLifecycle.service.requestCompletion saat Phase 7/8. Sisa polish UI (create wizard/admin) opsional.
+⚠️ Branch feature/phase-6-deliverables sudah push (6.1+6.2+6.3). Pertimbangkan merge→main + buka PR.
+
+--- arsip handoff #4 (Phase 6 backend) ---
 
 ✅ DONE & VERIFIED — **PHASE 6.1+6.2 BACKEND** (Deliverables & Contributions, WF8/9), pushed:
 - Endpoints LIVE: GET/POST /projects/:id/deliverables; PUT /deliverables/:id; POST /deliverables/:id/{submit,approve,request-revision}; GET/POST /projects/:id/contributions; PUT /contributions/:id; POST /contributions/:id/approve.
