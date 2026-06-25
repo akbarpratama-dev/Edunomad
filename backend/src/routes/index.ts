@@ -3,6 +3,7 @@ import { authMiddleware } from "../middleware/authMiddleware";
 import { roleMiddleware } from "../middleware/roleMiddleware";
 import { validateRequest } from "../middleware/validateRequest";
 import { projectController } from "../modules/project/project.controller";
+import { projectMemberController } from "../modules/projectMember/projectMember.controller";
 import { myProjectsQuerySchema } from "../validators/project.validator";
 import authRoutes from "./auth.routes";
 import userRoutes from "./user.routes";
@@ -50,6 +51,8 @@ router.get(
   validateRequest({ query: myProjectsQuerySchema }),
   projectController.myProjects
 );
+// The caller's own project memberships (beginner "Proyek Saya").
+router.get("/me/projects", authMiddleware, projectMemberController.myProjects);
 router.use("/", verificationRoutes);
 
 export default router;

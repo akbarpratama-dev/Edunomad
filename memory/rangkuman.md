@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-26 (Proyek Saya bento + error nativeButton)
+
+Prompt:
+(1) Ada error console base-ui `nativeButton` di /my-projects → fix. (2) "ubah tampilan Proyek Saya jadi seperti Figma [node 262-2], bento grid card dengan info-info berhubungan". Saat ditanya: cek apakah sampai semua phase selesai ada Proyek Saya utk mahasiswa (harusnya ya) → restyle/buat dashboard beginner sesuai phase; widget di luar MVP → "tampilkan semua + placeholder".
+
+Hasil:
+(1) Fix `ui/button.tsx`: auto `nativeButton={false}` saat `render` dipakai → console Errors:0 (global, semua Button render Link). (2) Konfirmasi via docs/08 + roadmap Phase 10: "Proyek Saya" Mahasiswa memang scope. Branch `redesign/my-projects`. Bangun `BeginnerProjectBoard` (bento: hero navy + 4 stat + Tugas[Contoh] + Milestone + Aktivitas[Contoh] + Tim + Deliverable + Feedback + Kontribusi). `/my-projects` role-aware (BEGINNER=bento, UMKM=daftar lama). Tambah backend `GET /me/projects` (membership, krn member di-seed tanpa application). Nav BEGINNER +"Proyek Saya". Data nyata + placeholder badge "Contoh". Browser-verified p4-beginner; backend build 0, tsc 0. Decision D-BEG-1, D-UI-9.
+
+---
+
+Date:
 2026-06-25 (Nav UMKM tanpa Telusuri Proyek)
 
 Prompt:

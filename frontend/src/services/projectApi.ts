@@ -85,6 +85,24 @@ export interface ProjectDetail extends Omit<ProjectListItem, "umkm"> {
   projectRoles: ProjectRole[];
 }
 
+// GET /me/projects — a membership row with enough project info for "Proyek Saya".
+export interface MyMembership {
+  id: string;
+  status: MemberStatus;
+  joinedAt: string;
+  projectRole: { id: string; roleName: string };
+  project: {
+    id: string;
+    title: string;
+    status: ProjectStatus;
+    deadline: string;
+    startDate: string;
+    umkm: { id: string; name: string };
+    senior: { id: string; name: string } | null;
+    category: Category;
+  };
+}
+
 // --- Request payloads ---
 export interface ProjectBasicInput {
   category_id: string;
@@ -158,6 +176,12 @@ export const projectApi = {
   }): Promise<Paginated<ProjectListItem>> {
     const res = await apiClient.get<Paginated<ProjectListItem>>("/my-projects", { params });
     return res.data;
+  },
+
+  // GET /me/projects — the caller's own project memberships (beginner "Proyek Saya").
+  async myMemberships(): Promise<MyMembership[]> {
+    const res = await apiClient.get<Envelope<MyMembership[]>>("/me/projects");
+    return res.data.data;
   },
 
   // --- Milestones (nested under a project) ---

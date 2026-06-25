@@ -1,6 +1,23 @@
 # Decisions
 
 Date:
+2026-06-26 (Beginner "Proyek Saya" bento + /me/projects + Button fix)
+
+Decision (D-BEG-1):
+Halaman `/my-projects` dibuat ROLE-AWARE: BEGINNER → bento dashboard proyek-aktif (Figma node 262:2, tampilan Mahasiswa), UMKM → daftar proyek lama (tak diubah). Dibuat komponen `BeginnerProjectBoard` + nav "Proyek Saya" utk BEGINNER. Karena beginner member di-seed langsung sebagai project_member TANPA baris application (terverifikasi di DB: p4-beginner punya 0 application, tapi membership ACTIVE), sumber data proyek-aktif = MEMBERSHIP, bukan application → ditambah endpoint backend baru `GET /me/projects` (layered: projectMember.repo.listByUserWithProject → service.listMyProjects → controller.myProjects → route authMiddleware) yang mengembalikan membership caller + project info. Widget Figma yg belum ada backend-nya (sistem Tugas/Task, Activity feed, ukuran file, % milestone) DITAMPILKAN sebagai placeholder berbadge "Contoh" (pilihan user); sisanya pakai data nyata (detail/members/deliverables/contributions/reviews).
+Reason:
+User minta tampilan bento sesuai Figma; dikonfirmasi memang scope (docs/08 "My Projects - Beginner" + roadmap Phase 10 Beginner Dashboard). User memilih "tampilkan semua widget + placeholder". Application-based lookup gagal utk member seeded → butuh endpoint membership. CLAUDE.md membolehkan memperbaiki implementasi UI selama workflow/role/rules tak berubah; tidak ada entity Task di skema jadi Tugas tetap placeholder (bukan mengarang fitur backend).
+Impact:
+Beginner punya dashboard proyek aktif fungsional dgn data nyata + placeholder jelas. Endpoint /me/projects reusable utk Phase 10 (Beginner Dashboard). Browser-verified p4-beginner. Catatan: jika Phase 10 nanti bikin /dashboard beginner, bisa reuse myMemberships(). Tugas/Aktivitas/file-size baru jadi nyata kalau fitur Task/activity/upload dibangun (di luar MVP saat ini).
+
+Decision (D-UI-9, Button nativeButton):
+`ui/button.tsx` kini set `nativeButton={false}` otomatis saat prop `render` dipakai (Button dirender jadi <a>/Link). Menghilangkan console error base-ui yang dulu (memory lama) ditandai "harmless, ignore". Override eksplisit tetap dihormati.
+Reason:
+Error berulang & user melaporkannya; fix di komponen pusat membereskan semua call-site sekaligus, lebih benar secara a11y daripada di-ignore.
+Impact:
+Console bersih di /my-projects (Errors:0) dan semua halaman yang pakai Button render Link.
+
+Date:
 2026-06-25 (Nav — UMKM tanpa Telusuri Proyek)
 
 Decision (D-NAV-1, user directive):
