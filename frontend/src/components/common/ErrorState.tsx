@@ -18,8 +18,8 @@ export function ErrorState({
   return (
     <div className="flex flex-col items-center gap-2 py-12 text-center">
       <AlertTriangle className="size-10 text-error" />
-      <h3 className="text-h3 text-neutral-dark">{heading}</h3>
-      <p className="max-w-sm text-body text-neutral-gray">{message}</p>
+      <h3 className="text-base font-semibold text-foreground">{heading}</h3>
+      <p className="max-w-sm text-sm text-muted-foreground">{message}</p>
       {onAction && (
         <Button variant="outline" onClick={onAction} className="mt-2">
           {actionLabel}

@@ -94,14 +94,14 @@ export default function RegisterStep4() {
             value={bio}
             onChange={(e) => setBio(e.target.value)}
           />
-          <p className="text-right text-body-sm text-neutral-gray">
+          <p className="text-right text-sm text-muted-foreground">
             {BIO_MAX - bio.length} tersisa
           </p>
         </div>
 
         <div className="flex flex-col gap-3">
           <Label>Portofolio & Profil Profesional</Label>
-          <p className="-mt-1 text-body-sm text-neutral-gray">
+          <p className="-mt-1 text-sm text-muted-foreground">
             Semua kolom opsional, namun sangat disarankan untuk meningkatkan peluang diterima.
           </p>
           <Input placeholder="GitHub URL" value={github} onChange={(e) => setGithub(e.target.value)} />
@@ -112,10 +112,10 @@ export default function RegisterStep4() {
 
         <div className="flex flex-col gap-1.5">
           <Label>CV</Label>
-          <p className="-mt-1 text-body-sm text-neutral-gray">Unggah CV jika tersedia (PDF/DOCX, maks 5 MB).</p>
+          <p className="-mt-1 text-sm text-muted-foreground">Unggah CV jika tersedia (PDF/DOCX, maks 5 MB).</p>
           {cvUrl ? (
             <div className="flex items-center justify-between rounded-lg border border-success bg-success/5 p-3">
-              <span className="flex items-center gap-2 text-body text-neutral-dark">
+              <span className="flex items-center gap-2 text-sm text-foreground">
                 <FileCheck2 className="size-4 text-success" />
                 {cvName} <span className="text-success">· Valid</span>
               </span>
@@ -126,7 +126,7 @@ export default function RegisterStep4() {
                   setCvName(undefined);
                 }}
                 aria-label="Hapus CV"
-                className="text-neutral-gray hover:text-error"
+                className="text-muted-foreground hover:text-error"
               >
                 <X className="size-4" />
               </button>
@@ -140,10 +140,10 @@ export default function RegisterStep4() {
                 e.preventDefault();
                 if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
               }}
-              className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-neutral-gray-light p-6 text-neutral-gray hover:bg-neutral-light"
+              className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-6 text-muted-foreground hover:bg-muted"
             >
               <UploadCloud className="size-6" />
-              <span className="text-body-sm">
+              <span className="text-sm">
                 {uploading ? "Mengunggah..." : "Klik untuk unggah atau seret file di sini"}
               </span>
             </button>

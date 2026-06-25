@@ -12,7 +12,7 @@ const badgeVariants = cva(
         // Badge/Tag — docs/08-UI_Pages_Specification_v1.0.md: green for active, gray for inactive
         default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
         secondary:
-          "bg-neutral-gray-light text-neutral-dark [a]:hover:bg-neutral-gray",
+          "bg-neutral-gray-light text-foreground [a]:hover:bg-neutral-gray",
         destructive:
           "bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
         outline:

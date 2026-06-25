@@ -124,7 +124,7 @@ export default function RegisterStep5() {
 
         <div className="flex flex-col gap-2">
           <Label>Keahlian & Tools</Label>
-          <p className="-mt-1 text-body-sm text-neutral-gray">
+          <p className="-mt-1 text-sm text-muted-foreground">
             Pilih keahlian yang kamu kuasai (tingkat di atas berlaku untuk semua).
           </p>
           {loadingSkills ? (
@@ -133,7 +133,7 @@ export default function RegisterStep5() {
             <div className="flex flex-col gap-3">
               {Object.entries(grouped).map(([category, items]) => (
                 <div key={category} className="flex flex-col gap-1.5">
-                  <span className="text-body-sm font-semibold text-neutral-dark">{category}</span>
+                  <span className="text-sm font-semibold text-foreground">{category}</span>
                   <div className="flex flex-wrap gap-2">
                     {items.map((s) => (
                       <button
@@ -141,10 +141,10 @@ export default function RegisterStep5() {
                         type="button"
                         onClick={() => setSelectedSkillIds((p) => toggle(p, s.id))}
                         className={cn(
-                          "rounded-full border px-3 py-1 text-body-sm transition-colors",
+                          "rounded-full border px-3 py-1 text-sm transition-colors",
                           selectedSkillIds.includes(s.id)
                             ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border text-neutral-dark hover:bg-neutral-light"
+                            : "border-border text-foreground hover:bg-muted"
                         )}
                       >
                         {s.name}
@@ -166,10 +166,10 @@ export default function RegisterStep5() {
                 type="button"
                 onClick={() => setInterests((p) => toggle(p, it))}
                 className={cn(
-                  "rounded-full border px-3 py-1 text-body-sm transition-colors",
+                  "rounded-full border px-3 py-1 text-sm transition-colors",
                   interests.includes(it)
                     ? "border-[#a3ce00] bg-[#eef7d6] text-[#5f8c00]"
-                    : "border-border text-neutral-dark hover:bg-neutral-light"
+                    : "border-border text-foreground hover:bg-muted"
                 )}
               >
                 {it}

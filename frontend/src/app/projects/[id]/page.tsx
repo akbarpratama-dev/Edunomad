@@ -179,7 +179,7 @@ function BeginnerApplyDialog({ project }: { project: ProjectDetail }) {
         Apply ke Peran
       </Button>
       {!hasRoles && (
-        <p className="text-body-sm text-neutral-gray">Proyek ini belum membuka peran.</p>
+        <p className="text-sm text-muted-foreground">Proyek ini belum membuka peran.</p>
       )}
       <Dialog open={open} onOpenChange={(o) => !busy && setOpen(o)}>
         <DialogContent>
@@ -237,7 +237,7 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
     return (
       <Card>
         <CardContent className="flex flex-col gap-2 pt-2">
-          <p className="text-body font-semibold text-neutral-dark">Anda pemilik proyek ini</p>
+          <p className="text-sm font-semibold text-foreground">Anda pemilik proyek ini</p>
           {project.status === "AWAITING_COMPLETION" && (
             <LifecycleAction
               label="Konfirmasi Penyelesaian"
@@ -263,7 +263,7 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
     return (
       <Card>
         <CardContent className="flex flex-col gap-2 pt-2">
-          <p className="text-body font-semibold text-neutral-dark">
+          <p className="text-sm font-semibold text-foreground">
             Anda mentor proyek ini
           </p>
           {recruiting && (
@@ -303,7 +303,7 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
           ) : (
             <>
               <Button disabled>Apply sebagai Mentor</Button>
-              <p className="text-body-sm text-neutral-gray">
+              <p className="text-sm text-muted-foreground">
                 {hasSenior
                   ? "Proyek ini sudah memiliki mentor."
                   : "Proyek ini tidak sedang membuka rekrutmen."}
@@ -324,7 +324,7 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
           ) : (
             <>
               <Button disabled>Apply ke Peran</Button>
-              <p className="text-body-sm text-neutral-gray">
+              <p className="text-sm text-muted-foreground">
                 {!recruiting
                   ? "Proyek ini tidak sedang membuka rekrutmen."
                   : "Menunggu mentor senior bergabung sebelum rekrutmen beginner dibuka."}

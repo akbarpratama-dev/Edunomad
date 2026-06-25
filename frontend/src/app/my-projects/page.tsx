@@ -105,10 +105,10 @@ function Content() {
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                "whitespace-nowrap px-4 py-2 text-body font-medium",
+                "whitespace-nowrap px-4 py-2 text-sm font-medium",
                 tab === t.key
                   ? "border-b-2 border-[#a3ce00] text-foreground"
-                  : "text-neutral-gray hover:text-neutral-dark"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               {t.label}
@@ -131,12 +131,12 @@ function Content() {
                 <CardContent className="flex flex-col gap-2 pt-2">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-body font-semibold text-neutral-dark">{item.title}</p>
-                      <p className="text-body-sm text-neutral-gray">{item.category.name}</p>
+                      <p className="text-sm font-semibold text-foreground">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">{item.category.name}</p>
                     </div>
                     <StatusBadge status={item.status} />
                   </div>
-                  <p className="text-body-sm text-neutral-gray">
+                  <p className="text-sm text-muted-foreground">
                     Deadline: {new Date(item.deadline).toLocaleDateString("id-ID")}
                   </p>
                   <div className="flex flex-wrap gap-2">

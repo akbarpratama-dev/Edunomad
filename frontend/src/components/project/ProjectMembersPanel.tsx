@@ -65,7 +65,7 @@ function RemoveMemberDialog({
           <DialogHeader>
             <DialogTitle>Keluarkan {member.user.name}?</DialogTitle>
           </DialogHeader>
-          <p className="text-body-sm text-neutral-gray">
+          <p className="text-sm text-muted-foreground">
             Permintaan ini perlu dikonfirmasi admin sebelum anggota benar-benar dikeluarkan.
           </p>
           <div className="flex flex-col gap-1.5">
@@ -133,9 +133,9 @@ export function ProjectMembersPanel({ project }: { project: ProjectDetail }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {members === null ? (
-          <p className="text-body-sm text-neutral-gray">Memuat anggota…</p>
+          <p className="text-sm text-muted-foreground">Memuat anggota…</p>
         ) : members.length === 0 ? (
-          <p className="text-body-sm text-neutral-gray">Belum ada anggota tim.</p>
+          <p className="text-sm text-muted-foreground">Belum ada anggota tim.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-neutral-200">
             {members.map((m) => {
@@ -144,11 +144,11 @@ export function ProjectMembersPanel({ project }: { project: ProjectDetail }) {
               return (
                 <li key={m.id} className="flex items-center justify-between gap-3 py-2.5">
                   <div className="min-w-0">
-                    <p className="truncate text-body font-medium text-neutral-dark">
+                    <p className="truncate text-sm font-medium text-foreground">
                       {m.user.name}
-                      {isSelf && <span className="text-neutral-gray"> (Anda)</span>}
+                      {isSelf && <span className="text-muted-foreground"> (Anda)</span>}
                     </p>
-                    <p className="truncate text-body-sm text-neutral-gray">
+                    <p className="truncate text-sm text-muted-foreground">
                       {m.projectRole.roleName}
                     </p>
                   </div>

@@ -51,23 +51,23 @@ export default function LoginPage() {
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Email</Label>
           <Input id="email" type="email" placeholder="nama@email.com" {...register("email")} />
-          {errors.email && <p className="text-body-sm text-error">{errors.email.message}</p>}
+          {errors.email && <p className="text-sm text-error">{errors.email.message}</p>}
         </div>
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="password">Password</Label>
           <PasswordInput id="password" placeholder="Masukkan password" {...register("password")} />
           {errors.password && (
-            <p className="text-body-sm text-error">{errors.password.message}</p>
+            <p className="text-sm text-error">{errors.password.message}</p>
           )}
         </div>
 
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-body-sm text-neutral-dark">
+          <label className="flex items-center gap-2 text-sm text-foreground">
             <Checkbox onCheckedChange={(c) => setValue("remember", c === true)} />
             Ingat Saya
           </label>
-          <Link href="/auth/forgot-password" className="text-body-sm text-[#5f8c00] font-semibold hover:underline">
+          <Link href="/auth/forgot-password" className="text-sm text-[#5f8c00] font-semibold hover:underline">
             Lupa Password?
           </Link>
         </div>
@@ -76,7 +76,7 @@ export default function LoginPage() {
           {submitting ? "Memproses..." : "Masuk →"}
         </Button>
 
-        <div className="flex items-center gap-3 text-body-sm text-neutral-gray">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span className="h-px flex-1 bg-border" />
           atau
           <span className="h-px flex-1 bg-border" />
@@ -86,7 +86,7 @@ export default function LoginPage() {
           Masuk dengan Google
         </Button>
 
-        <p className="text-center text-body-sm text-neutral-gray">
+        <p className="text-center text-sm text-muted-foreground">
           Belum punya akun?{" "}
           <Link href="/auth/register" className="text-[#5f8c00] font-semibold hover:underline">
             Daftar Sekarang

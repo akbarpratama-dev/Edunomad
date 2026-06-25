@@ -62,20 +62,20 @@ function Stepper({ step }: { step: number }) {
           <li key={label} className="flex items-center gap-2">
             <span
               className={cn(
-                "flex size-7 items-center justify-center rounded-full text-body-sm font-semibold",
+                "flex size-7 items-center justify-center rounded-full text-sm font-semibold",
                 active
                   ? "bg-primary text-primary-foreground"
                   : done
                     ? "bg-accent text-accent-foreground"
-                    : "bg-neutral-light text-neutral-gray"
+                    : "bg-muted text-muted-foreground"
               )}
             >
               {done ? <Check className="size-4" /> : n}
             </span>
             <span
               className={cn(
-                "text-body-sm",
-                active ? "font-medium text-neutral-dark" : "text-neutral-gray"
+                "text-sm",
+                active ? "font-medium text-foreground" : "text-muted-foreground"
               )}
             >
               {label}
@@ -153,7 +153,7 @@ function CreateProjectContent() {
   return (
     <AppShell breadcrumbs={[{ label: "Proyek Saya", href: "/my-projects" }, { label: "Buat Proyek" }]}>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-        <h1 className="text-h1 text-neutral-dark">Buat Proyek</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Buat Proyek</h1>
         <Stepper step={step} />
 
         {step === 1 && (
@@ -163,7 +163,7 @@ function CreateProjectContent() {
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="title">Judul Proyek</Label>
                   <Input id="title" placeholder="cth. Website Toko Online" {...register("title")} />
-                  {errors.title && <p className="text-body-sm text-error">{errors.title.message}</p>}
+                  {errors.title && <p className="text-sm text-error">{errors.title.message}</p>}
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -186,7 +186,7 @@ function CreateProjectContent() {
                     </SelectContent>
                   </Select>
                   {errors.category_id && (
-                    <p className="text-body-sm text-error">{errors.category_id.message}</p>
+                    <p className="text-sm text-error">{errors.category_id.message}</p>
                   )}
                 </div>
 
@@ -199,7 +199,7 @@ function CreateProjectContent() {
                     {...register("description")}
                   />
                   {errors.description && (
-                    <p className="text-body-sm text-error">{errors.description.message}</p>
+                    <p className="text-sm text-error">{errors.description.message}</p>
                   )}
                 </div>
 
@@ -212,7 +212,7 @@ function CreateProjectContent() {
                     {...register("expected_deliverables")}
                   />
                   {errors.expected_deliverables && (
-                    <p className="text-body-sm text-error">
+                    <p className="text-sm text-error">
                       {errors.expected_deliverables.message}
                     </p>
                   )}
@@ -223,14 +223,14 @@ function CreateProjectContent() {
                     <Label htmlFor="start_date">Tanggal Mulai</Label>
                     <Input id="start_date" type="date" {...register("start_date")} />
                     {errors.start_date && (
-                      <p className="text-body-sm text-error">{errors.start_date.message}</p>
+                      <p className="text-sm text-error">{errors.start_date.message}</p>
                     )}
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="deadline">Deadline</Label>
                     <Input id="deadline" type="date" {...register("deadline")} />
                     {errors.deadline && (
-                      <p className="text-body-sm text-error">{errors.deadline.message}</p>
+                      <p className="text-sm text-error">{errors.deadline.message}</p>
                     )}
                   </div>
                 </div>
@@ -337,7 +337,7 @@ function MilestonesStep({
     <div className="flex flex-col gap-4">
       <Card>
         <CardContent className="flex flex-col gap-4 pt-2">
-          <p className="text-body font-semibold text-neutral-dark">Tambah Milestone</p>
+          <p className="text-sm font-semibold text-foreground">Tambah Milestone</p>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="m-title">Judul</Label>
             <Input
@@ -379,11 +379,11 @@ function MilestonesStep({
             <Card key={m.id}>
               <CardContent className="flex items-start justify-between pt-2">
                 <div>
-                  <p className="text-body font-medium text-neutral-dark">{m.title}</p>
+                  <p className="text-sm font-medium text-foreground">{m.title}</p>
                   {m.description && (
-                    <p className="text-body-sm text-neutral-gray">{m.description}</p>
+                    <p className="text-sm text-muted-foreground">{m.description}</p>
                   )}
-                  <p className="text-body-sm text-neutral-gray">
+                  <p className="text-sm text-muted-foreground">
                     Tenggat: {new Date(m.dueDate).toLocaleDateString("id-ID")}
                   </p>
                 </div>
@@ -472,7 +472,7 @@ function RolesStep({
     <div className="flex flex-col gap-4">
       <Card>
         <CardContent className="flex flex-col gap-4 pt-2">
-          <p className="text-body font-semibold text-neutral-dark">Tambah Peran</p>
+          <p className="text-sm font-semibold text-foreground">Tambah Peran</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="r-name">Nama Peran</Label>
@@ -508,7 +508,7 @@ function RolesStep({
               <Label>Keahlian yang Dibutuhkan</Label>
               <div className="flex flex-wrap gap-3">
                 {skills.map((s) => (
-                  <label key={s.id} className="flex items-center gap-2 text-body-sm">
+                  <label key={s.id} className="flex items-center gap-2 text-sm">
                     <Checkbox
                       checked={selectedSkills.includes(s.id)}
                       onCheckedChange={() => toggleSkill(s.id)}
@@ -533,14 +533,14 @@ function RolesStep({
             <Card key={r.id}>
               <CardContent className="flex items-start justify-between pt-2">
                 <div className="flex flex-col gap-1">
-                  <p className="text-body font-medium text-neutral-dark">
+                  <p className="text-sm font-medium text-foreground">
                     {r.roleName}{" "}
-                    <span className="text-body-sm text-neutral-gray">
+                    <span className="text-sm text-muted-foreground">
                       · {r.capacity} orang
                     </span>
                   </p>
                   {r.requirements && (
-                    <p className="text-body-sm text-neutral-gray">{r.requirements}</p>
+                    <p className="text-sm text-muted-foreground">{r.requirements}</p>
                   )}
                   {r.roleSkills.length > 0 && (
                     <div className="flex flex-wrap gap-1">
@@ -593,21 +593,21 @@ function ReviewStep({
     <div className="flex flex-col gap-4">
       <Card>
         <CardContent className="flex flex-col gap-3 pt-2">
-          <h2 className="text-h3 text-neutral-dark">{basic.title}</h2>
-          <p className="text-body-sm text-neutral-gray">Kategori: {categoryName}</p>
+          <h2 className="text-base font-semibold text-foreground">{basic.title}</h2>
+          <p className="text-sm text-muted-foreground">Kategori: {categoryName}</p>
           <div>
-            <p className="text-body-sm font-semibold text-neutral-dark">Deskripsi</p>
-            <p className="text-body-sm text-neutral-gray whitespace-pre-wrap">
+            <p className="text-sm font-semibold text-foreground">Deskripsi</p>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
               {basic.description}
             </p>
           </div>
           <div>
-            <p className="text-body-sm font-semibold text-neutral-dark">Hasil yang Diharapkan</p>
-            <p className="text-body-sm text-neutral-gray whitespace-pre-wrap">
+            <p className="text-sm font-semibold text-foreground">Hasil yang Diharapkan</p>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
               {basic.expected_deliverables}
             </p>
           </div>
-          <p className="text-body-sm text-neutral-gray">
+          <p className="text-sm text-muted-foreground">
             {new Date(basic.start_date).toLocaleDateString("id-ID")} —{" "}
             {new Date(basic.deadline).toLocaleDateString("id-ID")}
           </p>
@@ -616,16 +616,16 @@ function ReviewStep({
 
       <Card>
         <CardContent className="flex flex-col gap-2 pt-2">
-          <p className="text-body font-semibold text-neutral-dark">
+          <p className="text-sm font-semibold text-foreground">
             Milestone ({milestones.length})
           </p>
           {milestones.length === 0 ? (
-            <p className="text-body-sm text-neutral-gray">Belum ada milestone.</p>
+            <p className="text-sm text-muted-foreground">Belum ada milestone.</p>
           ) : (
             milestones.map((m) => (
-              <p key={m.id} className="text-body-sm text-neutral-dark">
+              <p key={m.id} className="text-sm text-foreground">
                 • {m.title}{" "}
-                <span className="text-neutral-gray">
+                <span className="text-muted-foreground">
                   ({new Date(m.dueDate).toLocaleDateString("id-ID")})
                 </span>
               </p>
@@ -636,21 +636,21 @@ function ReviewStep({
 
       <Card>
         <CardContent className="flex flex-col gap-2 pt-2">
-          <p className="text-body font-semibold text-neutral-dark">Peran ({roles.length})</p>
+          <p className="text-sm font-semibold text-foreground">Peran ({roles.length})</p>
           {roles.length === 0 ? (
-            <p className="text-body-sm text-neutral-gray">Belum ada peran.</p>
+            <p className="text-sm text-muted-foreground">Belum ada peran.</p>
           ) : (
             roles.map((r) => (
-              <p key={r.id} className="text-body-sm text-neutral-dark">
+              <p key={r.id} className="text-sm text-foreground">
                 • {r.roleName}{" "}
-                <span className="text-neutral-gray">({r.capacity} orang)</span>
+                <span className="text-muted-foreground">({r.capacity} orang)</span>
               </p>
             ))
           )}
         </CardContent>
       </Card>
 
-      <p className="text-body-sm text-neutral-gray">
+      <p className="text-sm text-muted-foreground">
         Setelah dikirim, proyek akan berstatus <strong>Menunggu Tinjauan</strong> dan tidak dapat
         diedit hingga admin menyetujui atau menolak.
       </p>

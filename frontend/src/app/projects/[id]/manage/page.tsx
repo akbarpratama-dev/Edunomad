@@ -81,9 +81,9 @@ function Content() {
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
         <div>
-          <h1 className="text-h1 text-neutral-dark">Lamaran Senior</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Lamaran Senior</h1>
           {project && (
-            <p className="text-body-sm text-neutral-gray">
+            <p className="text-sm text-muted-foreground">
               {project.title}
               {project.senior ? ` · Mentor: ${project.senior.name}` : ""}
             </p>
@@ -97,10 +97,10 @@ function Content() {
         ) : project?.senior ? (
           <Card>
             <CardContent className="flex flex-col gap-2 pt-2">
-              <p className="text-body font-semibold text-neutral-dark">
+              <p className="text-sm font-semibold text-foreground">
                 Mentor sudah ditetapkan
               </p>
-              <p className="text-body-sm text-neutral-gray">
+              <p className="text-sm text-muted-foreground">
                 {project.senior.name} adalah mentor proyek ini. Lamaran lain otomatis ditolak.
               </p>
               <Button variant="outline" render={<Link href={`/projects/${id}`} />}>
@@ -121,11 +121,11 @@ function Content() {
                 <CardContent className="flex flex-col gap-2 pt-2">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-body font-semibold text-neutral-dark">
+                      <p className="text-sm font-semibold text-foreground">
                         {app.senior.name}
                       </p>
                       {app.senior.profile?.headline && (
-                        <p className="text-body-sm text-neutral-gray">
+                        <p className="text-sm text-muted-foreground">
                           {app.senior.profile.headline}
                         </p>
                       )}
@@ -133,12 +133,12 @@ function Content() {
                     <StatusBadge status={app.status} />
                   </div>
                   {app.senior.profile?.bio && (
-                    <p className="text-body-sm text-neutral-gray whitespace-pre-wrap">
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                       {app.senior.profile.bio}
                     </p>
                   )}
                   {app.message && (
-                    <p className="text-body-sm text-neutral-dark whitespace-pre-wrap">
+                    <p className="text-sm text-foreground whitespace-pre-wrap">
                       &ldquo;{app.message}&rdquo;
                     </p>
                   )}
@@ -147,7 +147,7 @@ function Content() {
                       href={app.senior.profile.linkedinUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-body-sm text-[#5f8c00] hover:underline"
+                      className="text-sm text-[#5f8c00] hover:underline"
                     >
                       LinkedIn
                     </a>

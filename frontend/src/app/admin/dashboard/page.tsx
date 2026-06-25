@@ -15,8 +15,8 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
     <Card>
       <CardContent className="pt-2">
-        <p className="text-body-sm text-neutral-gray">{label}</p>
-        <p className="text-h1 text-neutral-dark">{value}</p>
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="text-2xl font-bold tracking-tight text-foreground">{value}</p>
       </CardContent>
     </Card>
   );
@@ -42,7 +42,7 @@ function Content() {
     <AppShell breadcrumbs={[{ label: "Admin" }, { label: "Dashboard" }]}>
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-h1 text-neutral-dark">Admin Dashboard</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Admin Dashboard</h1>
           <div className="flex gap-2">
             <Button render={<Link href="/admin/users/verification" />}>
               <ShieldCheck className="size-4" /> Verifikasi
@@ -65,7 +65,7 @@ function Content() {
         ) : stats ? (
           <>
             <section className="flex flex-col gap-2">
-              <h2 className="flex items-center gap-2 text-h3 text-neutral-dark">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
                 <Users className="size-4" /> Pengguna ({stats.users.total})
               </h2>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -77,7 +77,7 @@ function Content() {
             </section>
 
             <section className="flex flex-col gap-2">
-              <h2 className="flex items-center gap-2 text-h3 text-neutral-dark">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
                 <FolderKanban className="size-4" /> Proyek ({stats.projects.total})
               </h2>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -96,15 +96,15 @@ function Content() {
               </CardHeader>
               <CardContent>
                 {stats.recentActivities.length === 0 ? (
-                  <p className="text-body-sm text-neutral-gray">Belum ada aktivitas.</p>
+                  <p className="text-sm text-muted-foreground">Belum ada aktivitas.</p>
                 ) : (
                   <ul className="flex flex-col gap-2">
                     {stats.recentActivities.map((a) => (
-                      <li key={a.id} className="flex justify-between text-body-sm">
-                        <span className="text-neutral-dark">
+                      <li key={a.id} className="flex justify-between text-sm">
+                        <span className="text-foreground">
                           {a.action} · {a.entityType}
                         </span>
-                        <span className="text-neutral-gray">
+                        <span className="text-muted-foreground">
                           {a.user?.name} · {new Date(a.createdAt).toLocaleString("id-ID")}
                         </span>
                       </li>

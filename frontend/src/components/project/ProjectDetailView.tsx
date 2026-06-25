@@ -35,23 +35,23 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
             <Badge variant="secondary">{project.category.name}</Badge>
             <ProjectStatusBadge status={project.status} />
           </div>
-          <h2 className="text-h2 text-neutral-dark">{project.title}</h2>
-          <p className="text-body-sm text-neutral-gray whitespace-pre-wrap">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">{project.title}</h2>
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap">
             {project.description}
           </p>
           <Separator />
           <div>
-            <p className="text-body-sm font-semibold text-neutral-dark">Hasil yang Diharapkan</p>
-            <p className="text-body-sm text-neutral-gray whitespace-pre-wrap">
+            <p className="text-sm font-semibold text-foreground">Hasil yang Diharapkan</p>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
               {project.expectedDeliverables}
             </p>
           </div>
-          <div className="flex flex-wrap gap-x-8 gap-y-1 text-body-sm">
-            <span className="text-neutral-gray">
-              Mulai: <span className="text-neutral-dark">{formatDate(project.startDate)}</span>
+          <div className="flex flex-wrap gap-x-8 gap-y-1 text-sm">
+            <span className="text-muted-foreground">
+              Mulai: <span className="text-foreground">{formatDate(project.startDate)}</span>
             </span>
-            <span className="text-neutral-gray">
-              Deadline: <span className="text-neutral-dark">{formatDate(project.deadline)}</span>
+            <span className="text-muted-foreground">
+              Deadline: <span className="text-foreground">{formatDate(project.deadline)}</span>
             </span>
           </div>
         </CardContent>
@@ -59,37 +59,37 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
 
       <Card>
         <CardContent className="flex flex-col gap-2 pt-2">
-          <p className="text-body font-semibold text-neutral-dark">UMKM</p>
-          <p className="text-body-sm text-neutral-dark">{project.umkm.name}</p>
+          <p className="text-sm font-semibold text-foreground">UMKM</p>
+          <p className="text-sm text-foreground">{project.umkm.name}</p>
           {project.senior ? (
             <>
               <Separator />
-              <p className="text-body font-semibold text-neutral-dark">Mentor (Senior)</p>
-              <p className="text-body-sm text-neutral-dark">{project.senior.name}</p>
+              <p className="text-sm font-semibold text-foreground">Mentor (Senior)</p>
+              <p className="text-sm text-foreground">{project.senior.name}</p>
             </>
           ) : (
-            <p className="text-body-sm text-neutral-gray">Belum ada mentor senior.</p>
+            <p className="text-sm text-muted-foreground">Belum ada mentor senior.</p>
           )}
         </CardContent>
       </Card>
 
       <Card>
         <CardContent className="flex flex-col gap-2 pt-2">
-          <p className="text-body font-semibold text-neutral-dark">
+          <p className="text-sm font-semibold text-foreground">
             Milestone ({project.milestones.length})
           </p>
           {project.milestones.length === 0 ? (
-            <p className="text-body-sm text-neutral-gray">Belum ada milestone.</p>
+            <p className="text-sm text-muted-foreground">Belum ada milestone.</p>
           ) : (
             project.milestones.map((m) => (
               <div key={m.id} className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-body-sm font-medium text-neutral-dark">{m.title}</p>
+                  <p className="text-sm font-medium text-foreground">{m.title}</p>
                   {m.description && (
-                    <p className="text-body-sm text-neutral-gray">{m.description}</p>
+                    <p className="text-sm text-muted-foreground">{m.description}</p>
                   )}
                 </div>
-                <span className="shrink-0 text-body-sm text-neutral-gray">
+                <span className="shrink-0 text-sm text-muted-foreground">
                   {formatDate(m.dueDate)}
                 </span>
               </div>
@@ -100,20 +100,20 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
 
       <Card>
         <CardContent className="flex flex-col gap-3 pt-2">
-          <p className="text-body font-semibold text-neutral-dark">
+          <p className="text-sm font-semibold text-foreground">
             Peran Dibutuhkan ({project.projectRoles.length})
           </p>
           {project.projectRoles.length === 0 ? (
-            <p className="text-body-sm text-neutral-gray">Belum ada peran.</p>
+            <p className="text-sm text-muted-foreground">Belum ada peran.</p>
           ) : (
             project.projectRoles.map((r) => (
               <div key={r.id} className="flex flex-col gap-1">
-                <p className="text-body-sm font-medium text-neutral-dark">
+                <p className="text-sm font-medium text-foreground">
                   {r.roleName}{" "}
-                  <span className="text-neutral-gray">· {r.capacity} orang</span>
+                  <span className="text-muted-foreground">· {r.capacity} orang</span>
                 </p>
                 {r.requirements && (
-                  <p className="text-body-sm text-neutral-gray">{r.requirements}</p>
+                  <p className="text-sm text-muted-foreground">{r.requirements}</p>
                 )}
                 {r.roleSkills.length > 0 && (
                   <div className="flex flex-wrap gap-1">
