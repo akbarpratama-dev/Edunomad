@@ -44,7 +44,7 @@ const ROLE_ITEMS: Record<Role, NavItem[]> = {
 };
 
 const TRAILING_ITEMS: NavItem[] = [
-  { label: "Artifacts", href: "/artifacts", icon: Award },
+  { label: "Sertifikat", href: "/artifacts", icon: Award },
   { label: "Notifications", href: "/notifications", icon: Bell },
 ];
 

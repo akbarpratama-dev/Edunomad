@@ -84,7 +84,7 @@ function Content() {
                 <StatCard label="Total Proyek" value={stats.projects.total} />
                 <StatCard label="Active" value={stats.projects.byStatus.ACTIVE ?? 0} />
                 <StatCard label="Pending Review" value={stats.projects.byStatus.PENDING_REVIEW ?? 0} />
-                <StatCard label="Artefak" value={stats.artifacts} />
+                <StatCard label="Sertifikat" value={stats.artifacts} />
               </div>
             </section>
 
