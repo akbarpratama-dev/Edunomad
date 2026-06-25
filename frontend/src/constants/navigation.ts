@@ -24,12 +24,22 @@ export interface NavItem {
 // Items shared by every role.
 const COMMON_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Telusuri Proyek", href: "/projects", icon: FolderKanban },
 ];
+
+// Browse the public project catalogue — only for roles that join/apply to projects.
+// UMKM creates & manages its own projects (Buat Proyek / Proyek Saya) and never
+// browses to find one, so it is intentionally excluded (docs/08 only documents
+// "Browse Projects" for Beginner and Senior).
+const BROWSE_PROJECTS: NavItem = {
+  label: "Telusuri Proyek",
+  href: "/projects",
+  icon: FolderKanban,
+};
 
 // Role-specific items appended after the common ones (per-role page sets now exist — Phase 3).
 const ROLE_ITEMS: Record<Role, NavItem[]> = {
   ADMIN: [
+    BROWSE_PROJECTS,
     { label: "Tinjau Proyek", href: "/admin/projects/review", icon: ClipboardCheck },
   ],
   UMKM: [
@@ -37,9 +47,11 @@ const ROLE_ITEMS: Record<Role, NavItem[]> = {
     { label: "Proyek Saya", href: "/my-projects", icon: FolderKanban },
   ],
   SENIOR: [
+    BROWSE_PROJECTS,
     { label: "Lamaran Mentor", href: "/applications/mentor", icon: FileSignature },
   ],
   BEGINNER: [
+    BROWSE_PROJECTS,
     { label: "Lamaran Saya", href: "/applications", icon: FileSignature },
     { label: "Review Saya", href: "/reviews", icon: Star },
   ],

@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-25 (Nav UMKM tanpa Telusuri Proyek)
+
+Prompt:
+"ubah workflow, umkm tidak ada fitur telusuri project, kan itu umkm ngapain nyari projek."
+
+Hasil:
+Setuju & sesuai docs/08 (Browse Projects cuma untuk Beginner/Senior, tak ada versi UMKM). "Telusuri Proyek" dikeluarkan dari COMMON_ITEMS jadi konstanta BROWSE_PROJECTS, hanya untuk BEGINNER/SENIOR/ADMIN. UMKM nav kini: Dashboard, Buat Proyek, Proyek Saya (+Sertifikat/Notifications). Route /projects tetap. Browser-verified (p4-umkm) + tsc 0. Decision D-NAV-1.
+
+---
+
+Date:
 2026-06-25 (Phase 7.2 Reviews frontend)
 
 Prompt:

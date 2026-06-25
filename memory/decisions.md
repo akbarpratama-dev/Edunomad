@@ -1,6 +1,16 @@
 # Decisions
 
 Date:
+2026-06-25 (Nav — UMKM tanpa Telusuri Proyek)
+
+Decision (D-NAV-1, user directive):
+"Telusuri Proyek" (/projects browse) DIHAPUS dari sidebar UMKM. Dipindah dari COMMON_ITEMS (dulu tampil untuk semua role) menjadi item `BROWSE_PROJECTS` yang hanya di-append ke ROLE_ITEMS untuk BEGINNER, SENIOR, dan ADMIN. UMKM sekarang hanya: Dashboard, Buat Proyek, Proyek Saya (+ Sertifikat/Notifications trailing). Route /projects tetap ada (tidak dihapus) — cuma tidak ada entri nav untuk UMKM.
+Reason:
+User: UMKM itu yang membuat & mengelola proyek sendiri, bukan mencari proyek untuk dilamar (itu peran Beginner/Senior). docs/08 pun hanya mendokumentasikan halaman "Browse Projects" untuk Beginner (line 779) dan "Browse Mentoring Projects" untuk Senior (line 895) — tidak ada versi UMKM. Jadi menghapusnya untuk UMKM justru lebih sesuai dokumentasi; sidebar generic di docs/08 §Navigation Patterns hanya template ilustratif. RBAC tak berubah (UMKM memang tak bisa melamar).
+Impact:
+Sidebar UMKM bersih dari aksi yang tak relevan. Browser-verified (p4-umkm): nav = Dashboard, Buat Proyek, Proyek Saya, Sertifikat, Notifications. Beginner/Senior/Admin tetap punya Telusuri Proyek. tsc 0 error. Admin sengaja dipertahankan punya Telusuri (perilaku tak diubah; user hanya menyebut UMKM).
+
+Date:
 2026-06-25 (Phase 7.2 Reviews frontend)
 
 Decision (D-P7-2):

@@ -1,5 +1,10 @@
 # Development Log
 
+2026-06-25 (Nav — hapus Telusuri Proyek untuk UMKM)
+Task: user minta ubah workflow — UMKM tidak punya fitur "Telusuri Proyek" (UMKM bikin proyek, bukan nyari). DONE & browser-verified.
+- `constants/navigation.ts`: "Telusuri Proyek" dikeluarkan dari COMMON_ITEMS → jadi konstanta `BROWSE_PROJECTS`, di-append hanya ke ROLE_ITEMS BEGINNER/SENIOR/ADMIN. UMKM nav = Dashboard, Buat Proyek, Proyek Saya (+ trailing Sertifikat/Notifications). Route /projects tetap ada.
+- Selaras docs/08 (Browse Projects hanya untuk Beginner [L779] & Senior [L895], tak ada versi UMKM). RBAC tak berubah. Verified p4-umkm: nav tanpa Telusuri Proyek; tsc 0. Decision D-NAV-1.
+
 2026-06-25 (Phase 7.2 — Reviews & Ratings FRONTEND)
 Task: Build the Phase 7.2 frontend on top of the already-done Phase 7.1 backend (Reviews & Ratings, Workflow 12). DONE & browser-verified (senior + UMKM + beginner). Note: the /clear init prompt was STALE (said "build Phase 7 / merge phase-6") — reconciled against memory: Phase 6 already merged to main (1fc2b7e), Phase 7.1 backend already committed on branch feature/phase-7-reviews. So no rebuild/merge — went straight to 7.2 frontend.
 - `services/reviewApi.ts` — service object (pola contributionApi). Types ProjectReview (listInclude: reviewer+reviewee {id,name,role}) + UserReview (reviewer+project). Methods: listForProject (GET /projects/:id/reviews), listForUser (GET /users/:id/reviews), reviewBeginner (POST /projects/:id/reviews/beginner {reviewee_id,rating,comment}), reviewSenior (POST /projects/:id/reviews/senior {rating,comment}), update (PUT /reviews/:id). + REVIEW_TYPE_LABEL.
