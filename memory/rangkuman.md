@@ -5,6 +5,26 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-25 (Nav UMKM tanpa Telusuri Proyek)
+
+Prompt:
+"ubah workflow, umkm tidak ada fitur telusuri project, kan itu umkm ngapain nyari projek."
+
+Hasil:
+Setuju & sesuai docs/08 (Browse Projects cuma untuk Beginner/Senior, tak ada versi UMKM). "Telusuri Proyek" dikeluarkan dari COMMON_ITEMS jadi konstanta BROWSE_PROJECTS, hanya untuk BEGINNER/SENIOR/ADMIN. UMKM nav kini: Dashboard, Buat Proyek, Proyek Saya (+Sertifikat/Notifications). Route /projects tetap. Browser-verified (p4-umkm) + tsc 0. Decision D-NAV-1.
+
+---
+
+Date:
+2026-06-25 (Phase 7.2 Reviews frontend)
+
+Prompt:
+"Lanjutkan EduNomad ke PHASE 7 — Reviews & Ratings… merge phase-6→main, cabang phase-7…" (init prompt dari /clear, STALE).
+
+Hasil:
+Rekonsiliasi state dari memory: ternyata Phase 6 SUDAH merged ke main (1fc2b7e) & Phase 7.1 BACKEND sudah selesai+commit di branch feature/phase-7-reviews (E2E 11/11). Jadi tidak rebuild/merge — langsung kerjakan **Phase 7.2 FRONTEND**. Dibuat: reviewApi (service object), StarRating (komponen reusable interaktif/readonly), ReviewTab (Review Center role-adaptif: senior nilai beginner; UMKM nilai beginner+senior; beginner lihat review diterima in-context), halaman /reviews (My Reviews beginner lintas-proyek + kartu rata-rata) + nav "Review Saya", wiring tab "Review" di workspace. tsc 0 error. Browser-verified 3 role (senior submit baru 5/5; UMKM lihat target senior; beginner /reviews avg 4.0 + tab read-only). Decision D-P7-2. Branch feature/phase-7-reviews (lanjutan). Carry-over completion-gate masih ditunda ke Phase 8.
+
+Date:
 2026-06-23 (batal redesign + smooth scroll)
 
 Prompt:
@@ -397,3 +417,5 @@ TERSISA: PHASE 4.3 (Project Members & Lifecycle — start/complete project, memb
 [2026-06-25] Merge redesign/app-shell→main (db743b8) + tag restore ui-restore-2026-06-25. Lalu PHASE 6 backend (Deliverables & Contributions, WF8/9): bangun deliverable + contribution module layered (constants/validator/repo/service/controller/route, $txn, no migration — model udah ada). Deliverable: DRAFT→SUBMITTED(+evidences)→APPROVED / REVISION_REQUESTED loop; feedback revisi disimpan di audit log (gak ada kolom schema, D-P6-1) + di-surface sbg revisionFeedback. Contribution: PENDING→APPROVED, one-per-beginner. E2E 24/24 (lifecycle + gate role/ownership/business). Frontend 6.3 = sesi berikut. NEXT setelah 6.3 = Phase 7 Reviews & Ratings.
 
 [2026-06-25] PHASE 6.3 frontend (Deliverables & Contributions). Bikin deliverableApi+contributionApi, DeliverablesTab (beginner create/submit evidence LINK/lihat feedback/resubmit; senior review inline Setujui/Minta Revisi+feedback), ContributionTab (beginner report summary+skill chips one-per-project; senior approve), tab Deliverables+Kontribusi di workspace. Review inline (bukan page terpisah, D-P6-3). File-upload ditunda (LINK dulu). Browser full loop verified. Phase 6 SELESAI. NEXT = Phase 7 Reviews & Ratings (merge feature/phase-6-deliverables→main dulu).
+
+[2026-06-25] Merge Phase 6→main (1fc2b7e). PHASE 7.1 backend Reviews & Ratings (WF12): review module layered (3 type SENIOR/UMKM→BEGINNER + UMKM→SENIOR, rating 1-5, anti-dup, editable sebelum COMPLETED). GET project/user reviews ditambah (D-P7-1). E2E 11/11. NEXT = 7.2 frontend (Review Center + My Reviews).

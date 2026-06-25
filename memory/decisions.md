@@ -1,6 +1,26 @@
 # Decisions
 
 Date:
+2026-06-25 (Nav — UMKM tanpa Telusuri Proyek)
+
+Decision (D-NAV-1, user directive):
+"Telusuri Proyek" (/projects browse) DIHAPUS dari sidebar UMKM. Dipindah dari COMMON_ITEMS (dulu tampil untuk semua role) menjadi item `BROWSE_PROJECTS` yang hanya di-append ke ROLE_ITEMS untuk BEGINNER, SENIOR, dan ADMIN. UMKM sekarang hanya: Dashboard, Buat Proyek, Proyek Saya (+ Sertifikat/Notifications trailing). Route /projects tetap ada (tidak dihapus) — cuma tidak ada entri nav untuk UMKM.
+Reason:
+User: UMKM itu yang membuat & mengelola proyek sendiri, bukan mencari proyek untuk dilamar (itu peran Beginner/Senior). docs/08 pun hanya mendokumentasikan halaman "Browse Projects" untuk Beginner (line 779) dan "Browse Mentoring Projects" untuk Senior (line 895) — tidak ada versi UMKM. Jadi menghapusnya untuk UMKM justru lebih sesuai dokumentasi; sidebar generic di docs/08 §Navigation Patterns hanya template ilustratif. RBAC tak berubah (UMKM memang tak bisa melamar).
+Impact:
+Sidebar UMKM bersih dari aksi yang tak relevan. Browser-verified (p4-umkm): nav = Dashboard, Buat Proyek, Proyek Saya, Sertifikat, Notifications. Beginner/Senior/Admin tetap punya Telusuri Proyek. tsc 0 error. Admin sengaja dipertahankan punya Telusuri (perilaku tak diubah; user hanya menyebut UMKM).
+
+Date:
+2026-06-25 (Phase 7.2 Reviews frontend)
+
+Decision (D-P7-2):
+Phase 7.2 review UI lives in TWO places, both reusing the existing Phase-7.1 endpoints (no new backend): (a) a role-adaptive "Review" tab inside the project workspace (`ReviewTab`) = the Review Center (7.2.1) for senior/UMKM (submit+edit per team member; UMKM also gets a senior target) AND the in-context received view for the reviewee; (b) a standalone `/reviews` page (`MyReviewsPage`, BEGINNER-only) = My Reviews (7.2.2), GET /users/me/reviews across all projects. The beginner's received list in the workspace tab is derived by filtering the project's GET /projects/:id/reviews for revieweeId==me (rather than a separate call). Submit is gated to project status ACTIVE on the client to mirror the backend rule.
+Reason:
+docs/08 places "Team Reviews" as a Senior Project-Workspace tab and "Reviews/Ratings" on the profile, and Phase 6 already established the workspace-tab pattern (Deliverables/Kontribusi) — so a Review tab is the consistent home for the Review Center; the standalone /reviews page satisfies task 7.2.2's "My Reviews Page (Beginner)" cross-project view with a sidebar entry. Filtering the already-fetched project reviews avoids a redundant per-user request inside the tab.
+Impact:
+Senior reviews beginners; UMKM reviews beginners + senior; beginner sees received reviews both in-project (tab) and globally (/reviews). Browser-verified all three roles. Carry-over D-P4.3-3 (completion-readiness gate incl. reviews in projectLifecycle.service.requestCompletion) STILL deferred — left for Phase 8 so the gate can include artifacts in one pass rather than a partial gate now (artifacts don't exist yet).
+
+Date:
 2026-06-23 (Landing → auth wiring)
 
 Decision (D-LP-6):
@@ -758,3 +778,6 @@ Hasil (warm browser): /auth/me 6–9s→1.3s, time-to-data ~9–11s→~3.8s. Reg
 
 ### D-UI-7 (2026-06-25): user-facing "Artifact"→"Sertifikat"
 Label yang dilihat user diganti Artifact/Artefak → "Sertifikat" (lebih gampang dipahami user ID): nav sidebar, kartu Aksi Cepat dashboard (beginner+senior), StatCard admin. KODE TETAP `artifact` (type Artifact, artifactApi, route /artifacts, stats.artifacts, AuditAction.ARTIFACT_*) — biar gak break. Landing sudah pakai "Sertifikat". ⚠️ Saat Phase 8 (Artifact System) bikin halaman /artifacts, pakai label "Sertifikat" juga.
+
+### D-P7-1 (2026-06-25, branch feature/phase-7-reviews): Phase 7.1 backend Reviews & Ratings
+Workflow 12, layered, no migration (Review model ada). Pairs (docs/06): SENIOR→BEGINNER, UMKM→BEGINNER, UMKM→SENIOR; rating 1-5; public ke reviewee; editable selama project ≠ COMPLETED (set isEdited/editedAt). reviewBeginner: reviewer=senior lead/umkm owner (TYPE diturunkan dari field mana yg match), reviewee=ACTIVE member, project ACTIVE, ONE per (project,reviewer,reviewee). reviewSenior: umkm→assigned senior. Endpoints: POST /projects/:id/reviews/beginner (SENIOR|UMKM), /reviews/senior (UMKM), PUT /reviews/:id, GET /projects/:id/reviews, GET /users/:id/reviews. KEPUTUSAN: GET endpoints DITAMBAH (task-breakdown 7.1.1 getProjectReviews/getUserReviews + frontend 7.2 butuh; API spec cuma POST/PUT — task-breakdown menang utk build). No audit (bukan admin action). Files: constants/reviewType, validators/review.validator, repositories/review.repository, services/review.service, modules/review/review.controller, routes/review.routes. build 0; E2E /tmp/p7-e2e.sh 11/11. NEXT = 7.2 frontend (Review Center senior/umkm + My Reviews beginner). Carry-over D-P4.3-3: completion gate reviews bisa diisi di projectLifecycle.requestCompletion.

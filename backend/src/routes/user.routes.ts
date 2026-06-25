@@ -4,6 +4,7 @@ import { requireActiveAccount, requireVerified } from "../middleware/verificatio
 import { validateRequest } from "../middleware/validateRequest";
 import { userController } from "../modules/user/user.controller";
 import { directMessageController } from "../modules/directMessage/directMessage.controller";
+import { reviewController } from "../modules/review/review.controller";
 import { updateProfileSchema, userIdParamSchema } from "../validators/user.validator";
 import userSkillRoutes from "./userSkill.routes";
 import experienceRoutes from "./experience.routes";
@@ -34,6 +35,14 @@ router.post(
   requireVerified,
   validateRequest({ params: userIdParamSchema }),
   directMessageController.createOrGet
+);
+
+// Reviews received by a user (Workflow 12) — visible to authenticated viewers.
+router.get(
+  "/:id/reviews",
+  authMiddleware,
+  validateRequest({ params: userIdParamSchema }),
+  reviewController.listForUser
 );
 
 // --- Other users (authenticated only; portfolio visible to logged-in users) ---

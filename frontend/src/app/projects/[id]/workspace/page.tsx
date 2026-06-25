@@ -15,6 +15,7 @@ import { ProjectMembersPanel } from "@/components/project/ProjectMembersPanel";
 import { DiscussionTab } from "@/components/workspace/DiscussionTab";
 import { DeliverablesTab } from "@/components/workspace/DeliverablesTab";
 import { ContributionTab } from "@/components/workspace/ContributionTab";
+import { ReviewTab } from "@/components/workspace/ReviewTab";
 import { DirectMessageDialog } from "@/components/workspace/DirectMessageDialog";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
@@ -26,13 +27,21 @@ import {
   type ProjectMember,
 } from "@/services/projectApi";
 
-type TabKey = "overview" | "milestones" | "discussion" | "deliverables" | "contributions" | "members";
+type TabKey =
+  | "overview"
+  | "milestones"
+  | "discussion"
+  | "deliverables"
+  | "contributions"
+  | "reviews"
+  | "members";
 const TABS: { key: TabKey; label: string }[] = [
   { key: "overview", label: "Ringkasan" },
   { key: "milestones", label: "Milestone" },
   { key: "discussion", label: "Diskusi" },
   { key: "deliverables", label: "Deliverables" },
   { key: "contributions", label: "Kontribusi" },
+  { key: "reviews", label: "Review" },
   { key: "members", label: "Anggota" },
 ];
 
@@ -101,6 +110,7 @@ function WorkspaceInner() {
       {tab === "discussion" && <DiscussionTab project={project} />}
       {tab === "deliverables" && <DeliverablesTab project={project} />}
       {tab === "contributions" && <ContributionTab project={project} />}
+      {tab === "reviews" && <ReviewTab project={project} />}
       {tab === "members" && <MembersTab project={project} />}
     </div>
   );
