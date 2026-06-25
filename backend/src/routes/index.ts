@@ -20,6 +20,7 @@ import discussionRoutes from "./discussion.routes";
 import directChatRoutes from "./directChat.routes";
 import deliverableRoutes from "./deliverable.routes";
 import contributionRoutes from "./contribution.routes";
+import reviewRoutes from "./review.routes";
 
 // Aggregates all feature routes under the /api/v1 base path (API spec).
 const router = Router();
@@ -38,6 +39,7 @@ router.use("/discussions", discussionRoutes);
 router.use("/direct-chat", directChatRoutes);
 router.use("/deliverables", deliverableRoutes);
 router.use("/contributions", contributionRoutes);
+router.use("/reviews", reviewRoutes);
 router.use("/admin", adminRoutes);
 
 // Absolute-path routes

@@ -13,6 +13,7 @@ import { projectLifecycleController } from "../modules/projectLifecycle/projectL
 import { discussionController } from "../modules/discussion/discussion.controller";
 import { deliverableController } from "../modules/deliverable/deliverable.controller";
 import { contributionController } from "../modules/contribution/contribution.controller";
+import { reviewController } from "../modules/review/review.controller";
 import {
   createProjectSchema,
   updateProjectSchema,
@@ -26,6 +27,7 @@ import { applyToRoleSchema } from "../validators/projectApplication.validator";
 import { createGroupDiscussionSchema } from "../validators/discussion.validator";
 import { createDeliverableSchema } from "../validators/deliverable.validator";
 import { submitContributionSchema } from "../validators/contribution.validator";
+import { reviewBeginnerSchema, reviewSeniorSchema } from "../validators/review.validator";
 
 const router = Router();
 const umkm = [roleMiddleware(["UMKM"])];
@@ -182,6 +184,31 @@ router.post(
   requireVerified,
   validateRequest({ params: projectIdParamSchema, body: submitContributionSchema }),
   contributionController.submit
+);
+
+// Reviews (Workflow 12) — beginner review by SENIOR/UMKM, senior review by UMKM.
+// Reviewer ownership + type derivation enforced in the service.
+router.get(
+  "/:id/reviews",
+  authMiddleware,
+  validateRequest({ params: projectIdParamSchema }),
+  reviewController.listForProject
+);
+router.post(
+  "/:id/reviews/beginner",
+  authMiddleware,
+  roleMiddleware(["SENIOR", "UMKM"]),
+  requireVerified,
+  validateRequest({ params: projectIdParamSchema, body: reviewBeginnerSchema }),
+  reviewController.reviewBeginner
+);
+router.post(
+  "/:id/reviews/senior",
+  authMiddleware,
+  ...umkm,
+  requireVerified,
+  validateRequest({ params: projectIdParamSchema, body: reviewSeniorSchema }),
+  reviewController.reviewSenior
 );
 
 // Project lifecycle (Workflow 5/11/15) — ownership/lead enforced in service.
