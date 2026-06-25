@@ -5,6 +5,15 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-25 (Phase 7.2 Reviews frontend)
+
+Prompt:
+"Lanjutkan EduNomad ke PHASE 7 — Reviews & Ratings… merge phase-6→main, cabang phase-7…" (init prompt dari /clear, STALE).
+
+Hasil:
+Rekonsiliasi state dari memory: ternyata Phase 6 SUDAH merged ke main (1fc2b7e) & Phase 7.1 BACKEND sudah selesai+commit di branch feature/phase-7-reviews (E2E 11/11). Jadi tidak rebuild/merge — langsung kerjakan **Phase 7.2 FRONTEND**. Dibuat: reviewApi (service object), StarRating (komponen reusable interaktif/readonly), ReviewTab (Review Center role-adaptif: senior nilai beginner; UMKM nilai beginner+senior; beginner lihat review diterima in-context), halaman /reviews (My Reviews beginner lintas-proyek + kartu rata-rata) + nav "Review Saya", wiring tab "Review" di workspace. tsc 0 error. Browser-verified 3 role (senior submit baru 5/5; UMKM lihat target senior; beginner /reviews avg 4.0 + tab read-only). Decision D-P7-2. Branch feature/phase-7-reviews (lanjutan). Carry-over completion-gate masih ditunda ke Phase 8.
+
+Date:
 2026-06-23 (batal redesign + smooth scroll)
 
 Prompt:

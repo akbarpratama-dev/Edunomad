@@ -1,7 +1,7 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-06-25 (Phase 0-6 + UI redesign + perf-fixes merged to main 1fc2b7e. PHASE 7.1 BACKEND Reviews done+verified E2E 11/11, branch feature/phase-7-reviews. NEXT = Phase 7.2 frontend â Phase 8).
+> Last updated: 2026-06-25 (Phase 0-6 + UI redesign + perf-fixes merged to main 1fc2b7e. **PHASE 7 Reviews & Ratings DONE** — 7.1 backend E2E 11/11 + 7.2 frontend browser-verified (3 roles), branch feature/phase-7-reviews. NEXT = merge to main then start â Phase 8).
 
 ## â­ Landing page (marketing `/`) â ADDED 2026-06-23, verified
 Built from user's Figma ("Premium SaaS Landing Page", file `nMFbzuPNcRcKgFVvMEFfaj`, node 5:2) via Figma MCP (source of truth) + skills impeccable/emil-design-eng/ui-ux-pro-max. 11 sections in `frontend/src/components/landing/` (motion.tsx, primitives.tsx, header.tsx, footer.tsx, sections/{hero,problem,how-it-works,feature-grid,project-showcase,portfolio,impact,testimonials,faq,cta}.tsx); composed in `app/page.tsx` (replaced the old `/`âlogin redirect). Stack: `motion` ^12.40.0 (NEW frontend dep, frontend/ only), animation library; landing palette scoped as `ln-*` Tailwind tokens in globals.css `@theme` (in-app docs/08 design system untouched); Manrope (via --font-sans, Black weight). [font InterâManrope across whole app, 2026-06-24] Motion = hero floating-card cluster + glow + entrance, scroll reveal/stagger (SSR-safe mounted-gate so never ships blank), CountUp stats, FAQ accordion, hover lifts â all `prefers-reduced-motion` aware. Header auth-aware (Masuk/Gabung vs Buka Dashboard). Verified: tsc clean, `npm run build` 0 errors (`/` prerendered STATIC), every section browser-screenshotted faithful to Figma. Decisions D-LP-1..4.
@@ -10,7 +10,7 @@ Built from user's Figma ("Premium SaaS Landing Page", file `nMFbzuPNcRcKgFVvMEFf
 ## Project
 EduNomad â project-collaboration platform (Beginners â Seniors â UMKM via real projects). Modular monolith. Backend: Express 5 + TS 6 + Prisma 7 + Supabase (Postgres). Frontend: Next.js 15.5.19 + React 19 + Tailwind v4 + shadcn/ui (base-ui) + Zustand + RHF + Zod. Supabase ref `sfzzkwckrfwzgcujykff` (ap-south-1).
 
-## Status: PHASE 0-6 ✅ (merged to main 1fc2b7e) + perf-fixes (single /auth/me, local JWKS JWT verify) + label Artifact→Sertifikat. **PHASE 7.1 BACKEND ✅** (Reviews & Ratings WF12, E2E 11/11, branch feature/phase-7-reviews). NEXT = **PHASE 7.2 FRONTEND** (Review Center + My Reviews) → Phase 8 Artifact System. Notifications = Phase 9 (NOT now).
+## Status: PHASE 0-6 ✅ (merged to main 1fc2b7e) + perf-fixes (single /auth/me, local JWKS JWT verify) + label Artifact→Sertifikat. **PHASE 7 REVIEWS & RATINGS ✅** (WF12 — 7.1 backend E2E 11/11 + 7.2 frontend: reviewApi + StarRating + ReviewTab Review Center + /reviews My Reviews + nav; browser-verified senior/UMKM/beginner; branch feature/phase-7-reviews). NEXT = **merge feature/phase-7-reviews→main, then PHASE 8 Artifact System** (UI label "Sertifikat", D-UI-7) + fill completion-gate (D-P4.3-3). Notifications = Phase 9 (NOT now).
 
 ### Phase 6.3 frontend done this session (2026-06-25, branch feature/phase-6-deliverables)
 deliverableApi + contributionApi service objects. DeliverablesTab (beginner create/edit DRAFT, submit/resubmit LINK evidence dynamic inputs, revision-feedback callout; senior lead review INLINE Setujui/Minta Revisi+feedback â D-P6-3, NOT a separate /deliverables/:id/review route). ContributionTab (beginner own report summary + skill-chip multiselect one-per-project edit-while-PENDING; senior list+approve). Workspace page += "Deliverables"+"Kontribusi" tabs. File-upload evidence (Supabase Storage) DEFERRED â LINK first (FILE type backend-ready). Browser-verified full loop (createâsubmitârequest-revisionâfeedback shown; contribution+skills) as beginner & senior; tsc 0. Decision D-P6-3.
@@ -62,36 +62,39 @@ DRAFT â PENDING_REVIEW â RECRUITING (approve) / REJECTED â ACTIVE
 - â ï¸ Both Phase-4 test projects ("Phase4 Recruitment Test", "Phase43 Lifecycle Browser Test") are now **COMPLETED** (consumed by E2E/browser). **A fresh RECRUITING/ACTIVE project + members must be created for Phase 5 testing.**
 - Helper scripts left in /tmp: p43-prov.sh (provision), p43-e2e.sh (lifecycle E2E), p43-setup-browser.sh (browser scenario setup).
 
-## ð NEXT-SESSION INIT PROMPT
+## 📌 NEXT-SESSION INIT PROMPT
 
 ```
-Lanjutkan EduNomad ke PHASE 7 â Reviews & Ratings (task-breakdown Â§7; Workflow terkait).
-Phase 0â6 SEMUA selesai & terverifikasi (Phase 6 = Deliverables & Contributions backend E2E 24/24 +
-frontend workspace tabs browser-verified) â JANGAN bangun ulang. Baca CLAUDE.MD + MEMORY-CLAUDE.md +
-semua memory/*.md + next-tasks.md blok "â¡ ACTIVE HANDOFF 2026-06-25 #5" + DESIGN.md (kontrak visual).
+Lanjutkan EduNomad ke PHASE 8 — Artifact System (task-breakdown §8; Workflow terkait — "Sertifikat" di UI, D-UI-7).
+Phase 0–7 SEMUA selesai & terverifikasi (Phase 7 Reviews & Ratings = 7.1 backend E2E 11/11 + 7.2 frontend
+browser-verified 3 role: senior/UMKM/beginner) — JANGAN bangun ulang. Baca CLAUDE.MD + MEMORY-CLAUDE.md +
+semua memory/*.md + next-tasks.md blok "⚡ ACTIVE HANDOFF 2026-06-25 #7" + DESIGN.md (kontrak visual).
 
-Branch: Phase 6 di `feature/phase-6-deliverables` (sudah push 6.1+6.2+6.3). Sebelum Phase 7: MERGE
-feature/phase-6-deliverables â main (PR / merge --no-ff), lalu cabang `feature/phase-7-reviews` dari main
-(GitHub Flow). Konfirmasi ke user kalau ragu soal merge/PR.
+Branch: Phase 7 di `feature/phase-7-reviews` (sudah push 7.1; PUSH commit 7.2 + memory dulu kalau belum).
+Sebelum Phase 8: MERGE feature/phase-7-reviews → main (PR / merge --no-ff), lalu cabang
+`feature/phase-8-artifacts` dari main (GitHub Flow). Konfirmasi ke user kalau ragu soal merge/PR.
 
 Backend tooling beres: `npm run dev` (:3001) type-check penuh, `npm run build` 0 error. Frontend :3000.
 Kalau node_modules rebuilt & deps tak lengkap: `npm cache clean --force && rm -rf node_modules
 package-lock.json && npm install`.
 
-Baca dulu (JANGAN nebak): task-breakdown.md Â§7 (urutan subtask exact) + docs/03 schema Reviews domain +
-docs/04 API Reviews endpoints + docs/06 RBAC (siapa boleh review siapa) + docs/07 Workflow (review wajib
-sebelum completion). Cek backend/src/prisma/schema.prisma â model review kemungkinan sudah ada (migration
-init_contributions_artifacts_reviews_domain) â kemungkinan NO migration. Lalu bangun layered
-(routeâcontrollerâserviceârepositoryâPrisma, $txn, audit kalau perlu, verifikasi tiap milestone E2E,
-update memory tiap selesai). Frontend ikut DESIGN.md (PageHeader, Card, token semantic, app-reveal,
+Baca dulu (JANGAN nebak): task-breakdown.md §8 (urutan subtask exact) + docs/03 schema Artifact/
+ArtifactVersion (IMMUTABLE, no updatedAt, history per docs) + docs/04 API Artifacts endpoints + docs/06
+RBAC (siapa generate artifact — kemungkinan senior/sistem) + docs/07 Workflow (artifact per-beginner saat/
+setelah completion). Cek backend/src/prisma/schema.prisma model Artifact/ArtifactVersion (migration
+init_contributions_artifacts_reviews_domain sudah ada → kemungkinan NO migration). Lalu bangun layered
+(route→controller→service→repository→Prisma, $txn, audit kalau perlu, verifikasi tiap milestone E2E,
+update memory tiap selesai). Frontend ikut DESIGN.md (PageHeader/Card, token semantic, app-reveal,
 contrast-law: chartreuse fill+dark-text only, link hijau #5f8c00). Reuse pola service object
-(deliverableApi/contributionApi/discussionApi).
+(reviewApi/contributionApi/deliverableApi). Nav "Sertifikat"→/artifacts SUDAH ada tapi page /artifacts BELUM.
 
-Carry-over (D-P4.3-3): completion-readiness gate (all deliverables+contributions+REVIEWS APPROVED) bisa
-diisi di projectLifecycle.service.requestCompletion saat Phase 7. Artifact = Phase 8, Notifications = Phase 9.
+Carry-over (D-P4.3-3) — SEKARANG waktunya: isi completion-readiness gate di
+projectLifecycle.service.requestCompletion = all deliverables APPROVED + all contributions APPROVED +
+reviews ada + artifacts generated, sebelum ACTIVE→AWAITING_COMPLETION (Workflow 15). Reviews+deliverables+
+contributions sudah ADA; tinggal artifacts (Phase 8) → gate bisa dibangun lengkap. Notifications = Phase 9.
 Reuse: projectMember.repository.isActiveMember, AuthGuard/AppShell/apiClient + workspace tab pattern.
 
-â ï¸ Test data SIAP: project ACTIVE `a1a1a1a1-0000-4000-8000-000000000005` (umkm=p4-umkm, senior=p4-senior,
+⚠️ Test data SIAP: project ACTIVE `a1a1a1a1-0000-4000-8000-000000000005` (umkm=p4-umkm, senior=p4-senior,
 members=p4-beginner+p43-b2; p43-b3=nonmember). pw TestPass123!. Sudah ada deliverable + contribution
-APPROVED dari Phase 6 E2E. anon key+URL via Supabase MCP. Dev server mungkin masih jalan (:3001/:3000).
+APPROVED + 4 review dari Phase 6/7 E2E. anon key+URL via Supabase MCP. Dev server mungkin masih jalan (:3001/:3000).
 ```

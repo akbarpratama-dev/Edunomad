@@ -1,6 +1,16 @@
 # Decisions
 
 Date:
+2026-06-25 (Phase 7.2 Reviews frontend)
+
+Decision (D-P7-2):
+Phase 7.2 review UI lives in TWO places, both reusing the existing Phase-7.1 endpoints (no new backend): (a) a role-adaptive "Review" tab inside the project workspace (`ReviewTab`) = the Review Center (7.2.1) for senior/UMKM (submit+edit per team member; UMKM also gets a senior target) AND the in-context received view for the reviewee; (b) a standalone `/reviews` page (`MyReviewsPage`, BEGINNER-only) = My Reviews (7.2.2), GET /users/me/reviews across all projects. The beginner's received list in the workspace tab is derived by filtering the project's GET /projects/:id/reviews for revieweeId==me (rather than a separate call). Submit is gated to project status ACTIVE on the client to mirror the backend rule.
+Reason:
+docs/08 places "Team Reviews" as a Senior Project-Workspace tab and "Reviews/Ratings" on the profile, and Phase 6 already established the workspace-tab pattern (Deliverables/Kontribusi) — so a Review tab is the consistent home for the Review Center; the standalone /reviews page satisfies task 7.2.2's "My Reviews Page (Beginner)" cross-project view with a sidebar entry. Filtering the already-fetched project reviews avoids a redundant per-user request inside the tab.
+Impact:
+Senior reviews beginners; UMKM reviews beginners + senior; beginner sees received reviews both in-project (tab) and globally (/reviews). Browser-verified all three roles. Carry-over D-P4.3-3 (completion-readiness gate incl. reviews in projectLifecycle.service.requestCompletion) STILL deferred — left for Phase 8 so the gate can include artifacts in one pass rather than a partial gate now (artifacts don't exist yet).
+
+Date:
 2026-06-23 (Landing → auth wiring)
 
 Decision (D-LP-6):

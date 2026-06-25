@@ -1,4 +1,23 @@
 ============================================================
+⚡ ACTIVE HANDOFF (2026-06-25 #7) — PHASE 7 SELESAI (7.1 backend + 7.2 frontend), branch `feature/phase-7-reviews`
+============================================================
+main = 1fc2b7e (Phase 0–6 + UI redesign + perf-fix + label Sertifikat). Tag restore `ui-restore-2026-06-25`. Branch feature/phase-7-reviews = Phase 7 lengkap.
+
+✅ DONE & VERIFIED — **PHASE 7.2 FRONTEND** (Reviews & Ratings, Workflow 12):
+- `services/reviewApi.ts` (service object): listForProject (GET /projects/:id/reviews), listForUser (GET /users/:id/reviews), reviewBeginner (POST /projects/:id/reviews/beginner), reviewSenior (POST /projects/:id/reviews/senior), update (PUT /reviews/:id). Types ProjectReview + UserReview.
+- `components/review/StarRating.tsx`: reusable 1–5 star (onChange = interactive radiogroup; none = read-only).
+- `components/workspace/ReviewTab.tsx`: role-adaptive Review Center. SENIOR lead → review tiap ACTIVE beginner member; UMKM owner → review beginners + senior (target ekstra); BEGINNER/reviewee → read-only review diterima (filter project reviews by revieweeId==me). Submit gated ke project ACTIVE. Existing review → display+Edit; none → star picker + Kirim Review.
+- `app/reviews/page.tsx`: My Reviews (BEGINNER-only AuthGuard), GET /users/me/reviews lintas-proyek + kartu rata-rata + link proyek.
+- Wired "Review" tab di workspace + nav "Review Saya"→/reviews (BEGINNER).
+- VERIFIED browser (project a1a1a1a1-…0005): senior (Test Beginner sudah-dinilai 4/5 + submit baru Beginner Two 5/5), UMKM (senior-target render + sudah-dinilai 5/5), beginner (/reviews avg 4.0 + tab read-only). tsc 0 err. D-P7-2.
+
+➡️ NEXT = **PHASE 8 — Artifact System** (task-breakdown §8). UI label user-facing = "Sertifikat" (D-UI-7, nav item "Sertifikat"→/artifacts sudah ada tapi /artifacts page BELUM dibuat). Baca task-breakdown §8 + schema Artifact/ArtifactVersion (immutable, no updatedAt) + API Artifacts + RBAC (siapa generate artifact — senior/sistem) + Workflow (artifact per-beginner saat/ setelah completion). Cek schema.prisma model Artifact/ArtifactVersion (sudah ada migration init_contributions_artifacts_reviews_domain → kemungkinan NO migration). Cabang `feature/phase-8-artifacts` dari main SETELAH merge feature/phase-7-reviews→main.
+**Carry-over D-P4.3-3 (sekarang waktunya):** isi completion-readiness gate di `projectLifecycle.service.requestCompletion` — all deliverables APPROVED + all contributions APPROVED + reviews ada + artifacts generated, sebelum izinkan ACTIVE→AWAITING_COMPLETION (Workflow 15). Sekarang reviews+deliverables+contributions semua ADA, tinggal artifacts (Phase 8) → gate bisa dibangun lengkap di Phase 8.
+⚠️ Sebelum Phase 8: MERGE feature/phase-7-reviews→main (PR / merge --no-ff), lalu cabang feature/phase-8-artifacts. Konfirmasi ke user kalau ragu. Notifications = Phase 9.
+⚠️ Test project a1a1a1a1-…0005 ACTIVE: skrg ada 4 review (senior→2 beginner, umkm→beginner, umkm→senior). pw TestPass123!.
+
+--- arsip handoff #6 (Phase 7.1 backend) ---
+============================================================
 ⚡ ACTIVE HANDOFF (2026-06-25 #6) — PHASE 7.1 backend SELESAI, branch `feature/phase-7-reviews`
 ============================================================
 main = 1fc2b7e (Phase 0–6 + UI redesign + perf-fix [single /auth/me + local JWKS verify] + label Artifact→Sertifikat, semua merged). Tag restore `ui-restore-2026-06-25`.

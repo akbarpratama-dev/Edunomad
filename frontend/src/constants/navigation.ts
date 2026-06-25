@@ -10,6 +10,7 @@ import {
   FileText,
   ClipboardCheck,
   FileSignature,
+  Star,
 } from "lucide-react";
 import type { Role } from "@/types/user";
 
@@ -40,6 +41,7 @@ const ROLE_ITEMS: Record<Role, NavItem[]> = {
   ],
   BEGINNER: [
     { label: "Lamaran Saya", href: "/applications", icon: FileSignature },
+    { label: "Review Saya", href: "/reviews", icon: Star },
   ],
 };
 
