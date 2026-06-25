@@ -71,12 +71,12 @@ const QUICK_ACTIONS: Record<Role, QuickAction[]> = {
   BEGINNER: [
     { label: "Telusuri Proyek", desc: "Temukan proyek nyata dan lamar perannya.", href: "/projects", icon: FolderKanban },
     { label: "Lamaran Saya", desc: "Pantau status lamaran proyekmu.", href: "/applications", icon: FileSignature },
-    { label: "Artifacts", desc: "Portofolio terverifikasi dari kontribusimu.", href: "/artifacts", icon: Award },
+    { label: "Sertifikat", desc: "Portofolio terverifikasi dari kontribusimu.", href: "/artifacts", icon: Award },
   ],
   SENIOR: [
     { label: "Telusuri Proyek", desc: "Cari proyek yang butuh mentor.", href: "/projects", icon: FolderKanban },
     { label: "Lamaran Mentor", desc: "Kelola lamaran mentoring kamu.", href: "/applications/mentor", icon: FileSignature },
-    { label: "Artifacts", desc: "Riwayat artefak yang kamu terbitkan.", href: "/artifacts", icon: Award },
+    { label: "Sertifikat", desc: "Riwayat sertifikat yang kamu terbitkan.", href: "/artifacts", icon: Award },
   ],
   UMKM: [
     { label: "Buat Proyek", desc: "Publikasikan kebutuhan proyek UMKM-mu.", href: "/projects/create", icon: FolderPlus },

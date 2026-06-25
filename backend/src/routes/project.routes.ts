@@ -11,6 +11,8 @@ import { projectApplicationController } from "../modules/projectApplication/proj
 import { projectMemberController } from "../modules/projectMember/projectMember.controller";
 import { projectLifecycleController } from "../modules/projectLifecycle/projectLifecycle.controller";
 import { discussionController } from "../modules/discussion/discussion.controller";
+import { deliverableController } from "../modules/deliverable/deliverable.controller";
+import { contributionController } from "../modules/contribution/contribution.controller";
 import {
   createProjectSchema,
   updateProjectSchema,
@@ -22,6 +24,8 @@ import { createRoleSchema } from "../validators/projectRole.validator";
 import { applyAsMentorSchema } from "../validators/seniorApplication.validator";
 import { applyToRoleSchema } from "../validators/projectApplication.validator";
 import { createGroupDiscussionSchema } from "../validators/discussion.validator";
+import { createDeliverableSchema } from "../validators/deliverable.validator";
+import { submitContributionSchema } from "../validators/contribution.validator";
 
 const router = Router();
 const umkm = [roleMiddleware(["UMKM"])];
@@ -146,6 +150,38 @@ router.post(
   requireVerified,
   validateRequest({ params: projectIdParamSchema, body: createGroupDiscussionSchema }),
   discussionController.create
+);
+
+// Deliverables (Workflow 8) — list: any auth; create: BEGINNER member (service).
+router.get(
+  "/:id/deliverables",
+  authMiddleware,
+  validateRequest({ params: projectIdParamSchema }),
+  deliverableController.listForProject
+);
+router.post(
+  "/:id/deliverables",
+  authMiddleware,
+  roleMiddleware(["BEGINNER"]),
+  requireVerified,
+  validateRequest({ params: projectIdParamSchema, body: createDeliverableSchema }),
+  deliverableController.create
+);
+
+// Contributions (Workflow 9) — list: any auth (senior review); submit: BEGINNER.
+router.get(
+  "/:id/contributions",
+  authMiddleware,
+  validateRequest({ params: projectIdParamSchema }),
+  contributionController.listForProject
+);
+router.post(
+  "/:id/contributions",
+  authMiddleware,
+  roleMiddleware(["BEGINNER"]),
+  requireVerified,
+  validateRequest({ params: projectIdParamSchema, body: submitContributionSchema }),
+  contributionController.submit
 );
 
 // Project lifecycle (Workflow 5/11/15) — ownership/lead enforced in service.

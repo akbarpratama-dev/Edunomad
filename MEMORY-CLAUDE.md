@@ -1,7 +1,7 @@
 # MEMORY-CLAUDE.md — EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-06-24 (PHASE 5 merged to main f260ca3. Then app-shell + dashboard redesigned to Figma navy on branch redesign/app-shell, D-UI-2. Roadmap NEXT = Phase 6 Deliverables & Contributions; UI follow-up = persis-in Diskusi page ke Figma kalau diminta).
+> Last updated: 2026-06-25 (PHASE 6 SELESAI — 6.1+6.2 backend E2E 24/24 + 6.3 frontend browser-verified, branch feature/phase-6-deliverables. NEXT = Phase 7 Reviews & Ratings).
 
 ## ⭐ Landing page (marketing `/`) — ADDED 2026-06-23, verified
 Built from user's Figma ("Premium SaaS Landing Page", file `nMFbzuPNcRcKgFVvMEFfaj`, node 5:2) via Figma MCP (source of truth) + skills impeccable/emil-design-eng/ui-ux-pro-max. 11 sections in `frontend/src/components/landing/` (motion.tsx, primitives.tsx, header.tsx, footer.tsx, sections/{hero,problem,how-it-works,feature-grid,project-showcase,portfolio,impact,testimonials,faq,cta}.tsx); composed in `app/page.tsx` (replaced the old `/`→login redirect). Stack: `motion` ^12.40.0 (NEW frontend dep, frontend/ only), animation library; landing palette scoped as `ln-*` Tailwind tokens in globals.css `@theme` (in-app docs/08 design system untouched); Manrope (via --font-sans, Black weight). [font Inter→Manrope across whole app, 2026-06-24] Motion = hero floating-card cluster + glow + entrance, scroll reveal/stagger (SSR-safe mounted-gate so never ships blank), CountUp stats, FAQ accordion, hover lifts — all `prefers-reduced-motion` aware. Header auth-aware (Masuk/Gabung vs Buka Dashboard). Verified: tsc clean, `npm run build` 0 errors (`/` prerendered STATIC), every section browser-screenshotted faithful to Figma. Decisions D-LP-1..4.
@@ -10,7 +10,13 @@ Built from user's Figma ("Premium SaaS Landing Page", file `nMFbzuPNcRcKgFVvMEFf
 ## Project
 EduNomad — project-collaboration platform (Beginners ↔ Seniors ↔ UMKM via real projects). Modular monolith. Backend: Express 5 + TS 6 + Prisma 7 + Supabase (Postgres). Frontend: Next.js 15.5.19 + React 19 + Tailwind v4 + shadcn/ui (base-ui) + Zustand + RHF + Zod. Supabase ref `sfzzkwckrfwzgcujykff` (ap-south-1).
 
-## Status: PHASE 0–3 ✅. PHASE 4 ✅. UI Figma-redesign ✅ (merged to main 84127ce). **PHASE 5 ✅ DONE & verified — 5.1 backend + 5.2 frontend** (discussions + DM + RLS/Realtime + workspace UI, branch `feature/phase-5-workspace`, browser+realtime verified). NEXT = **PHASE 6 Deliverables & Contributions** (task-breakdown §6). Notifications = Phase 9 (NOT now).
+## Status: PHASE 0–5 ✅ (all merged to main db743b8). UI Figma-redesign ✅ (tag ui-restore-2026-06-25). **PHASE 6 ✅ DONE & verified — 6.1+6.2 backend (E2E 24/24) + 6.3 frontend** (Deliverables & Contributions, workspace tabs, browser-verified full loop, branch `feature/phase-6-deliverables` not yet merged). NEXT = **PHASE 7 Reviews & Ratings** (task-breakdown §7). Notifications = Phase 9 (NOT now).
+
+### Phase 6.3 frontend done this session (2026-06-25, branch feature/phase-6-deliverables)
+deliverableApi + contributionApi service objects. DeliverablesTab (beginner create/edit DRAFT, submit/resubmit LINK evidence dynamic inputs, revision-feedback callout; senior lead review INLINE Setujui/Minta Revisi+feedback — D-P6-3, NOT a separate /deliverables/:id/review route). ContributionTab (beginner own report summary + skill-chip multiselect one-per-project edit-while-PENDING; senior list+approve). Workspace page += "Deliverables"+"Kontribusi" tabs. File-upload evidence (Supabase Storage) DEFERRED — LINK first (FILE type backend-ready). Browser-verified full loop (create→submit→request-revision→feedback shown; contribution+skills) as beginner & senior; tsc 0. Decision D-P6-3.
+
+### Phase 6.1+6.2 done this session (2026-06-25, branch feature/phase-6-deliverables)
+Backend Deliverables (WF8) + Contributions (WF9), layered + $txn, no migration (models exist). Endpoints: GET/POST /projects/:id/deliverables, PUT /deliverables/:id, POST /deliverables/:id/{submit,approve,request-revision}; GET/POST /projects/:id/contributions, PUT /contributions/:id, POST /contributions/:id/approve. Deliverable DRAFT→SUBMITTED(evidences LINK url/FILE file_path, replaced per submit)→APPROVED / REVISION_REQUESTED loop; create=BEGINNER active member+project ACTIVE; approve/request-revision=senior lead, only from SUBMITTED. **Revision feedback has NO schema column → stored in audit log (DELIVERABLE_REVISION_REQUESTED metadata), surfaced as `revisionFeedback` on GET list (D-P6-1).** Contribution: one per beginner per project, PENDING→APPROVED(+reviewedBy). New files: constants/deliverableStatus, validators/{deliverable,contribution}.validator, repositories/{deliverable,contribution}.repository, services/{deliverable,contribution}.service, modules/{deliverable,contribution}/*.controller, routes/{deliverable,contribution}.routes. auditActions += DELIVERABLE_APPROVED/REVISION_REQUESTED/CONTRIBUTION_APPROVED + EntityType DELIVERABLE/CONTRIBUTION_REPORT; projectMember.repo += isActiveMember. Verified: build 0 err, E2E /tmp/p6-e2e.sh 24/24. Decisions D-P6-1, D-P6-2.
 
 ### Phase 5.2 frontend done this session (2026-06-24, branch feature/phase-5-workspace)
 discussionApi service; ChatPanel (shared group+DM: Supabase Realtime subscribe postgres_changes INSERT on discussion_messages filter discussion_id → re-pull list [D-P5-4], writes via Express, realtime.setAuth for RLS); DiscussionTab (list/create/select group, create=senior-lead/UMKM-owner seeded w/ active members); DirectMessageDialog (find-or-get 1:1); app/projects/[id]/workspace/page.tsx (tabs Ringkasan|Milestone|Diskusi|Anggota; Overview+Milestones inline; Members reuses ProjectMembersPanel + DM launchers); "Buka Workspace" entry on detail page (ACTIVE/AWAITING). Deliverables/Reviews/Artifacts tabs = later phases. DM conversation-list deferred (no GET /direct-chats in 5.1). Verified browser (p4-senior, project a1a1a1a1-…0005): render, Express send, REALTIME live delivery (beginner API msg → senior tab no refresh), DM find-or-get+history; tsc 0. Decision D-P5-4.
@@ -59,35 +65,33 @@ DRAFT → PENDING_REVIEW → RECRUITING (approve) / REJECTED → ACTIVE (senior 
 ## 📌 NEXT-SESSION INIT PROMPT
 
 ```
-Lanjutkan EduNomad ke PHASE 6 — Deliverables & Contributions (task-breakdown §6; Workflow terkait).
-Phase 0–5 SEMUA selesai & terverifikasi (Phase 5 = workspace chat backend+frontend+realtime, browser-verified)
-— JANGAN bangun ulang. Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok
-"⚡ ACTIVE HANDOFF 2026-06-24 #3".
+Lanjutkan EduNomad ke PHASE 7 — Reviews & Ratings (task-breakdown §7; Workflow terkait).
+Phase 0–6 SEMUA selesai & terverifikasi (Phase 6 = Deliverables & Contributions backend E2E 24/24 +
+frontend workspace tabs browser-verified) — JANGAN bangun ulang. Baca CLAUDE.MD + MEMORY-CLAUDE.md +
+semua memory/*.md + next-tasks.md blok "⚡ ACTIVE HANDOFF 2026-06-25 #5" + DESIGN.md (kontrak visual).
 
-Branch: Phase 5 ada di `feature/phase-5-workspace` (sudah push). Sebelum Phase 6: MERGE feature/phase-5-workspace
-→ main dulu (buka PR / merge --no-ff), lalu cabang `feature/phase-6-deliverables` dari main (GitHub Flow,
-CONTRIBUTING.md). Konfirmasi ke user kalau ragu soal merge/PR.
+Branch: Phase 6 di `feature/phase-6-deliverables` (sudah push 6.1+6.2+6.3). Sebelum Phase 7: MERGE
+feature/phase-6-deliverables → main (PR / merge --no-ff), lalu cabang `feature/phase-7-reviews` dari main
+(GitHub Flow). Konfirmasi ke user kalau ragu soal merge/PR.
 
 Backend tooling beres: `npm run dev` (:3001) type-check penuh, `npm run build` 0 error. Frontend :3000.
 Kalau node_modules rebuilt & deps tak lengkap: `npm cache clean --force && rm -rf node_modules
 package-lock.json && npm install`.
 
-Baca dulu (JANGAN nebak): task-breakdown.md §6 (urutan subtask exact) + docs/03 schema Deliverables Domain +
-Contributions Domain + docs/04 API Deliverables/Contributions Endpoints + docs/06 RBAC (beginner submit
-deliverable/contribution, senior review/approve, request revision) + docs/07 Workflow (deliverable review,
-contribution approval, milestone revision WF 10). Lalu bangun layered (route→controller→service→repository→
-Prisma, $transaction utk aksi multi-step, audit log kalau perlu, verifikasi tiap milestone, update memory
-tiap selesai). Prisma models Deliverable/Contribution dll sudah ada (migrations init_deliverables_domain +
-init_contributions_artifacts_reviews_domain) → cek schema.prisma dulu, kemungkinan NO migration.
-Carry-over (D-P4.3-3): isi completion-readiness gate deliverables/contributions di
-projectLifecycle.service.requestCompletion saat Phase 6 jalan.
+Baca dulu (JANGAN nebak): task-breakdown.md §7 (urutan subtask exact) + docs/03 schema Reviews domain +
+docs/04 API Reviews endpoints + docs/06 RBAC (siapa boleh review siapa) + docs/07 Workflow (review wajib
+sebelum completion). Cek backend/src/prisma/schema.prisma — model review kemungkinan sudah ada (migration
+init_contributions_artifacts_reviews_domain) → kemungkinan NO migration. Lalu bangun layered
+(route→controller→service→repository→Prisma, $txn, audit kalau perlu, verifikasi tiap milestone E2E,
+update memory tiap selesai). Frontend ikut DESIGN.md (PageHeader, Card, token semantic, app-reveal,
+contrast-law: chartreuse fill+dark-text only, link hijau #5f8c00). Reuse pola service object
+(deliverableApi/contributionApi/discussionApi).
 
-Reuse pola: repository/service/controller + $txn, projectMember.repository, AuthGuard/AppShell/apiClient +
-service object (projectApi/applicationApi/discussionApi). Untuk frontend, tambah tab "Deliverables" di
-workspace (/projects/[id]/workspace) yg tadi di-skip. Notifications = PHASE 9 (BUKAN sekarang).
+Carry-over (D-P4.3-3): completion-readiness gate (all deliverables+contributions+REVIEWS APPROVED) bisa
+diisi di projectLifecycle.service.requestCompletion saat Phase 7. Artifact = Phase 8, Notifications = Phase 9.
+Reuse: projectMember.repository.isActiveMember, AuthGuard/AppShell/apiClient + workspace tab pattern.
 
 ⚠️ Test data SIAP: project ACTIVE `a1a1a1a1-0000-4000-8000-000000000005` (umkm=p4-umkm, senior=p4-senior,
-members=p4-beginner+p43-b2; p43-b3=outsider). Semua user pw TestPass123!. anon key+URL via Supabase MCP.
-Sudah ada group discussion + DM + messages dari Phase 5 (boleh diabaikan/dipakai). Backend & frontend dev
-server mungkin masih jalan background (:3001 / :3000).
+members=p4-beginner+p43-b2; p43-b3=nonmember). pw TestPass123!. Sudah ada deliverable + contribution
+APPROVED dari Phase 6 E2E. anon key+URL via Supabase MCP. Dev server mungkin masih jalan (:3001/:3000).
 ```

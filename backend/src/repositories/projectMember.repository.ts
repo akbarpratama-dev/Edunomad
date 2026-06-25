@@ -37,6 +37,14 @@ export const projectMemberRepository = {
     });
   },
 
+  // Is this user an ACTIVE member of the project? (deliverable/contribution gate).
+  async isActiveMember(projectId: string, userId: string) {
+    const count = await prisma.projectMember.count({
+      where: { projectId, userId, status: MemberStatus.ACTIVE },
+    });
+    return count > 0;
+  },
+
   // GET /projects/:id/members.
   listByProject(projectId: string) {
     return prisma.projectMember.findMany({

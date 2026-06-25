@@ -11,6 +11,11 @@ export const AuditAction = {
   ARTIFACT_GENERATED: "ARTIFACT_GENERATED",
   ARTIFACT_REGENERATED: "ARTIFACT_REGENERATED",
   PROJECT_COMPLETED: "PROJECT_COMPLETED",
+  // Phase 6 — deliverable review (revision feedback lives in the audit metadata
+  // since the schema has no feedback column) + contribution approval.
+  DELIVERABLE_APPROVED: "DELIVERABLE_APPROVED",
+  DELIVERABLE_REVISION_REQUESTED: "DELIVERABLE_REVISION_REQUESTED",
+  CONTRIBUTION_APPROVED: "CONTRIBUTION_APPROVED",
 } as const;
 
 export type AuditActionType = (typeof AuditAction)[keyof typeof AuditAction];
@@ -23,4 +28,6 @@ export const EntityType = {
   PROJECT: "project",
   PROJECT_MEMBER: "project_member",
   ARTIFACT: "artifact",
+  DELIVERABLE: "deliverable",
+  CONTRIBUTION_REPORT: "contribution_report",
 } as const;
