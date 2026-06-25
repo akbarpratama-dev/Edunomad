@@ -1,6 +1,17 @@
 ============================================================
-⚡ ACTIVE HANDOFF (2026-06-25 #5) — PHASE 6 SELESAI (backend + frontend), branch `feature/phase-6-deliverables`
+⚡ ACTIVE HANDOFF (2026-06-25 #6) — PHASE 7.1 backend SELESAI, branch `feature/phase-7-reviews`
 ============================================================
+main = 1fc2b7e (Phase 0–6 + UI redesign + perf-fix [single /auth/me + local JWKS verify] + label Artifact→Sertifikat, semua merged). Tag restore `ui-restore-2026-06-25`.
+
+✅ DONE & VERIFIED — **PHASE 7.1 BACKEND** (Reviews & Ratings WF12), pushed:
+- Endpoints: POST /projects/:id/reviews/beginner (SENIOR|UMKM), POST /projects/:id/reviews/senior (UMKM), PUT /reviews/:id, GET /projects/:id/reviews, GET /users/:id/reviews.
+- Pairs SENIOR→BEGINNER/UMKM→BEGINNER/UMKM→SENIOR, rating 1-5, anti-dup (one per project,reviewer,reviewee), editable selama project≠COMPLETED (isEdited/editedAt), reviewee=ACTIVE member, project ACTIVE. Type diturunkan dari reviewer (senior lead vs umkm owner). No migration. E2E /tmp/p7-e2e.sh 11/11. D-P7-1.
+
+➡️ BELUM — **PHASE 7.2 FRONTEND** (sesi berikut): 7.2.1 Review Center (senior & umkm): list anggota tim utk di-review + form star-rating(1-5)+komentar + lihat/edit review submitted. 7.2.2 My Reviews (beginner): lihat review diterima (rating bintang, nama reviewer, komentar, project). Bikin reviewApi (pola service object). Bisa jadi tab "Review" di workspace ATAU page /reviews — ikut UI spec/pola workspace. Ikut DESIGN.md (PageHeader/Card/token semantic/app-reveal/contrast-law hijau #5f8c00). Notifications=Phase 9.
+Carry-over D-P4.3-3: completion gate (deliverables+contributions+reviews APPROVED/ada) bisa diisi di projectLifecycle.service.requestCompletion. NEXT phase = Phase 8 Artifact System (label UI = "Sertifikat", D-UI-7).
+⚠️ Branch feature/phase-7-reviews sudah push. Test project a1a1a1a1-…0005 ACTIVE sudah ada 3 review (senior→beginner, umkm→beginner, umkm→senior) dari E2E. pw TestPass123!.
+
+--- arsip handoff #5 (Phase 6) ---
 main = db743b8 (Phase 0–5 + UI redesign merged). Tag restore `ui-restore-2026-06-25`.
 
 ✅ DONE & VERIFIED — **PHASE 6.3 FRONTEND** (ca8ee8d): deliverableApi + contributionApi; DeliverablesTab (beginner create/edit DRAFT, submit/resubmit evidence LINK dynamic inputs, feedback callout; senior lead review INLINE Setujui/Minta Revisi+feedback — D-P6-3, bukan page terpisah); ContributionTab (beginner own report summary+skill chips one-per-project; senior list+approve); tab "Deliverables"+"Kontribusi" di /projects/[id]/workspace. File-upload evidence (Supabase Storage) DITUNDA — LINK dulu (FILE backend ready). tsc 0; browser full loop verified (create→submit→request-revision→feedback tampil; contribution+skills).
