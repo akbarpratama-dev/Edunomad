@@ -1,5 +1,14 @@
 # Development Log
 
+2026-06-26 (Senior & UMKM /dashboard premium — samakan dgn Beginner)
+Task: lanjutan — bikin dashboard Senior & UMKM mirip Beginner (welcome+stat+bento). DONE & browser-verified 3 role.
+- `components/dashboard/dashboardKit.tsx` (BARU, shared): initials/Avatar/SampleTag/Panel/StatCard/WelcomeHeader/CardHead/AgendaCard/ProjectMiniRow/PlaceholderActivityCard/PlaceholderNotifCard. BeginnerDashboard DI-REFACTOR pakai kit (hapus duplikat lokal; perilaku sama, tetap verified 0 err).
+- `SeniorDashboard.tsx`: stat Proyek Mentoring (REAL {active}/5), Lamaran Mentor (REAL pending count), Review Tertunda (Contoh), Sertifikat 0. Bento: Proyek Mentoring (REAL dari /me/mentored-projects → row ProjectMiniRow ke workspace) | Aktivitas (Contoh) | Lamaran Mentor Saya (REAL mySeniorApplications → /applications/mentor) + Agenda (REAL deadline).
+- `UMKMDashboard.tsx`: stat Proyek Aktif (REAL {active}/5), Sedang Rekrutmen (REAL count RECRUITING), Lamaran Senior (Contoh), Sertifikat 0. Bento: Proyek Saya (REAL dari /my-projects → row ke /projects/:id, footer Buat Proyek) | Aktivitas (Contoh) | Notifikasi (Contoh) + Agenda (REAL).
+- Backend: endpoint baru `GET /me/mentored-projects` (SENIOR; project.service.getMentoredProjects → findManyPaginated({seniorId})), controller.mentoredProjects, route roleMiddleware SENIOR. /my-projects (UMKM) dipakai ulang utk UMKM dashboard (tanpa ubah backend). projectApi += mentoredProjects(). build 0, tsc 0.
+- `app/dashboard/page.tsx`: ROLE_DASHBOARD map {BEGINNER,SENIOR,UMKM}; ADMIN tetap redirect. Banner verifikasi hanya bila status≠VERIFIED.
+- VERIFIED browser: Senior (p4-senior) Proyek Mentoring 1/5 + 3 proyek + Lamaran 2 Diterima + Agenda; UMKM (p4-umkm) Proyek Aktif 1/5 + 4 proyek + Buat proyek; Beginner tetap OK. Clean-load console 0 err (catatan: ganti-akun di tab sama sempat 403 ke endpoint role lama krn appUser ke-cache sesaat — bukan masalah utk user single-role; reload bersih 0 err). Decision D-BEG-3.
+
 2026-06-26 (Beginner /dashboard redesign — premium homepage dari screenshot)
 Task: user kasih screenshot (design-refs/dashboard-beginner.png) + prompt UI lengkap (Clay/Linear-style premium), minta redesign dashboard Mahasiswa. DONE & browser-verified. User memilih: "Konten dashboard saja" (sidebar navy TETAP, tak ubah halaman lain) + "Data nyata + placeholder Contoh". "nanti role lain mirip" (belum dikerjakan).
 - `/dashboard` (`app/dashboard/page.tsx`) dibuat role-branch: BEGINNER → `<BeginnerDashboard/>` (full-width) + banner verifikasi HANYA jika status≠VERIFIED; SENIOR/UMKM tetap konten generik lama (hero+alert+quick actions). ADMIN tetap redirect /admin/dashboard.

@@ -19,8 +19,17 @@ import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { BeginnerDashboard } from "@/components/dashboard/BeginnerDashboard";
+import { SeniorDashboard } from "@/components/dashboard/SeniorDashboard";
+import { UMKMDashboard } from "@/components/dashboard/UMKMDashboard";
 import { useAuthStore } from "@/stores/authStore";
 import type { AccountStatus, Role } from "@/types/user";
+
+// Premium per-role dashboards (Beginner/Senior/UMKM). Admin redirects elsewhere.
+const ROLE_DASHBOARD: Partial<Record<Role, React.ComponentType>> = {
+  BEGINNER: BeginnerDashboard,
+  SENIOR: SeniorDashboard,
+  UMKM: UMKMDashboard,
+};
 
 const STATUS_BANNER: Record<
   AccountStatus,
@@ -100,9 +109,10 @@ function DashboardContent() {
   const Icon = banner.icon;
   const actions = QUICK_ACTIONS[appUser.role];
 
-  // Beginner gets the premium project-based dashboard (Figma/screenshot ref).
-  // The verification banner only shows when there's something to act on.
-  if (appUser.role === "BEGINNER") {
+  // Premium project-based dashboard per role (screenshot ref). The verification
+  // banner only shows when there's something to act on.
+  const RoleDashboard = ROLE_DASHBOARD[appUser.role];
+  if (RoleDashboard) {
     return (
       <AppShell breadcrumbs={[{ label: "Dashboard" }]}>
         <div className="flex w-full flex-col gap-6">
@@ -113,7 +123,7 @@ function DashboardContent() {
               <AlertDescription>{banner.desc}</AlertDescription>
             </Alert>
           )}
-          <BeginnerDashboard />
+          <RoleDashboard />
         </div>
       </AppShell>
     );

@@ -1,6 +1,16 @@
 # Decisions
 
 Date:
+2026-06-26 (Senior & UMKM dashboards + shared kit)
+
+Decision (D-BEG-3):
+Dashboard Senior & UMKM dibuat mengikuti bahasa desain Beginner (welcome + stat + bento), via shared `components/dashboard/dashboardKit.tsx` (primitives + placeholder cards + ProjectMiniRow + AgendaCard). BeginnerDashboard di-refactor pakai kit (DRY). ROLE_DASHBOARD map di dashboard/page.tsx (BEGINNER/SENIOR/UMKM); ADMIN tetap redirect /admin/dashboard. Data nyata: Senior pakai endpoint BARU `GET /me/mentored-projects` (projects where seniorId=caller) + mySeniorApplications; UMKM pakai /my-projects yang sudah ada. Stat tanpa backend (Review Tertunda, Lamaran Senior) + Aktivitas/Notifikasi = placeholder "Contoh".
+Reason:
+User: "lanjut dashboard Senior/UMKM" (mereka bilang sebelumnya "role lain mirip"). Kit menghindari triplikasi Panel/StatCard/Avatar. Senior butuh sumber proyek dari membership-style endpoint (sama alasannya seperti /me/projects beginner — assignment bisa via seed tanpa application), jadi /me/mentored-projects ditambah; UMKM sudah punya /my-projects.
+Impact:
+3 dashboard konsisten & premium dgn data nyata + placeholder jelas. Sidebar navy tetap (D-BEG-2). Edge: ganti-akun di tab yang sama memicu 403 sesaat ke endpoint role lama (appUser ke-cache sebelum /auth/me re-resolve) — harmless, hanya muncul saat switch akun, bukan utk user single-role (reload bersih = 0 err). Saat Phase 8/9, widget Sertifikat/Notifikasi/Aktivitas/Review-Tertunda bisa di-wire nyata.
+
+Date:
 2026-06-26 (Beginner /dashboard premium redesign)
 
 Decision (D-BEG-2):

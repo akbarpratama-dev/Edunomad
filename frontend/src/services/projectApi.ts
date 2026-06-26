@@ -186,6 +186,12 @@ export const projectApi = {
     return res.data.data;
   },
 
+  // GET /me/mentored-projects — projects the caller mentors (senior dashboard).
+  async mentoredProjects(): Promise<ProjectListItem[]> {
+    const res = await apiClient.get<Envelope<ProjectListItem[]>>("/me/mentored-projects");
+    return res.data.data;
+  },
+
   // --- Milestones (nested under a project) ---
   async addMilestone(projectId: string, input: MilestoneInput): Promise<Milestone> {
     const res = await apiClient.post<Envelope<Milestone>>(

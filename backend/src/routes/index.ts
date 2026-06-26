@@ -53,6 +53,13 @@ router.get(
 );
 // The caller's own project memberships (beginner "Proyek Saya").
 router.get("/me/projects", authMiddleware, projectMemberController.myProjects);
+// Projects the caller mentors (senior dashboard).
+router.get(
+  "/me/mentored-projects",
+  authMiddleware,
+  roleMiddleware(["SENIOR"]),
+  projectController.mentoredProjects
+);
 router.use("/", verificationRoutes);
 
 export default router;

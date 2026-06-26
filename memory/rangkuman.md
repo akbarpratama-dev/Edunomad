@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-26 (Dashboard Senior & UMKM)
+
+Prompt:
+"lanjut dashboard Senior/UMKM" (samakan desain dgn Beginner).
+
+Hasil:
+Bikin shared dashboardKit (primitives + cards), refactor Beginner pakai kit, bangun SeniorDashboard + UMKMDashboard (welcome+stat+bento). Backend tambah `GET /me/mentored-projects` (senior); UMKM pakai /my-projects. dashboard/page.tsx ROLE_DASHBOARD map. Data nyata (Senior: proyek mentoring+lamaran; UMKM: proyek+rekrutmen+agenda) + placeholder Contoh. Browser-verified 3 role (Senior 1/5 mentoring, UMKM 1/5 aktif, Beginner OK), clean-load 0 err. Sidebar navy tetap. Decision D-BEG-3.
+
+---
+
+Date:
 2026-06-26 (Redesign /dashboard beginner dari screenshot)
 
 Prompt:
