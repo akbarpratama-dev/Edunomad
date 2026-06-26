@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,16 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const navItems = getNavItems(role);
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
+  // Highlight a single item: the one whose href is the longest prefix of the
+  // current path (so /projects/create wins over /projects, and nested admin
+  // pages match their own entry rather than nothing).
+  const activeHref = useMemo(() => {
+    if (!pathname) return undefined;
+    return navItems
+      .filter((i) => pathname === i.href || pathname.startsWith(i.href + "/"))
+      .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+  }, [navItems, pathname]);
+
   return (
     <div className="app-dark flex h-full w-64 flex-col bg-[#201f31] text-[#e8e8ec]">
       {/* Brand */}
@@ -51,7 +62,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+          const isActive = item.href === activeHref;
           const Icon = item.icon;
           const isNotif = item.href === "/notifications";
           return (

@@ -11,6 +11,8 @@ import {
   ClipboardCheck,
   FileSignature,
   Star,
+  ShieldCheck,
+  ScrollText,
 } from "lucide-react";
 import type { Role } from "@/types/user";
 
@@ -21,10 +23,13 @@ export interface NavItem {
 }
 
 // Sidebar Navigation — docs/08-UI_Pages_Specification_v1.0.md Shared Components & Patterns.
-// Items shared by every role.
-const COMMON_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-];
+// The Dashboard entry is role-aware: ADMIN lands on /admin/dashboard (a /dashboard
+// visit redirects there), so the nav must point there too or it never highlights.
+const dashboardItem = (role?: Role): NavItem => ({
+  label: "Dashboard",
+  href: role === "ADMIN" ? "/admin/dashboard" : "/dashboard",
+  icon: LayoutDashboard,
+});
 
 // Browse the public project catalogue — only for roles that join/apply to projects.
 // UMKM creates & manages its own projects (Buat Proyek / Proyek Saya) and never
@@ -41,6 +46,8 @@ const ROLE_ITEMS: Record<Role, NavItem[]> = {
   ADMIN: [
     BROWSE_PROJECTS,
     { label: "Tinjau Proyek", href: "/admin/projects/review", icon: ClipboardCheck },
+    { label: "Verifikasi Pengguna", href: "/admin/users/verification", icon: ShieldCheck },
+    { label: "Audit Log", href: "/admin/audit-logs", icon: ScrollText },
   ],
   UMKM: [
     { label: "Buat Proyek", href: "/projects/create", icon: FolderPlus },
@@ -64,7 +71,10 @@ const TRAILING_ITEMS: NavItem[] = [
 ];
 
 export function getNavItems(role?: Role): NavItem[] {
-  return [...COMMON_ITEMS, ...(role ? ROLE_ITEMS[role] : []), ...TRAILING_ITEMS];
+  // Sertifikat/Notifications don't apply to ADMIN (and aren't built yet), so the
+  // admin sidebar skips the trailing items.
+  const trailing = role === "ADMIN" ? [] : TRAILING_ITEMS;
+  return [dashboardItem(role), ...(role ? ROLE_ITEMS[role] : []), ...trailing];
 }
 
 export const FOOTER_NAV_ITEMS: NavItem[] = [

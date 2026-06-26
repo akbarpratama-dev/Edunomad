@@ -1,5 +1,10 @@
 # Development Log
 
+2026-06-26 (FIX sidebar active highlight, terutama halaman admin)
+Bug (user report): item sidebar tak ke-select di halaman admin. Sebab: di /admin/dashboard, nav "Dashboard" href=/dashboard (beda path) → tak match. Halaman /admin/users/verification & /admin/audit-logs bahkan tak punya nav item.
+Fix: (1) `constants/navigation.ts` — Dashboard href ROLE-AWARE via `dashboardItem(role)` (ADMIN→/admin/dashboard); ADMIN nav += "Verifikasi Pengguna" (/admin/users/verification) + "Audit Log" (/admin/audit-logs); untuk ADMIN buang TRAILING (Sertifikat/Notifications — irrelevant + 404). (2) `components/layout/Sidebar.tsx` — deteksi active diganti BEST-MATCH (href prefix terpanjang yang cocok dgn pathname menang) via useMemo `activeHref`, ganti `pathname===href||startsWith` per-item → cegah no-highlight & dobel-highlight (mis. /projects vs /projects/create).
+VERIFIED browser (p43-admin): /admin/dashboard→Dashboard active; /admin/projects/review→Tinjau Proyek; /admin/users/verification→Verifikasi Pengguna (tepat satu item tiap halaman); console 0 err; tsc 0. Decision D-FIX-1.
+
 2026-06-26 (Admin /dashboard premium — semua role dashboard kini premium)
 Task: lanjutan — redesign dashboard Admin ke gaya premium yang sama. DONE & browser-verified (p43-admin). Data 100% NYATA (admin punya endpoint lengkap dari Phase 2).
 - `components/dashboard/AdminDashboard.tsx` (BARU, pakai dashboardKit): Welcome + 4 stat (Total Pengguna, Proyek Aktif, Verifikasi Pending, Tinjau Proyek — REAL dari adminApi.dashboard + listVerifications.meta.total), bento 3 kolom: Antrian Verifikasi (REAL listVerifications PENDING → /admin/users/verification), Tinjau Proyek (REAL projectApi.pending → /admin/projects/review), Aktivitas/Audit (REAL stats.recentActivities, action di-humanize → /admin/audit-logs).
