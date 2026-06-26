@@ -1,6 +1,43 @@
 # Decisions
 
 Date:
+2026-06-26 (Senior & UMKM dashboards + shared kit)
+
+Decision (D-BEG-3):
+Dashboard Senior & UMKM dibuat mengikuti bahasa desain Beginner (welcome + stat + bento), via shared `components/dashboard/dashboardKit.tsx` (primitives + placeholder cards + ProjectMiniRow + AgendaCard). BeginnerDashboard di-refactor pakai kit (DRY). ROLE_DASHBOARD map di dashboard/page.tsx (BEGINNER/SENIOR/UMKM); ADMIN tetap redirect /admin/dashboard. Data nyata: Senior pakai endpoint BARU `GET /me/mentored-projects` (projects where seniorId=caller) + mySeniorApplications; UMKM pakai /my-projects yang sudah ada. Stat tanpa backend (Review Tertunda, Lamaran Senior) + Aktivitas/Notifikasi = placeholder "Contoh".
+Reason:
+User: "lanjut dashboard Senior/UMKM" (mereka bilang sebelumnya "role lain mirip"). Kit menghindari triplikasi Panel/StatCard/Avatar. Senior butuh sumber proyek dari membership-style endpoint (sama alasannya seperti /me/projects beginner — assignment bisa via seed tanpa application), jadi /me/mentored-projects ditambah; UMKM sudah punya /my-projects.
+Impact:
+3 dashboard konsisten & premium dgn data nyata + placeholder jelas. Sidebar navy tetap (D-BEG-2). Edge: ganti-akun di tab yang sama memicu 403 sesaat ke endpoint role lama (appUser ke-cache sebelum /auth/me re-resolve) — harmless, hanya muncul saat switch akun, bukan utk user single-role (reload bersih = 0 err). Saat Phase 8/9, widget Sertifikat/Notifikasi/Aktivitas/Review-Tertunda bisa di-wire nyata.
+
+Date:
+2026-06-26 (Beginner /dashboard premium redesign)
+
+Decision (D-BEG-2):
+`/dashboard` BEGINNER diganti jadi homepage premium (ref: screenshot user di design-refs/dashboard-beginner.png + prompt Clay/Linear-style). User memilih cakupan "KONTEN DASHBOARD SAJA" → sidebar navy + topbar EXISTING (AppShell) TIDAK diubah; hanya area konten yang dibangun ulang. SENIOR/UMKM tetap dashboard generik lama (role-branch di page). Widget tanpa backend (Tugas, Aktivitas feed, Notifikasi[Phase 9]) = placeholder badge "Contoh"; sisanya REAL: Proyek Aktif (count membership ACTIVE), Proyek Saya list (dari /me/projects, += description + active members), Agenda Mendatang (derive deadline proyek), Artifact stat = 0 real (Phase 8). Banner verifikasi hanya tampil bila status≠VERIFIED.
+Reason:
+User minta tampilan persis screenshot (premium, project-based, bukan analytics). Pilih "konten saja" agar tidak mengubah sidebar global (DESIGN.md = navy, dipakai semua halaman) — menghindari regresi app-wide. docs/08 + roadmap Phase 10 (Beginner Dashboard) memang merencanakan dashboard ini, jadi in-scope. Placeholder dipilih user untuk fitur yang belum ada backend.
+Impact:
+Beginner punya dashboard homepage fungsional & premium dengan data nyata. Sidebar navy konsisten dgn halaman lain. "Role lain (Senior/UMKM) mirip" = follow-up belum dikerjakan (user bilang nanti). Saat Phase 8/9 jadi, widget Artifact/Notifikasi/Aktivitas bisa di-wire nyata. /me/projects include diperkaya (description + active members) — reusable.
+
+Date:
+2026-06-26 (Beginner "Proyek Saya" bento + /me/projects + Button fix)
+
+Decision (D-BEG-1):
+Halaman `/my-projects` dibuat ROLE-AWARE: BEGINNER → bento dashboard proyek-aktif (Figma node 262:2, tampilan Mahasiswa), UMKM → daftar proyek lama (tak diubah). Dibuat komponen `BeginnerProjectBoard` + nav "Proyek Saya" utk BEGINNER. Karena beginner member di-seed langsung sebagai project_member TANPA baris application (terverifikasi di DB: p4-beginner punya 0 application, tapi membership ACTIVE), sumber data proyek-aktif = MEMBERSHIP, bukan application → ditambah endpoint backend baru `GET /me/projects` (layered: projectMember.repo.listByUserWithProject → service.listMyProjects → controller.myProjects → route authMiddleware) yang mengembalikan membership caller + project info. Widget Figma yg belum ada backend-nya (sistem Tugas/Task, Activity feed, ukuran file, % milestone) DITAMPILKAN sebagai placeholder berbadge "Contoh" (pilihan user); sisanya pakai data nyata (detail/members/deliverables/contributions/reviews).
+Reason:
+User minta tampilan bento sesuai Figma; dikonfirmasi memang scope (docs/08 "My Projects - Beginner" + roadmap Phase 10 Beginner Dashboard). User memilih "tampilkan semua widget + placeholder". Application-based lookup gagal utk member seeded → butuh endpoint membership. CLAUDE.md membolehkan memperbaiki implementasi UI selama workflow/role/rules tak berubah; tidak ada entity Task di skema jadi Tugas tetap placeholder (bukan mengarang fitur backend).
+Impact:
+Beginner punya dashboard proyek aktif fungsional dgn data nyata + placeholder jelas. Endpoint /me/projects reusable utk Phase 10 (Beginner Dashboard). Browser-verified p4-beginner. Catatan: jika Phase 10 nanti bikin /dashboard beginner, bisa reuse myMemberships(). Tugas/Aktivitas/file-size baru jadi nyata kalau fitur Task/activity/upload dibangun (di luar MVP saat ini).
+
+Decision (D-UI-9, Button nativeButton):
+`ui/button.tsx` kini set `nativeButton={false}` otomatis saat prop `render` dipakai (Button dirender jadi <a>/Link). Menghilangkan console error base-ui yang dulu (memory lama) ditandai "harmless, ignore". Override eksplisit tetap dihormati.
+Reason:
+Error berulang & user melaporkannya; fix di komponen pusat membereskan semua call-site sekaligus, lebih benar secara a11y daripada di-ignore.
+Impact:
+Console bersih di /my-projects (Errors:0) dan semua halaman yang pakai Button render Link.
+
+Date:
 2026-06-25 (Nav — UMKM tanpa Telusuri Proyek)
 
 Decision (D-NAV-1, user directive):

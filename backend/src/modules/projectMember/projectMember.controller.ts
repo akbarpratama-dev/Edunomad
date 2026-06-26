@@ -13,6 +13,16 @@ export const projectMemberController = {
     }
   },
 
+  // GET /me/projects — caller's own memberships
+  async myProjects(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await projectMemberService.listMyProjects(req.user!.id);
+      res.json(successResponse(data, "Memberships retrieved"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
   // POST /members/:id/remove (SENIOR lead)
   async requestRemoval(req: Request, res: Response, next: NextFunction) {
     try {

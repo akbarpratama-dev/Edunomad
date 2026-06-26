@@ -71,4 +71,14 @@ export const projectController = {
       next(err);
     }
   },
+
+  // GET /me/mentored-projects (SENIOR) — projects where the caller is the mentor.
+  async mentoredProjects(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await projectService.getMentoredProjects(req.user!.id);
+      res.json(successResponse(data, "Mentored projects retrieved"));
+    } catch (err) {
+      next(err);
+    }
+  },
 };

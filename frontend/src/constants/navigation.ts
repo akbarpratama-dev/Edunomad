@@ -52,6 +52,7 @@ const ROLE_ITEMS: Record<Role, NavItem[]> = {
   ],
   BEGINNER: [
     BROWSE_PROJECTS,
+    { label: "Proyek Saya", href: "/my-projects", icon: FolderKanban },
     { label: "Lamaran Saya", href: "/applications", icon: FileSignature },
     { label: "Review Saya", href: "/reviews", icon: Star },
   ],

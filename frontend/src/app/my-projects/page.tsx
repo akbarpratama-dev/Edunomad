@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { BeginnerProjectBoard } from "@/components/project/BeginnerProjectBoard";
+import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/apiClient";
 import {
@@ -180,10 +182,32 @@ function Content() {
   );
 }
 
+// Beginner "Proyek Saya" — bento dashboard for their active project (docs/08
+// "My Projects - Beginner"; Figma node 262:2).
+function BeginnerView() {
+  return (
+    <AppShell breadcrumbs={[{ label: "Proyek Saya" }]}>
+      <div className="flex flex-col gap-4">
+        <PageHeader
+          title="Proyek Saya"
+          subtitle="Pantau progres, tugas, milestone, dan kontribusi Anda dalam proyek yang sedang berjalan."
+        />
+        <BeginnerProjectBoard />
+      </div>
+    </AppShell>
+  );
+}
+
+function RoleRouter() {
+  const role = useAuthStore((s) => s.appUser?.role);
+  if (role === "BEGINNER") return <BeginnerView />;
+  return <Content />;
+}
+
 export default function MyProjectsPage() {
   return (
-    <AuthGuard allowedRoles={["UMKM"]}>
-      <Content />
+    <AuthGuard allowedRoles={["UMKM", "BEGINNER"]}>
+      <RoleRouter />
     </AuthGuard>
   );
 }

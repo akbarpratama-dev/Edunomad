@@ -13,6 +13,11 @@ export const projectMemberService = {
     return projectMemberRepository.listByProject(projectId);
   },
 
+  // GET /me/projects — the caller's own project memberships (beginner "Proyek Saya").
+  listMyProjects(userId: string) {
+    return projectMemberRepository.listByUserWithProject(userId);
+  },
+
   // POST /members/:id/remove (SENIOR lead) — Workflow 17 request flow.
   async requestRemoval(seniorId: string, memberId: string, reason: string) {
     const member = await projectMemberRepository.findById(memberId);

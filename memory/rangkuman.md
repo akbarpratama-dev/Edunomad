@@ -5,6 +5,39 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-26 (Dashboard Senior & UMKM)
+
+Prompt:
+"lanjut dashboard Senior/UMKM" (samakan desain dgn Beginner).
+
+Hasil:
+Bikin shared dashboardKit (primitives + cards), refactor Beginner pakai kit, bangun SeniorDashboard + UMKMDashboard (welcome+stat+bento). Backend tambah `GET /me/mentored-projects` (senior); UMKM pakai /my-projects. dashboard/page.tsx ROLE_DASHBOARD map. Data nyata (Senior: proyek mentoring+lamaran; UMKM: proyek+rekrutmen+agenda) + placeholder Contoh. Browser-verified 3 role (Senior 1/5 mentoring, UMKM 1/5 aktif, Beginner OK), clean-load 0 err. Sidebar navy tetap. Decision D-BEG-3.
+
+---
+
+Date:
+2026-06-26 (Redesign /dashboard beginner dari screenshot)
+
+Prompt:
+User kasih screenshot + prompt UI lengkap (premium Clay/Linear dashboard) → "ubah desain dashboard, untuk mahasiswa, nanti yang lain mirip". Pilihan: cakupan = "konten dashboard saja" (sidebar navy tetap); widget belum-ada-backend = "data nyata + placeholder Contoh". Foto disimpan ke design-refs/dashboard-beginner.png.
+
+Hasil:
+`/dashboard` role-branch: BEGINNER → BeginnerDashboard premium (welcome, 4 stat, Proyek Saya[real], Aktivitas[Contoh], Notifikasi[Contoh], Agenda[real deadline]); role lain tetap generik. /me/projects include diperkaya (description+active members) utk kartu. Sidebar/topbar (AppShell navy) TIDAK diubah (sesuai pilihan user). Browser-verified p4-beginner data nyata + placeholder; backend build 0, tsc 0, console 0 error. Decision D-BEG-2. (Catatan: dashboard Senior/UMKM "mirip" = follow-up, belum dikerjakan.)
+
+---
+
+Date:
+2026-06-26 (Proyek Saya bento + error nativeButton)
+
+Prompt:
+(1) Ada error console base-ui `nativeButton` di /my-projects → fix. (2) "ubah tampilan Proyek Saya jadi seperti Figma [node 262-2], bento grid card dengan info-info berhubungan". Saat ditanya: cek apakah sampai semua phase selesai ada Proyek Saya utk mahasiswa (harusnya ya) → restyle/buat dashboard beginner sesuai phase; widget di luar MVP → "tampilkan semua + placeholder".
+
+Hasil:
+(1) Fix `ui/button.tsx`: auto `nativeButton={false}` saat `render` dipakai → console Errors:0 (global, semua Button render Link). (2) Konfirmasi via docs/08 + roadmap Phase 10: "Proyek Saya" Mahasiswa memang scope. Branch `redesign/my-projects`. Bangun `BeginnerProjectBoard` (bento: hero navy + 4 stat + Tugas[Contoh] + Milestone + Aktivitas[Contoh] + Tim + Deliverable + Feedback + Kontribusi). `/my-projects` role-aware (BEGINNER=bento, UMKM=daftar lama). Tambah backend `GET /me/projects` (membership, krn member di-seed tanpa application). Nav BEGINNER +"Proyek Saya". Data nyata + placeholder badge "Contoh". Browser-verified p4-beginner; backend build 0, tsc 0. Decision D-BEG-1, D-UI-9.
+
+---
+
+Date:
 2026-06-25 (Nav UMKM tanpa Telusuri Proyek)
 
 Prompt:

@@ -110,6 +110,12 @@ export const projectService = {
     return { data, total, page: query.page, limit: query.limit };
   },
 
+  // GET /me/mentored-projects (SENIOR) — projects the caller mentors, any status.
+  async getMentoredProjects(seniorId: string) {
+    const { data } = await projectRepository.findManyPaginated({ seniorId }, 1, 100);
+    return data;
+  },
+
   // --- Admin project approval (3.2) ---
   async getPendingProjects(page: number, limit: number) {
     const { data, total } = await projectRepository.findManyPaginated(

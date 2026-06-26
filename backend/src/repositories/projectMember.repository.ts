@@ -15,6 +15,30 @@ const memberDetailInclude = {
   project: { select: { id: true, title: true, umkmId: true, seniorId: true, status: true } },
 } satisfies Prisma.ProjectMemberInclude;
 
+// GET /me/projects — the caller's own memberships with enough project info to
+// render the beginner "Proyek Saya" view.
+const myMembershipInclude = {
+  projectRole: { select: { id: true, roleName: true } },
+  project: {
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      status: true,
+      deadline: true,
+      startDate: true,
+      umkm: { select: { id: true, name: true } },
+      senior: { select: { id: true, name: true } },
+      category: { select: { id: true, name: true, slug: true } },
+      // Active teammates — used for the dashboard project-card avatar cluster.
+      projectMembers: {
+        where: { status: MemberStatus.ACTIVE },
+        select: { user: { select: { id: true, name: true } } },
+      },
+    },
+  },
+} satisfies Prisma.ProjectMemberInclude;
+
 export const projectMemberRepository = {
   // BR-001: a beginner may belong to only ONE ACTIVE project at a time.
   countActiveByUser(userId: string) {
@@ -43,6 +67,21 @@ export const projectMemberRepository = {
       where: { projectId, userId, status: MemberStatus.ACTIVE },
     });
     return count > 0;
+  },
+
+  // GET /me/projects — projects the user is (or was) a member of, newest first.
+  // Excludes WITHDRAWN/REMOVED so the view shows only live or completed memberships.
+  listByUserWithProject(userId: string) {
+    return prisma.projectMember.findMany({
+      where: {
+        userId,
+        status: {
+          in: [MemberStatus.ACTIVE, MemberStatus.COMPLETED, MemberStatus.REMOVAL_REQUESTED],
+        },
+      },
+      include: myMembershipInclude,
+      orderBy: { joinedAt: "desc" },
+    });
   },
 
   // GET /projects/:id/members.
