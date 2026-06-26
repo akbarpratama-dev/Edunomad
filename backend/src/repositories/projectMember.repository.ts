@@ -23,12 +23,18 @@ const myMembershipInclude = {
     select: {
       id: true,
       title: true,
+      description: true,
       status: true,
       deadline: true,
       startDate: true,
       umkm: { select: { id: true, name: true } },
       senior: { select: { id: true, name: true } },
       category: { select: { id: true, name: true, slug: true } },
+      // Active teammates — used for the dashboard project-card avatar cluster.
+      projectMembers: {
+        where: { status: MemberStatus.ACTIVE },
+        select: { user: { select: { id: true, name: true } } },
+      },
     },
   },
 } satisfies Prisma.ProjectMemberInclude;

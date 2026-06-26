@@ -18,6 +18,7 @@ import {
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { BeginnerDashboard } from "@/components/dashboard/BeginnerDashboard";
 import { useAuthStore } from "@/stores/authStore";
 import type { AccountStatus, Role } from "@/types/user";
 
@@ -98,6 +99,25 @@ function DashboardContent() {
   const banner = STATUS_BANNER[appUser.status];
   const Icon = banner.icon;
   const actions = QUICK_ACTIONS[appUser.role];
+
+  // Beginner gets the premium project-based dashboard (Figma/screenshot ref).
+  // The verification banner only shows when there's something to act on.
+  if (appUser.role === "BEGINNER") {
+    return (
+      <AppShell breadcrumbs={[{ label: "Dashboard" }]}>
+        <div className="flex w-full flex-col gap-6">
+          {appUser.status !== "VERIFIED" && (
+            <Alert variant={banner.variant}>
+              <Icon />
+              <AlertTitle>{banner.title}</AlertTitle>
+              <AlertDescription>{banner.desc}</AlertDescription>
+            </Alert>
+          )}
+          <BeginnerDashboard />
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell breadcrumbs={[{ label: "Dashboard" }]}>

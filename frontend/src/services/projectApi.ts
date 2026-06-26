@@ -94,12 +94,14 @@ export interface MyMembership {
   project: {
     id: string;
     title: string;
+    description: string;
     status: ProjectStatus;
     deadline: string;
     startDate: string;
     umkm: { id: string; name: string };
     senior: { id: string; name: string } | null;
     category: Category;
+    projectMembers: { user: { id: string; name: string } }[];
   };
 }
 

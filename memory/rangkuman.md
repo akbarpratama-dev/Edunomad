@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-26 (Redesign /dashboard beginner dari screenshot)
+
+Prompt:
+User kasih screenshot + prompt UI lengkap (premium Clay/Linear dashboard) → "ubah desain dashboard, untuk mahasiswa, nanti yang lain mirip". Pilihan: cakupan = "konten dashboard saja" (sidebar navy tetap); widget belum-ada-backend = "data nyata + placeholder Contoh". Foto disimpan ke design-refs/dashboard-beginner.png.
+
+Hasil:
+`/dashboard` role-branch: BEGINNER → BeginnerDashboard premium (welcome, 4 stat, Proyek Saya[real], Aktivitas[Contoh], Notifikasi[Contoh], Agenda[real deadline]); role lain tetap generik. /me/projects include diperkaya (description+active members) utk kartu. Sidebar/topbar (AppShell navy) TIDAK diubah (sesuai pilihan user). Browser-verified p4-beginner data nyata + placeholder; backend build 0, tsc 0, console 0 error. Decision D-BEG-2. (Catatan: dashboard Senior/UMKM "mirip" = follow-up, belum dikerjakan.)
+
+---
+
+Date:
 2026-06-26 (Proyek Saya bento + error nativeButton)
 
 Prompt:

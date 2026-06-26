@@ -1,6 +1,16 @@
 # Decisions
 
 Date:
+2026-06-26 (Beginner /dashboard premium redesign)
+
+Decision (D-BEG-2):
+`/dashboard` BEGINNER diganti jadi homepage premium (ref: screenshot user di design-refs/dashboard-beginner.png + prompt Clay/Linear-style). User memilih cakupan "KONTEN DASHBOARD SAJA" → sidebar navy + topbar EXISTING (AppShell) TIDAK diubah; hanya area konten yang dibangun ulang. SENIOR/UMKM tetap dashboard generik lama (role-branch di page). Widget tanpa backend (Tugas, Aktivitas feed, Notifikasi[Phase 9]) = placeholder badge "Contoh"; sisanya REAL: Proyek Aktif (count membership ACTIVE), Proyek Saya list (dari /me/projects, += description + active members), Agenda Mendatang (derive deadline proyek), Artifact stat = 0 real (Phase 8). Banner verifikasi hanya tampil bila status≠VERIFIED.
+Reason:
+User minta tampilan persis screenshot (premium, project-based, bukan analytics). Pilih "konten saja" agar tidak mengubah sidebar global (DESIGN.md = navy, dipakai semua halaman) — menghindari regresi app-wide. docs/08 + roadmap Phase 10 (Beginner Dashboard) memang merencanakan dashboard ini, jadi in-scope. Placeholder dipilih user untuk fitur yang belum ada backend.
+Impact:
+Beginner punya dashboard homepage fungsional & premium dengan data nyata. Sidebar navy konsisten dgn halaman lain. "Role lain (Senior/UMKM) mirip" = follow-up belum dikerjakan (user bilang nanti). Saat Phase 8/9 jadi, widget Artifact/Notifikasi/Aktivitas bisa di-wire nyata. /me/projects include diperkaya (description + active members) — reusable.
+
+Date:
 2026-06-26 (Beginner "Proyek Saya" bento + /me/projects + Button fix)
 
 Decision (D-BEG-1):
