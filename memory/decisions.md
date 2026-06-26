@@ -1,6 +1,16 @@
 # Decisions
 
 Date:
+2026-06-26 (Admin dashboard premium)
+
+Decision (D-BEG-4):
+Dashboard Admin (`/admin/dashboard`) di-redesign ke gaya premium (dashboardKit), menggantikan halaman kartu-statistik Phase 2. Komponen `AdminDashboard` — 100% data NYATA (adminApi.dashboard + listVerifications + projectApi.pending): 4 stat + Antrian Verifikasi + Tinjau Proyek + Aktivitas/Audit. Admin TIDAK dimasukkan ROLE_DASHBOARD map di /dashboard — tetap pakai redirect /dashboard→/admin/dashboard (konsisten dgn arsitektur Phase 2). Stat "Verifikasi Pending" diambil dari meta.total antrian verifikasi (request PENDING), bukan users.byStatus.PENDING_VERIFICATION, supaya konsisten dgn isi antrian.
+Reason:
+User: "iya" (lanjut admin). Admin sudah punya endpoint lengkap → tak perlu backend baru, semua real. Menjaga redirect /admin/dashboard agar struktur admin (yang punya page-set sendiri) tak berubah.
+Impact:
+SEMUA 4 role (Beginner/Senior/UMKM/Admin) kini punya dashboard premium konsisten via dashboardKit. Browser-verified p43-admin, 0 err. Tak ada backend baru.
+
+Date:
 2026-06-26 (Senior & UMKM dashboards + shared kit)
 
 Decision (D-BEG-3):

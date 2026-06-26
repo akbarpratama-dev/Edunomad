@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-26 (Dashboard Admin premium)
+
+Prompt:
+"iya" (lanjut bikin dashboard Admin premium, setelah konfirmasi admin belum dibuat).
+
+Hasil:
+AdminDashboard (pakai dashboardKit) — 100% data nyata: 4 stat (Total Pengguna/Proyek Aktif/Verifikasi Pending/Tinjau Proyek) + Antrian Verifikasi + Tinjau Proyek + Aktivitas/Audit. /admin/dashboard ditulis ulang render AdminDashboard. Admin tetap via redirect (tak masuk ROLE_DASHBOARD map). Stat verifikasi pakai meta.total antrian (konsisten). Browser-verified p43-admin (0 err). Semua 4 role dashboard kini premium. Tanpa backend baru. Decision D-BEG-4. Branch redesign/admin-dashboard.
+
+---
+
+Date:
 2026-06-26 (Dashboard Senior & UMKM)
 
 Prompt:

@@ -1,5 +1,12 @@
 # Development Log
 
+2026-06-26 (Admin /dashboard premium — semua role dashboard kini premium)
+Task: lanjutan — redesign dashboard Admin ke gaya premium yang sama. DONE & browser-verified (p43-admin). Data 100% NYATA (admin punya endpoint lengkap dari Phase 2).
+- `components/dashboard/AdminDashboard.tsx` (BARU, pakai dashboardKit): Welcome + 4 stat (Total Pengguna, Proyek Aktif, Verifikasi Pending, Tinjau Proyek — REAL dari adminApi.dashboard + listVerifications.meta.total), bento 3 kolom: Antrian Verifikasi (REAL listVerifications PENDING → /admin/users/verification), Tinjau Proyek (REAL projectApi.pending → /admin/projects/review), Aktivitas/Audit (REAL stats.recentActivities, action di-humanize → /admin/audit-logs).
+- `app/admin/dashboard/page.tsx` ditulis ulang ringkas → render <AdminDashboard/> dalam AuthGuard ADMIN + AppShell (halaman kartu-statistik Phase 2 diganti). Admin tetap via redirect /dashboard→/admin/dashboard (tak masuk ROLE_DASHBOARD map).
+- FIX konsistensi: stat "Verifikasi Pending" pakai meta.total antrian (request PENDING), BUKAN users.byStatus.PENDING_VERIFICATION (di test, user di-VERIFIED paksa via SQL tapi request masih PENDING → dua sumber beda; total antrian = konsisten dgn list).
+- VERIFIED (p43-admin): Total Pengguna 7, Proyek Aktif 1, Verifikasi Pending 6, Tinjau Proyek 1; antrian verifikasi 5 + tinjau "wejlklj" + audit asli; semua link real; console 0 err. tsc 0. Decision D-BEG-4. **SEMUA 4 role dashboard kini premium.**
+
 2026-06-26 (Senior & UMKM /dashboard premium — samakan dgn Beginner)
 Task: lanjutan — bikin dashboard Senior & UMKM mirip Beginner (welcome+stat+bento). DONE & browser-verified 3 role.
 - `components/dashboard/dashboardKit.tsx` (BARU, shared): initials/Avatar/SampleTag/Panel/StatCard/WelcomeHeader/CardHead/AgendaCard/ProjectMiniRow/PlaceholderActivityCard/PlaceholderNotifCard. BeginnerDashboard DI-REFACTOR pakai kit (hapus duplikat lokal; perilaku sama, tetap verified 0 err).
