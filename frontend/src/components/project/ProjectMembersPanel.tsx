@@ -127,7 +127,7 @@ export function ProjectMembersPanel({ project }: { project: ProjectDetail }) {
   );
 
   return (
-    <Card>
+    <Card className="app-reveal">
       <CardHeader>
         <CardTitle>Anggota Tim</CardTitle>
       </CardHeader>
@@ -137,7 +137,7 @@ export function ProjectMembersPanel({ project }: { project: ProjectDetail }) {
         ) : members.length === 0 ? (
           <p className="text-sm text-muted-foreground">Belum ada anggota tim.</p>
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-200">
+          <ul className="flex flex-col divide-y divide-border">
             {members.map((m) => {
               const meta = MEMBER_STATUS_META[m.status];
               const isSelf = m.user.id === appUser.id;

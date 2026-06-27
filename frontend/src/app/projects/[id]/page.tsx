@@ -235,8 +235,8 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
 
   if (isOwner) {
     return (
-      <Card>
-        <CardContent className="flex flex-col gap-2 pt-2">
+      <Card className="app-reveal">
+        <CardContent className="flex flex-col gap-2">
           <p className="text-sm font-semibold text-foreground">Anda pemilik proyek ini</p>
           {project.status === "AWAITING_COMPLETION" && (
             <LifecycleAction
@@ -261,8 +261,8 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
 
   if (isLeadSenior) {
     return (
-      <Card>
-        <CardContent className="flex flex-col gap-2 pt-2">
+      <Card className="app-reveal">
+        <CardContent className="flex flex-col gap-2">
           <p className="text-sm font-semibold text-foreground">
             Anda mentor proyek ini
           </p>
@@ -296,8 +296,8 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
 
   if (appUser.role === "SENIOR") {
     return (
-      <Card>
-        <CardContent className="flex flex-col gap-2 pt-2">
+      <Card className="app-reveal">
+        <CardContent className="flex flex-col gap-2">
           {recruiting && !hasSenior ? (
             <SeniorApplyDialog project={project} />
           ) : (
@@ -317,8 +317,8 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
 
   if (appUser.role === "BEGINNER") {
     return (
-      <Card>
-        <CardContent className="flex flex-col gap-2 pt-2">
+      <Card className="app-reveal">
+        <CardContent className="flex flex-col gap-2">
           {recruiting && hasSenior ? (
             <BeginnerApplyDialog project={project} />
           ) : (
@@ -360,27 +360,29 @@ function Content() {
   useEffect(load, [id]);
 
   return (
-    <AppShell
-      breadcrumbs={[
-        { label: "Telusuri Proyek", href: "/projects" },
-        { label: project?.title ?? "Detail" },
-      ]}
-    >
-      <div className="mx-auto w-full max-w-3xl">
+    <AppShell>
+      <div className="mx-auto w-full max-w-5xl">
         {loading ? (
           <ListSkeleton rows={5} />
         ) : error ? (
           <ErrorState message={error} onAction={load} />
         ) : project ? (
-          <div className="flex flex-col gap-4">
-            <ProjectDetailView project={project} />
-            <ActionPanel project={project} reload={load} />
-            {(project.status === "ACTIVE" || project.status === "AWAITING_COMPLETION") && (
-              <Button render={<Link href={`/projects/${project.id}/workspace`} />}>
-                Buka Workspace
-              </Button>
-            )}
-            <ProjectMembersPanel key={project.status} project={project} />
+          <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
+            <div className="min-w-0">
+              <ProjectDetailView project={project} />
+            </div>
+            <aside className="flex flex-col gap-4 lg:sticky lg:top-2 lg:self-start">
+              <ActionPanel project={project} reload={load} />
+              {(project.status === "ACTIVE" || project.status === "AWAITING_COMPLETION") && (
+                <Button
+                  className="app-reveal w-full"
+                  render={<Link href={`/projects/${project.id}/workspace`} />}
+                >
+                  Buka Workspace
+                </Button>
+              )}
+              <ProjectMembersPanel key={project.status} project={project} />
+            </aside>
           </div>
         ) : null}
       </div>
