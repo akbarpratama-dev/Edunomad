@@ -7,7 +7,7 @@ import { FolderKanban, Plus } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
+import { PillTabs } from "@/components/common/PillTabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ListSkeleton } from "@/components/common/LoadingState";
@@ -15,7 +15,6 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { BeginnerProjectBoard } from "@/components/project/BeginnerProjectBoard";
 import { useAuthStore } from "@/stores/authStore";
-import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/apiClient";
 import {
   projectApi,
@@ -89,8 +88,8 @@ function Content() {
   };
 
   return (
-    <AppShell breadcrumbs={[{ label: "Proyek Saya" }]}>
-      <div className="flex flex-col gap-4">
+    <AppShell>
+      <div className="flex flex-col gap-5">
         <PageHeader
           title="Proyek Saya"
           subtitle="Kelola proyek yang kamu publikasikan dan rekrutmen timnya."
@@ -101,22 +100,7 @@ function Content() {
           }
         />
 
-        <div className="flex gap-2 overflow-x-auto border-b border-border">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={cn(
-                "whitespace-nowrap px-4 py-2 text-sm font-medium",
-                tab === t.key
-                  ? "border-b-2 border-[#a3ce00] text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <PillTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Filter status proyek" />
 
         {loading ? (
           <ListSkeleton rows={4} />
@@ -128,41 +112,51 @@ function Content() {
           />
         ) : (
           <div className="flex flex-col gap-3">
-            {items.map((item) => (
-              <Card key={item.id}>
-                <CardContent className="flex flex-col gap-2 pt-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{item.title}</p>
+            {items.map((item, i) => (
+              <article
+                key={item.id}
+                style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+                className="app-reveal flex flex-col gap-3 rounded-[20px] border border-border bg-card p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span
+                      className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]"
+                      aria-hidden="true"
+                    >
+                      <FolderKanban className="size-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-semibold tracking-tight text-foreground">{item.title}</p>
                       <p className="text-sm text-muted-foreground">{item.category.name}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        Deadline {new Date(item.deadline).toLocaleDateString("id-ID")}
+                      </p>
                     </div>
-                    <StatusBadge status={item.status} />
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Deadline: {new Date(item.deadline).toLocaleDateString("id-ID")}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" render={<Link href={`/projects/${item.id}`} />}>
-                      Lihat Detail
-                    </Button>
-                    {item.status === "DRAFT" && (
-                      <>
-                        <Button size="sm" disabled={busy} onClick={() => submit(item)}>
-                          Kirim untuk Ditinjau
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={busy}
-                          onClick={() => setDeleting(item)}
-                        >
-                          Hapus
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                  <StatusBadge status={item.status} />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" render={<Link href={`/projects/${item.id}`} />}>
+                    Lihat Detail
+                  </Button>
+                  {item.status === "DRAFT" && (
+                    <>
+                      <Button size="sm" disabled={busy} onClick={() => submit(item)}>
+                        Kirim untuk Ditinjau
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() => setDeleting(item)}
+                      >
+                        Hapus
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </article>
             ))}
           </div>
         )}
@@ -186,8 +180,8 @@ function Content() {
 // "My Projects - Beginner"; Figma node 262:2).
 function BeginnerView() {
   return (
-    <AppShell breadcrumbs={[{ label: "Proyek Saya" }]}>
-      <div className="flex flex-col gap-4">
+    <AppShell>
+      <div className="flex flex-col gap-5">
         <PageHeader
           title="Proyek Saya"
           subtitle="Pantau progres, tugas, milestone, dan kontribusi Anda dalam proyek yang sedang berjalan."
