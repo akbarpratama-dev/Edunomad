@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-28 (Unify-UI sweep — batches 2–6, SELESAI)
+
+Prompt:
+Lanjutkan UNIFY-UI sweep: seragamkan SEMUA halaman ke design language premium yang sama. Batch1 (shared Card+PageHeader) sudah; lanjut per-halaman pakai PillTabs/app-reveal/badge konsisten/empty premium. Urutan batch2–6; auth jangan diubah; tiap batch commit+browser-verify+tsc 0+console 0+merge ke main.
+
+Hasil:
+SWEEP SELESAI. Bikin `common/PillTabs.tsx` (navy-fill active chip + counts) + upgrade `common/EmptyState.tsx` ke premium dashed. 6 batch dikerjakan & di-merge ke main: batch2 applications/mentor/reviews (e4b4a57); batch3 projects/[id] 2-col + ProjectDetailView eyebrow/meta + workspace PillTabs (994276e); batch4 manage/applicants/create wizard + stepper chartreuse + text-error→destructive (02be61c); batch5 admin review/verification/audit (tabel→panel premium) (9924ab0); batch6 my-projects view UMKM (ee0f045). Tiap batch tsc 0 + browser-verified (navy pill, card 20px, h1 28px) + console 0 err. Auth /auth/* tak disentuh. Decision D-UI-11. NEXT = resume Phase 8 Artifact (feature/phase-8-artifacts 1e6a4a3).
+
+---
+
+Date:
 2026-06-27 (Redesign Jelajahi Proyek)
 
 Prompt:

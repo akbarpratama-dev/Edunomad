@@ -1,6 +1,16 @@
 # Decisions
 
 Date:
+2026-06-28 (Unify-UI sweep — one premium design language)
+
+Decision (D-UI-11):
+Semua halaman authed diseragamkan ke SATU bahasa desain premium (DESIGN.md) lewat primitive bersama, bukan styling ad-hoc per halaman. Tab status di SELURUH app dipindah dari underline `border-b-2 border-[#a3ce00]` ke komponen baru `common/PillTabs.tsx` dengan active = **navy fill #201f31 + teks putih** (chip-active DESIGN.md), bukan "border-primary" mentah yang sempat tertulis di handoff (chartreuse pucat tak terbaca sbg border di light). `common/EmptyState.tsx` di-upgrade jadi premium dashed rounded-[20px] (berlaku app-wide otomatis). List rows lama (Card+CardContent pt-2) diganti `article.app-reveal rounded-[20px] border bg-card p-5` dengan stagger animationDelay + glyph/avatar. Validation error class `text-error` (#FF4444) dinormalkan ke `text-destructive` (#e5484d) di create wizard. Breadcrumbs prop (sudah deprecated, diabaikan AppShell) dibuang dari tiap halaman yang disentuh. Auth /auth/* SENGAJA tidak diubah (punya sistem desain terpisah yang sudah rapi). Dikerjakan bertahap 6 batch, tiap batch commit+verify+merge ke main.
+Reason:
+User minta "SEMUA halaman pakai UI/card yang sama (premium)" + "merge tiap batch". Primitive bersama (Card/PageHeader/PillTabs/EmptyState) = leverage tertinggi: ubah sekali, semua konsumen ikut. Navy-fill pill dipilih karena DESIGN.md adalah kontrak visual kanonik (chip-active = navy) dan terbaca, mengalahkan catatan handoff yang longgar.
+Impact:
+Konsistensi visual penuh lintas role (beginner/senior/umkm/admin) tanpa ubah workflow/RBAC/route/nav. PillTabs jadi komponen reusable utk semua tab status ke depan. ProjectDetailView yang dipakai admin review dialog ikut premium (efek samping diinginkan). Phase 8 Artifact tetap di-pause (feature/phase-8-artifacts 1e6a4a3) → resume setelah ini.
+
+Date:
 2026-06-27 (Redesign /projects + enrich browse payload)
 
 Decision (D-UI-10):

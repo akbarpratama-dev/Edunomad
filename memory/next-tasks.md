@@ -1,21 +1,17 @@
 ============================================================
-⚡ ACTIVE HANDOFF (2026-06-28 #8) — UNIFY-UI sweep IN PROGRESS, branch `redesign/unify-ui`
+⚡ ACTIVE HANDOFF (2026-06-28 #9) — RESUME PHASE 8 ARTIFACT (unify-UI sweep SELESAI)
 ============================================================
-main = 2f1546d (Phase 0–7 + bento Proyek Saya + dashboard 4 role + Jelajahi Proyek premium + breadcrumb dihapus + guidelines + nav konsisten Beranda/Jelajahi Proyek/Notifikasi). Branch aktif `redesign/unify-ui` (dari main).
+main = ee0f045 (Phase 0–7 + unify-UI sweep penuh: semua halaman authed satu bahasa desain premium). Tidak ada branch unify aktif lagi — `redesign/unify-ui` sudah merged habis ke main (batch 1–6).
 
-KONTEKS: user minta SEMUA halaman pakai UI/card yang SAMA (premium). Banyak halaman masih UI lama. Pilihan user: "sapu bersih bertahap" + "merge tiap batch". 
+✅ UNIFY-UI SWEEP SELESAI & merged ke main (D-UI-11). Primitive bersama: `ui/card.tsx`, `common/PageHeader.tsx`, NEW `common/PillTabs.tsx` (navy-fill active chip + counts), `common/EmptyState.tsx` premium. Halaman yang dipremium-kan: batch2 applications/mentor/reviews (e4b4a57); batch3 projects/[id] 2-col + ProjectDetailView + workspace PillTabs (994276e); batch4 manage/applicants/create wizard (02be61c); batch5 admin review/verification/audit (9924ab0); batch6 my-projects UMKM (ee0f045). Auth /auth/* tak disentuh. Tiap batch tsc 0 + browser-verified + console 0 err.
+   ⚠️ Catatan tooling: tsc kadang transiently lempar TS2882 (CSS ambient: globals.css / lenis.css) saat dev server lagi regen `.next/types`. Bukan error nyata — tunggu ~2s, re-run `npx tsc -p frontend/tsconfig.json --noEmit` → EXIT 0.
 
-✅ BATCH 1 SELESAI (commit efdb5e3): primitive bersama di-premium-kan — `ui/card.tsx` (Card rounded-[20px]+border #e7e3d8 flat, no shadow, p-5; CardTitle font-semibold) + `common/PageHeader.tsx` (h1 28px text-pretty). Semua halaman pakai Card/PageHeader otomatis ikut premium. tsc 0, /reviews verified.
-
-➡️ LANJUTKAN sweep per-halaman ke pola premium (pakai dashboardKit Panel/StatCard/app-reveal/badge tint konsisten, header tanpa breadcrumb sudah global). Urutan batch:
-- BATCH 2: `/applications` (Beginner Lamaran), `/applications/mentor` (Senior), `/reviews` (My Reviews) — rapikan tabs jadi pill konsisten + kartu premium + empty-state.
-- BATCH 3: `/projects/[id]` detail (ProjectDetailView) + `/projects/[id]/workspace` (tab bar + tiap tab).
-- BATCH 4: `/projects/[id]/manage` + `/applicants` + `/projects/create` wizard.
-- BATCH 5: admin `/admin/projects/review` + `/admin/users/verification` + `/admin/audit-logs` (tabel→kartu/list premium).
-- BATCH 6: `/my-projects` VIEW UMKM (Content lama; Beginner sudah bento).
-Auth `/auth/*` JANGAN diubah (sistem desain terpisah, sudah rapi). Tiap batch: commit + browser-verify (login p4-beginner/p4-senior/p4-umkm/p43-admin pw TestPass123!) + tsc 0 + console 0 err, lalu merge ke main.
-
-⏸️ PHASE 8 ARTIFACT di-PAUSE: WIP di branch `feature/phase-8-artifacts` commit 1e6a4a3 (pdfkit/qrcode + artifactPdf.service + artifact.repository; belum service/controller/routes/frontend + completion gate). Lanjut SETELAH unify-UI selesai. Baca task-breakdown §8 + schema Artifact (sudah ada, no migration) + endpoints (POST /projects/:id/generate-artifacts, /artifacts/:id/regenerate, GET /artifacts/:id[/download], GET /verify/:code) + Workflow 13/14/18.
+➡️ NEXT = RESUME **PHASE 8 — Artifact System**. WIP ada di branch `feature/phase-8-artifacts` commit 1e6a4a3 (sudah: pdfkit/qrcode deps + `artifactPdf.service` + `artifact.repository`). Cabang itu dibuat dari main LAMA — pertimbangkan rebase ke main ee0f045 dulu (atau cherry-pick). SISA pekerjaan:
+   1. Backend: artifact.service + controller + routes (endpoints: POST /projects/:id/generate-artifacts, POST /artifacts/:id/regenerate, GET /artifacts/:id, GET /artifacts/:id/download, GET /verify/:code). Wire ke routes/index.ts.
+   2. Completion gate (carry-over D-P4.3-3): isi `projectLifecycle.service.requestCompletion` — semua deliverables APPROVED + contributions APPROVED + reviews ada + artifacts generated sebelum ACTIVE→AWAITING_COMPLETION (Workflow 15). Reviews/deliverables/contributions sudah ada; tinggal artifacts.
+   3. Frontend: 4 page (label user-facing "Sertifikat" D-UI-7; nav item /artifacts sudah ada tapi page belum dibuat) — pakai pola premium baru (PageHeader/PillTabs/Card/EmptyState/app-reveal).
+   Baca task-breakdown §8 + schema Artifact/ArtifactVersion (immutable, sudah ada → kemungkinan NO migration) + API Artifacts + RBAC (siapa generate) + Workflow 13/14/18 (artifact per-beginner saat/setelah completion + verifikasi publik via /verify/:code).
+   Test fixtures: p4-beginner/senior/umkm + p43-admin @test.edunomad.com pw TestPass123!; project ACTIVE a1a1a1a1-0000-4000-8000-000000000005.
 
 --- arsip handoff #7 (Phase 7) ---
 ============================================================

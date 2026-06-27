@@ -1,7 +1,7 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-06-28 (main = 2f1546d. Phase 0-7 DONE + premium dashboards(4 role)+Jelajahi Proyek+breadcrumb removed+nav Beranda/Jelajahi Proyek/Notifikasi. NOW: UNIFY-UI sweep on branch redesign/unify-ui — batch1 done (shared Card+PageHeader premium, efdb5e3); batches 2-6 = make ~12 legacy pages match premium. Phase 8 Artifact PAUSED on feature/phase-8-artifacts 1e6a4a3).
+> Last updated: 2026-06-28 (main = ee0f045. Phase 0-7 DONE + **UNIFY-UI SWEEP COMPLETE** — all authed pages now share ONE premium design language via shared primitives Card/PageHeader/PillTabs/EmptyState + app-reveal; 6 batches merged to main; auth /auth/* untouched; D-UI-11. NEXT = resume PHASE 8 Artifact on feature/phase-8-artifacts 1e6a4a3 + completion gate D-P4.3-3).
 
 ## â­ Landing page (marketing `/`) â ADDED 2026-06-23, verified
 Built from user's Figma ("Premium SaaS Landing Page", file `nMFbzuPNcRcKgFVvMEFfaj`, node 5:2) via Figma MCP (source of truth) + skills impeccable/emil-design-eng/ui-ux-pro-max. 11 sections in `frontend/src/components/landing/` (motion.tsx, primitives.tsx, header.tsx, footer.tsx, sections/{hero,problem,how-it-works,feature-grid,project-showcase,portfolio,impact,testimonials,faq,cta}.tsx); composed in `app/page.tsx` (replaced the old `/`âlogin redirect). Stack: `motion` ^12.40.0 (NEW frontend dep, frontend/ only), animation library; landing palette scoped as `ln-*` Tailwind tokens in globals.css `@theme` (in-app docs/08 design system untouched); Manrope (via --font-sans, Black weight). [font InterâManrope across whole app, 2026-06-24] Motion = hero floating-card cluster + glow + entrance, scroll reveal/stagger (SSR-safe mounted-gate so never ships blank), CountUp stats, FAQ accordion, hover lifts â all `prefers-reduced-motion` aware. Header auth-aware (Masuk/Gabung vs Buka Dashboard). Verified: tsc clean, `npm run build` 0 errors (`/` prerendered STATIC), every section browser-screenshotted faithful to Figma. Decisions D-LP-1..4.
@@ -10,7 +10,7 @@ Built from user's Figma ("Premium SaaS Landing Page", file `nMFbzuPNcRcKgFVvMEFf
 ## Project
 EduNomad â project-collaboration platform (Beginners â Seniors â UMKM via real projects). Modular monolith. Backend: Express 5 + TS 6 + Prisma 7 + Supabase (Postgres). Frontend: Next.js 15.5.19 + React 19 + Tailwind v4 + shadcn/ui (base-ui) + Zustand + RHF + Zod. Supabase ref `sfzzkwckrfwzgcujykff` (ap-south-1).
 
-## Status: PHASE 0-6 ✅ (merged to main 1fc2b7e) + perf-fixes (single /auth/me, local JWKS JWT verify) + label Artifact→Sertifikat. **PHASE 7 REVIEWS & RATINGS ✅** (WF12 — 7.1 backend E2E 11/11 + 7.2 frontend: reviewApi + StarRating + ReviewTab Review Center + /reviews My Reviews + nav; browser-verified senior/UMKM/beginner; branch feature/phase-7-reviews). NEXT = **merge feature/phase-7-reviews→main, then PHASE 8 Artifact System** (UI label "Sertifikat", D-UI-7) + fill completion-gate (D-P4.3-3). Notifications = Phase 9 (NOT now).
+## Status: PHASE 0-7 ✅ (all merged to main) + **UNIFY-UI SWEEP ✅ COMPLETE** (2026-06-28, main = ee0f045, D-UI-11). Every authed page shares one premium design language via shared primitives: `ui/card.tsx` (rounded-[20px] flat), `common/PageHeader.tsx` (h1 28px), NEW `common/PillTabs.tsx` (navy-fill active chip + counts), `common/EmptyState.tsx` (premium dashed). 6 batches merged: applications/mentor/reviews · projects/[id]+workspace · manage/applicants/create · admin review/verification/audit · my-projects UMKM. Auth /auth/* untouched. **NEXT = resume PHASE 8 Artifact System** (UI label "Sertifikat", D-UI-7; WIP feature/phase-8-artifacts 1e6a4a3) + fill completion-gate (D-P4.3-3). Notifications = Phase 9 (NOT now).
 
 ### Phase 6.3 frontend done this session (2026-06-25, branch feature/phase-6-deliverables)
 deliverableApi + contributionApi service objects. DeliverablesTab (beginner create/edit DRAFT, submit/resubmit LINK evidence dynamic inputs, revision-feedback callout; senior lead review INLINE Setujui/Minta Revisi+feedback â D-P6-3, NOT a separate /deliverables/:id/review route). ContributionTab (beginner own report summary + skill-chip multiselect one-per-project edit-while-PENDING; senior list+approve). Workspace page += "Deliverables"+"Kontribusi" tabs. File-upload evidence (Supabase Storage) DEFERRED â LINK first (FILE type backend-ready). Browser-verified full loop (createâsubmitârequest-revisionâfeedback shown; contribution+skills) as beginner & senior; tsc 0. Decision D-P6-3.
@@ -64,25 +64,25 @@ DRAFT â PENDING_REVIEW â RECRUITING (approve) / REJECTED â ACTIVE
 ## 📌 NEXT-SESSION INIT PROMPT
 
 ```
-Lanjutkan EduNomad: UNIFY-UI sweep (seragamkan SEMUA halaman ke design language premium yang sama).
-Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-06-28 #8" + DESIGN.md.
+Lanjutkan EduNomad: resume PHASE 8 — Artifact System (UI label "Sertifikat", D-UI-7).
+Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-06-28 #9"
++ DESIGN.md + task-breakdown §8.
 
-main = 2f1546d. Branch aktif `redesign/unify-ui`. BATCH 1 SELESAI (efdb5e3): primitive bersama premium
-(ui/card.tsx Card rounded-[20px]+border #e7e3d8 flat; common/PageHeader.tsx h1 28px text-pretty) → semua
-halaman pakai Card/PageHeader otomatis ikut premium.
+main = ee0f045 (Phase 0-7 + UNIFY-UI sweep SELESAI: semua halaman authed satu bahasa desain premium —
+shared Card/PageHeader/PillTabs/EmptyState + app-reveal). WIP Phase 8 di branch feature/phase-8-artifacts
+1e6a4a3 (sudah: pdfkit/qrcode + artifactPdf.service + artifact.repository) — cabang dari main LAMA,
+pertimbangkan rebase ke ee0f045 dulu.
 
-LANJUTKAN per-halaman ke pola premium (pakai dashboardKit Panel/StatCard/app-reveal, badge tint konsisten,
-tabs jadi pill border-primary, empty-state premium; header tanpa breadcrumb sudah global). Urutan:
-batch2 = /applications + /applications/mentor + /reviews; batch3 = /projects/[id] + workspace;
-batch4 = /manage + /applicants + /projects/create; batch5 = admin review/verification/audit;
-batch6 = /my-projects view UMKM. Auth /auth/* JANGAN diubah. Tiap batch: commit + browser-verify
-(p4-beginner/p4-senior/p4-umkm/p43-admin, pw TestPass123!) + tsc 0 + console 0 err, lalu merge ke main.
+SISA Phase 8: (1) Backend artifact.service + controller + routes — endpoints POST /projects/:id/generate-artifacts,
+POST /artifacts/:id/regenerate, GET /artifacts/:id, GET /artifacts/:id/download, GET /verify/:code; wire ke
+routes/index.ts. (2) Completion gate (carry-over D-P4.3-3) di projectLifecycle.service.requestCompletion:
+semua deliverables APPROVED + contributions APPROVED + reviews ada + artifacts generated sebelum
+ACTIVE→AWAITING_COMPLETION (Workflow 15). (3) Frontend 4 page (label "Sertifikat"; nav /artifacts sudah ada,
+page belum) pakai pola premium baru (PageHeader/PillTabs/Card/EmptyState/app-reveal). Baca schema
+Artifact/ArtifactVersion (immutable, sudah ada → kemungkinan NO migration) + RBAC (siapa generate) + Workflow 13/14/18.
 
-Dev server: backend :3001 (npm run dev, full type-check), frontend :3000. Kalau deps tak lengkap:
-npm cache clean --force && rm -rf node_modules package-lock.json && npm install.
-
-SETELAH unify-UI: lanjut PHASE 8 Artifact (WIP di feature/phase-8-artifacts 1e6a4a3: pdfkit/qrcode +
-artifactPdf.service + artifact.repository; sisa = service/controller/routes + 4 frontend page + completion
-gate D-P4.3-3). task-breakdown §8; endpoints POST /projects/:id/generate-artifacts, /artifacts/:id/regenerate,
-GET /artifacts/:id[/download], GET /verify/:code; Workflow 13/14/18; schema Artifact sudah ada (no migration).
+Dev: backend :3001 (npm run dev full type-check), frontend :3000. tsc TS2882 CSS-ambient = transient saat
+.next/types regen → settle ~2s, re-run. Deps tak lengkap → npm cache clean --force && rm -rf node_modules
+package-lock.json && npm install. Test users p4-beginner/senior/umkm + p43-admin @test.edunomad.com pw
+TestPass123!; project ACTIVE a1a1a1a1-0000-4000-8000-000000000005. Verify per fitur + tsc 0 + console 0 err.
 ```
