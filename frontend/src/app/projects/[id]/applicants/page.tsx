@@ -6,13 +6,14 @@ import { toast } from "sonner";
 import { Inbox } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/common/PageHeader";
+import { PillTabs } from "@/components/common/PillTabs";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { EmptyState } from "@/components/common/EmptyState";
-import { cn } from "@/lib/utils";
+import { initials } from "@/components/dashboard/dashboardKit";
 import { ApiError } from "@/lib/apiClient";
 import { projectApi, type ProjectDetail } from "@/services/projectApi";
 import {
@@ -23,7 +24,7 @@ import {
 } from "@/services/applicationApi";
 
 type TabKey = ApplicationStatus;
-const TABS: { key: TabKey; label: string }[] = [
+const TAB_DEFS: { key: TabKey; label: string }[] = [
   { key: "PENDING", label: "Menunggu" },
   { key: "ACCEPTED", label: "Diterima" },
   { key: "REJECTED", label: "Ditolak" },
@@ -80,36 +81,20 @@ function Content() {
   };
 
   const visible = items.filter((a) => a.status === tab);
+  const tabs = TAB_DEFS.map((t) => ({
+    ...t,
+    count: items.filter((a) => a.status === t.key).length,
+  }));
 
   return (
-    <AppShell
-      breadcrumbs={[
-        { label: "Telusuri Proyek", href: "/projects" },
-        { label: project?.title ?? "Pelamar" },
-      ]}
-    >
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Pelamar Beginner</h1>
-          {project && <p className="text-sm text-muted-foreground">{project.title}</p>}
-        </div>
+    <AppShell>
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
+        <PageHeader
+          title="Pelamar Beginner"
+          subtitle={project ? project.title : "Kelola lamaran beginner untuk proyek ini."}
+        />
 
-        <div className="flex gap-2 overflow-x-auto border-b border-border">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={cn(
-                "whitespace-nowrap px-4 py-2 text-sm font-medium",
-                tab === t.key
-                  ? "border-b-2 border-[#a3ce00] text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <PillTabs tabs={tabs} value={tab} onChange={setTab} ariaLabel="Filter status pelamar" />
 
         {loading ? (
           <ListSkeleton rows={4} />
@@ -123,58 +108,60 @@ function Content() {
           />
         ) : (
           <div className="flex flex-col gap-3">
-            {visible.map((app) => (
-              <Card key={app.id}>
-                <CardContent className="flex flex-col gap-2 pt-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {app.beginner.name}
-                      </p>
+            {visible.map((app, i) => (
+              <article
+                key={app.id}
+                style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+                className="app-reveal flex flex-col gap-3 rounded-[20px] border border-border bg-card p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span
+                      className="grid size-11 shrink-0 place-items-center rounded-full bg-sky-200 text-sm font-bold text-sky-900"
+                      aria-hidden="true"
+                    >
+                      {initials(app.beginner.name)}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-semibold tracking-tight text-foreground">{app.beginner.name}</p>
                       <p className="text-sm text-muted-foreground">
                         Peran: {app.projectRole.roleName}
-                        {app.beginner.profile?.headline
-                          ? ` · ${app.beginner.profile.headline}`
-                          : ""}
+                        {app.beginner.profile?.headline ? ` · ${app.beginner.profile.headline}` : ""}
                       </p>
                     </div>
-                    <StatusBadge status={app.status} />
                   </div>
-                  {app.beginner.userSkills.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {app.beginner.userSkills.map((us) => (
-                        <Badge key={us.skill.id} variant="secondary">
-                          {us.skill.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                  {app.motivation && (
-                    <p className="text-sm text-foreground whitespace-pre-wrap">
-                      &ldquo;{app.motivation}&rdquo;
-                    </p>
-                  )}
-                  {app.status === "PENDING" && (
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        disabled={busyId === app.id}
-                        onClick={() => decide(app, "accept")}
-                      >
-                        Terima
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={busyId === app.id}
-                        onClick={() => decide(app, "reject")}
-                      >
-                        Tolak
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                  <StatusBadge status={app.status} />
+                </div>
+                {app.beginner.userSkills.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {app.beginner.userSkills.map((us) => (
+                      <Badge key={us.skill.id} variant="secondary">
+                        {us.skill.name}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                {app.motivation && (
+                  <p className="whitespace-pre-wrap rounded-xl bg-muted/50 px-3.5 py-2.5 text-sm text-foreground/80">
+                    &ldquo;{app.motivation}&rdquo;
+                  </p>
+                )}
+                {app.status === "PENDING" && (
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" disabled={busyId === app.id} onClick={() => decide(app, "accept")}>
+                      Terima
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={busyId === app.id}
+                      onClick={() => decide(app, "reject")}
+                    >
+                      Tolak
+                    </Button>
+                  </div>
+                )}
+              </article>
             ))}
           </div>
         )}
