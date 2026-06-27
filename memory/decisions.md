@@ -1,6 +1,16 @@
 # Decisions
 
 Date:
+2026-06-27 (Redesign /projects + enrich browse payload)
+
+Decision (D-UI-10):
+Halaman `/projects` (Telusuri/Jelajahi Proyek) di-redesign premium (ref screenshot design-refs/explore-projects.png). Untuk membuat KARTU real (mentor, role slots, teknologi), payload browse publik diperkaya: backend tambah `browseInclude` + `findManyPaginatedBrowse` (senior + projectRoles + roleSkills), `getProjects` pakai itu; `ProjectListItem` frontend dapat field opsional `senior` + `projectRoles` (hanya terisi dari GET /projects, consumer list lain tetap undefined). Filter Kategori+Status = backend (real); Deadline+Urutkan = client-side pada halaman saat ini (backend belum dukung sort/deadline param). Filter "Level" dari prompt DIHILANGKAN (proyek tak punya field level — tak mau bikin kontrol mati). Featured card hanya tampil di page 1 tanpa filter. Sidebar navy tetap (sesuai pola redesign sebelumnya).
+Reason:
+User minta tampilan premium seperti screenshot, "terutama card". Kartu butuh role/mentor/tech → enrich browse (lebih murah daripada N call detail). Sort/deadline client-side cukup utk UX premium tanpa ubah kontrak backend besar. Level dihilangkan demi kejujuran (vs kontrol non-fungsional).
+Impact:
+Kartu proyek kaya data nyata. Browse payload sedikit lebih besar (acceptable). Sort/deadline hanya akurat dalam halaman (server pagination 9/hal) — minor, bisa di-improve kalau backend sort ditambah. Phase 8 (artifact) ditunda — WIP di feature/phase-8-artifacts (1e6a4a3); lanjut setelah redesign ini.
+
+Date:
 2026-06-26 (Admin dashboard premium)
 
 Decision (D-BEG-4):
