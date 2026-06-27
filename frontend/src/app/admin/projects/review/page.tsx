@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Inbox } from "lucide-react";
+import { Inbox, FolderKanban } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -15,10 +14,11 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { PageHeader } from "@/components/common/PageHeader";
+import { PillTabs } from "@/components/common/PillTabs";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ProjectDetailView } from "@/components/project/ProjectDetailView";
-import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/apiClient";
 import {
   projectApi,
@@ -103,26 +103,14 @@ function Content() {
   };
 
   return (
-    <AppShell breadcrumbs={[{ label: "Admin" }, { label: "Tinjau Proyek" }]}>
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Tinjau Proyek</h1>
+    <AppShell>
+      <div className="flex flex-col gap-5">
+        <PageHeader
+          title="Tinjau Proyek"
+          subtitle="Setujui atau tolak proyek yang diajukan UMKM sebelum dibuka untuk rekrutmen."
+        />
 
-        <div className="flex gap-2 border-b border-border">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={cn(
-                "px-4 py-2 text-sm font-medium",
-                tab === t.key
-                  ? "border-b-2 border-[#a3ce00] text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <PillTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Filter status proyek" />
 
         {tab === "REJECTED" ? (
           <EmptyState
@@ -144,45 +132,55 @@ function Content() {
           />
         ) : (
           <div className="flex flex-col gap-3">
-            {items.map((item) => (
-              <Card key={item.id}>
-                <CardContent className="flex flex-col gap-2 pt-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{item.title}</p>
+            {items.map((item, i) => (
+              <article
+                key={item.id}
+                style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+                className="app-reveal flex flex-col gap-3 rounded-[20px] border border-border bg-card p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span
+                      className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]"
+                      aria-hidden="true"
+                    >
+                      <FolderKanban className="size-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-semibold tracking-tight text-foreground">{item.title}</p>
                       <p className="text-sm text-muted-foreground">
                         {item.umkm.name} · {item.category.name}
                       </p>
                     </div>
-                    <span className="shrink-0 text-sm text-muted-foreground">
-                      {new Date(item.createdAt).toLocaleDateString("id-ID")}
-                    </span>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openDetail(item.id)}>
-                      Lihat Detail
-                    </Button>
-                    {tab === "PENDING" && (
-                      <>
-                        <Button size="sm" disabled={busy} onClick={() => approve(item)}>
-                          Setujui
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={busy}
-                          onClick={() => {
-                            setRejecting(item);
-                            setReason("");
-                          }}
-                        >
-                          Tolak
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {new Date(item.createdAt).toLocaleDateString("id-ID")}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" onClick={() => openDetail(item.id)}>
+                    Lihat Detail
+                  </Button>
+                  {tab === "PENDING" && (
+                    <>
+                      <Button size="sm" disabled={busy} onClick={() => approve(item)}>
+                        Setujui
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() => {
+                          setRejecting(item);
+                          setReason("");
+                        }}
+                      >
+                        Tolak
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </article>
             ))}
           </div>
         )}

@@ -6,6 +6,7 @@ import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/common/PageHeader";
 import { TableSkeleton } from "@/components/common/LoadingState";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ScrollText } from "lucide-react";
@@ -38,11 +39,14 @@ function Content() {
   useEffect(load, [load]);
 
   return (
-    <AppShell breadcrumbs={[{ label: "Admin" }, { label: "Audit Logs" }]}>
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Audit Logs</h1>
+    <AppShell>
+      <div className="flex flex-col gap-5">
+        <PageHeader
+          title="Audit Logs"
+          subtitle="Jejak aktivitas administratif dan perubahan penting di platform."
+        />
 
-        <div className="flex flex-wrap items-end gap-2">
+        <div className="app-reveal flex flex-wrap items-end gap-2">
           <div className="flex flex-col gap-1">
             <label className="text-sm text-muted-foreground">Action</label>
             <Input
@@ -77,27 +81,34 @@ function Content() {
           <EmptyState icon={ScrollText} heading="Belum Ada Log" message="Tidak ada audit log yang cocok." />
         ) : (
           <>
-            <div className="overflow-x-auto rounded-lg border border-border">
+            <div className="app-reveal overflow-x-auto rounded-[20px] border border-border bg-card">
               <table className="w-full text-left text-sm">
-                <thead className="bg-muted text-muted-foreground">
-                  <tr>
-                    <th className="p-2">Waktu</th>
-                    <th className="p-2">Aktor</th>
-                    <th className="p-2">Action</th>
-                    <th className="p-2">Entity</th>
-                    <th className="p-2">Metadata</th>
+                <thead>
+                  <tr className="border-b border-border bg-muted/50 text-[11px] uppercase tracking-wide text-muted-foreground">
+                    <th className="px-4 py-3 font-semibold">Waktu</th>
+                    <th className="px-4 py-3 font-semibold">Aktor</th>
+                    <th className="px-4 py-3 font-semibold">Action</th>
+                    <th className="px-4 py-3 font-semibold">Entity</th>
+                    <th className="px-4 py-3 font-semibold">Metadata</th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((log) => (
-                    <tr key={log.id} className="border-t border-border">
-                      <td className="p-2 text-muted-foreground">
+                    <tr
+                      key={log.id}
+                      className="border-t border-border transition-colors hover:bg-muted/40"
+                    >
+                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground tabular-nums">
                         {new Date(log.createdAt).toLocaleString("id-ID")}
                       </td>
-                      <td className="p-2 text-foreground">{log.user?.name ?? "—"}</td>
-                      <td className="p-2 font-medium text-foreground">{log.action}</td>
-                      <td className="p-2 text-muted-foreground">{log.entityType}</td>
-                      <td className="p-2 text-muted-foreground">
+                      <td className="px-4 py-3 text-foreground">{log.user?.name ?? "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className="rounded-md bg-[#eef7d6] px-2 py-0.5 text-xs font-semibold text-[#5f8c00]">
+                          {log.action}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{log.entityType}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                         {log.metadata ? JSON.stringify(log.metadata) : "—"}
                       </td>
                     </tr>
