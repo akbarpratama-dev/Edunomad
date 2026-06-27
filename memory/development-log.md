@@ -1,5 +1,26 @@
 # Development Log
 
+2026-06-28 (Web Interface Guidelines pass + konsistensi nav)
+Task: user jalankan skill web-design-guidelines — cek UI imbalance, perbaiki. Ambil rules dari vercel-labs/web-interface-guidelines. Fix yang diterapkan:
+- Anti-pattern `transition: all` → properti spesifik: ui/button.tsx (transition-[color,background-color,border-color,box-shadow,transform] +duration-200), ui/badge.tsx (transition-colors), ui/progress.tsx (transition-[width]).
+- Ellipsis: projects search "Cari proyek..." → "…" + autoComplete=off + spellCheck=false + aria-label.
+- color-scheme: globals.css :root `color-scheme: light`; layout.tsx export `viewport` {themeColor #faf8f3, colorScheme light}.
+- Decorative icons aria-hidden + text-pretty heading di dashboardKit (StatCard icon+trend, WelcomeHeader) + projects h1/desc.
+- KONSISTENSI NAV (imbalance nyata): label sidebar disamakan ke bahasa desain — "Dashboard"→"Beranda", "Telusuri Proyek"→"Jelajahi Proyek" (kini SAMA dgn judul halaman /projects, sebelumnya beda bikin bingung), "Notifications"→"Notifikasi".
+- Catatan (sudah dari sebelumnya): [data-app] sudah punya focus-visible global utk a/button/role-button → fokus ter-cover. Sisa minor belum: aria-hidden belum di SEMUA ikon dekoratif app-wide (baru representatif), input search belum punya `name`.
+VERIFIED browser /projects: nav Beranda/Jelajahi Proyek/…/Notifikasi konsisten + "Jelajahi Proyek" active = judul halaman; screenshot full-page menilai layout seimbang; console 0 err; tsc 0.
+
+2026-06-27 (Hapus breadcrumb header global — fix judul dobel)
+Bug (user): tiap halaman ada breadcrumb bar (mis. "Admin > Tinjau Proyek") yang dobel dengan H1 halaman. Minta header breadcrumb dihilangkan semua halaman (ref screenshot: hanya kontrol kanan-atas).
+Fix: `components/layout/Header.tsx` ditulis ulang — buang Breadcrumbs, jadi slim bar: kiri = hamburger mobile saja, kanan = notif + dropdown profil (avatar + nama + ROLE_LABEL + logout). `AppShell.tsx` tak lagi render breadcrumb (prop `breadcrumbs?` dibiarkan opsional & diabaikan agar ~15 halaman tetap kompilasi tanpa diubah); main padding atas dihapus (header kasih ruang). 
+PENTING: DropdownMenuTrigger base-ui sudah berupa <button>, jadi child profil HARUS <span> bukan <button> (sempat hydration error button-bersarang → diperbaiki). VERIFIED /admin/dashboard + /projects: tak ada breadcrumb, profil "Phase43 Admin/Admin" tampil, H1 tunggal, console 0 err. tsc 0.
+
+2026-06-27 (Redesign /projects "Jelajahi Proyek" premium — terutama kartu)
+Task: user kasih screenshot (design-refs/explore-projects.png) + prompt premium (Clay/Linear). Redesign halaman Telusuri Proyek, fokus kartu. Sidebar tetap (navy AppShell). DONE & browser-verified. Branch redesign/explore-projects (dari main). [Catatan: Phase 8 backend artifact DITUNDA — disimpan WIP di branch feature/phase-8-artifacts commit 1e6a4a3 (pdfkit/qrcode + artifactPdf.service + artifact.repository), lanjut nanti.]
+- Backend: `project.repository` += `browseInclude` (umkm+category+senior+projectRoles{roleName,capacity,roleSkills→skill}) + `findManyPaginatedBrowse`; `project.service.getProjects` pakai browse method → payload browse publik kini kaya (mentor, role slots, tech). Frontend `ProjectListItem` += optional `senior` + `projectRoles` (BrowseRole). build 0, tsc 0.
+- `app/projects/page.tsx` ditulis ulang: header + search besar + filter bar (Kategori[backend], Status[backend], Deadline[client window], Urutkan[client sort] + Reset) + FeaturedCard (proyek pilihan, bg hijau muda, role/durasi/mentor/umkm/slot/tech + thumbnail dekoratif → tampil hanya page 1 tanpa filter) + grid kartu premium (thumbnail gradient, status badge [Membuka Pendaftaran/Segera Ditutup≤10hari/Aktif/Selesai], judul, UMKM+verified, deskripsi, tech chips, durasi+posisi, mentor avatar, hover lift) + right sidebar (Kategori Populer[clickable→filter], Skill Yang Dicari[clickable→search], Tips Melamar) + empty-state Reset Filter. Layout xl:grid [1fr_300px]. Helpers: weeksOf/daysLeft/slotsOf/techOf/statusMeta. DESIGN.md tokens + app-reveal.
+- VERIFIED browser: featured (Phase5: Mentor Test Senior, 4 Minggu, 3 slot, Frontend(3)) + grid (Phase43/Phase4 real roles/slots/mentor) + right sidebar real categories/skills; klik skill "React"→search terisi + featured hilang saat filter + empty-state; console 0 err. Decision D-UI-10.
+
 2026-06-26 (FIX sidebar active highlight, terutama halaman admin)
 Bug (user report): item sidebar tak ke-select di halaman admin. Sebab: di /admin/dashboard, nav "Dashboard" href=/dashboard (beda path) → tak match. Halaman /admin/users/verification & /admin/audit-logs bahkan tak punya nav item.
 Fix: (1) `constants/navigation.ts` — Dashboard href ROLE-AWARE via `dashboardItem(role)` (ADMIN→/admin/dashboard); ADMIN nav += "Verifikasi Pengguna" (/admin/users/verification) + "Audit Log" (/admin/audit-logs); untuk ADMIN buang TRAILING (Sertifikat/Notifications — irrelevant + 404). (2) `components/layout/Sidebar.tsx` — deteksi active diganti BEST-MATCH (href prefix terpanjang yang cocok dgn pathname menang) via useMemo `activeHref`, ganti `pathname===href||startsWith` per-item → cegah no-highlight & dobel-highlight (mis. /projects vs /projects/create).

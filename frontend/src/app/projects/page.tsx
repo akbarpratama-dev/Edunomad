@@ -1,11 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, FolderSearch } from "lucide-react";
+import {
+  Search,
+  FolderSearch,
+  RotateCcw,
+  Flame,
+  Clock,
+  Users,
+  GraduationCap,
+  Building2,
+  BadgeCheck,
+  ArrowRight,
+} from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -17,59 +27,83 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ListSkeleton } from "@/components/common/LoadingState";
-import { EmptyState } from "@/components/common/EmptyState";
-import { PageHeader } from "@/components/common/PageHeader";
-import { ProjectStatusBadge } from "@/components/project/ProjectDetailView";
-import {
-  projectApi,
-  type Category,
-  type ProjectListItem,
-  type ProjectStatus,
-} from "@/services/projectApi";
+import { cn } from "@/lib/utils";
+import { projectApi, type Category, type ProjectListItem, type ProjectStatus } from "@/services/projectApi";
+import { fetchSkills, type Skill } from "@/services/skillApi";
 
 const ALL = "ALL";
-const PUBLIC_STATUSES: { key: ProjectStatus; label: string }[] = [
-  { key: "RECRUITING", label: "Rekrutmen" },
-  { key: "ACTIVE", label: "Aktif" },
-  { key: "COMPLETED", label: "Selesai" },
-];
 const PAGE_SIZE = 9;
+const TIPS = [
+  { t: "Lengkapi profilmu", d: "Pastikan profil, bio, dan skill terisi lengkap." },
+  { t: "Unggah portofolio terbaik", d: "Tunjukkan karya terbaik dan relevan." },
+  { t: "Baca deskripsi proyek", d: "Pahami kebutuhan dan ekspektasi proyek." },
+  { t: "Sesuaikan skill & pengalaman", d: "Tunjukkan relevansi dengan proyek." },
+];
+const THUMB_TONES = [
+  "from-violet-500/30 to-violet-700/40",
+  "from-[#201f31] to-[#3a3850]",
+  "from-emerald-500/30 to-emerald-700/40",
+  "from-sky-500/30 to-sky-700/40",
+  "from-amber-500/30 to-amber-700/40",
+  "from-rose-500/30 to-rose-700/40",
+];
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+function initials(name: string) {
+  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
+}
+function weeksOf(p: ProjectListItem) {
+  const start = new Date(p.startDate || p.createdAt).getTime();
+  const end = new Date(p.deadline).getTime();
+  return Math.max(1, Math.round((end - start) / (7 * 86_400_000)));
+}
+function daysLeft(p: ProjectListItem) {
+  return Math.ceil((new Date(p.deadline).getTime() - Date.now()) / 86_400_000);
+}
+function slotsOf(p: ProjectListItem) {
+  return (p.projectRoles ?? []).reduce((s, r) => s + (r.capacity || 0), 0);
+}
+function techOf(p: ProjectListItem) {
+  const names = new Set<string>();
+  (p.projectRoles ?? []).forEach((r) => r.roleSkills.forEach((rs) => names.add(rs.skill.name)));
+  return [...names];
+}
+function statusMeta(p: ProjectListItem): { label: string; className: string } {
+  if (p.status === "RECRUITING") {
+    return daysLeft(p) <= 10
+      ? { label: "Segera Ditutup", className: "bg-amber-50 text-amber-700 border-amber-200" }
+      : { label: "Membuka Pendaftaran", className: "bg-[#eef7d6] text-[#3f7a2e] border-transparent" };
+  }
+  if (p.status === "ACTIVE") return { label: "Aktif", className: "bg-sky-50 text-sky-700 border-sky-200" };
+  if (p.status === "COMPLETED") return { label: "Selesai", className: "bg-muted text-muted-foreground border-border" };
+  return { label: p.status, className: "bg-muted text-muted-foreground border-border" };
+}
 
 function Content() {
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
-  const [category, setCategory] = useState<string>(ALL);
-  const [status, setStatus] = useState<string>(ALL);
+  const [category, setCategory] = useState(ALL);
+  const [status, setStatus] = useState(ALL);
+  const [deadline, setDeadline] = useState(ALL);
+  const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
   const [items, setItems] = useState<ProjectListItem[]>([]);
-
-  // value→label maps so the Select trigger shows the label (base-ui `items` prop).
-  const categoryItems: Record<string, string> = {
-    [ALL]: "Semua Kategori",
-    ...Object.fromEntries(categories.map((c) => [c.id, c.name])),
-  };
-  const statusItems: Record<string, string> = {
-    [ALL]: "Semua Status",
-    ...Object.fromEntries(PUBLIC_STATUSES.map((s) => [s.key, s.label])),
-  };
-
   const [meta, setMeta] = useState({ total: 0, lastPage: 1 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     projectApi.categories().then(setCategories).catch(() => {});
+    fetchSkills().then(setSkills).catch(() => {});
   }, []);
 
-  // Debounce the search input.
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q.trim()), 350);
     return () => clearTimeout(t);
   }, [q]);
-
-  // Reset to page 1 when filters change.
-  useEffect(() => setPage(1), [debouncedQ, category, status]);
+  useEffect(() => setPage(1), [debouncedQ, category, status, deadline, sort]);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -90,127 +124,363 @@ function Content() {
   }, [debouncedQ, category, status, page]);
   useEffect(load, [load]);
 
-  return (
-    <AppShell breadcrumbs={[{ label: "Telusuri Proyek" }]}>
-      <div className="flex flex-col gap-5">
-        <PageHeader
-          title="Telusuri Proyek"
-          subtitle="Temukan proyek nyata untuk berkolaborasi dan membangun portofolio."
-        />
+  const filtersActive = debouncedQ || category !== ALL || status !== ALL || deadline !== ALL;
+  const resetFilters = () => {
+    setQ("");
+    setCategory(ALL);
+    setStatus(ALL);
+    setDeadline(ALL);
+    setSort("newest");
+  };
 
-        {/* Filters */}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="relative sm:col-span-2 lg:col-span-2">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+  // Client-side refinements on the current page (deadline window + sort).
+  const view = useMemo(() => {
+    let list = [...items];
+    if (deadline !== ALL) {
+      const max = Number(deadline);
+      list = list.filter((p) => daysLeft(p) <= max && daysLeft(p) >= 0);
+    }
+    if (sort === "deadline") list.sort((a, b) => daysLeft(a) - daysLeft(b));
+    return list;
+  }, [items, deadline, sort]);
+
+  const showFeatured = page === 1 && !filtersActive && view.length > 0;
+  const featured = showFeatured ? view[0] : null;
+  const gridItems = showFeatured ? view.slice(1) : view;
+
+  const categoryItems = { [ALL]: "Semua Kategori", ...Object.fromEntries(categories.map((c) => [c.id, c.name])) };
+  const statusItems = { [ALL]: "Semua Status", RECRUITING: "Membuka Pendaftaran", ACTIVE: "Berjalan", COMPLETED: "Selesai" };
+  const deadlineItems = { [ALL]: "Semua Deadline", "7": "1 Minggu", "14": "2 Minggu", "30": "1 Bulan" };
+  const sortItems = { newest: "Terbaru", deadline: "Deadline Terdekat" };
+
+  return (
+    <AppShell breadcrumbs={[{ label: "Jelajahi Proyek" }]}>
+      <div className="flex flex-col gap-5">
+        {/* Title — full width, aligned with the floating header controls */}
+        <div className="app-reveal max-w-3xl pr-2">
+          <h1 className="text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">Jelajahi Proyek</h1>
+          <p className="mt-1 text-sm text-muted-foreground text-pretty">
+            Temukan proyek nyata dari berbagai UMKM dan bergabung bersama mentor profesional untuk
+            membangun pengalaman yang dapat dibuktikan.
+          </p>
+        </div>
+
+        <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
+          {/* MAIN */}
+          <div className="flex min-w-0 flex-col gap-5">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              className="pl-9"
-              placeholder="Cari proyek..."
+              className="h-12 rounded-2xl pl-11"
+              placeholder="Cari proyek…"
+              autoComplete="off"
+              spellCheck={false}
+              aria-label="Cari proyek"
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
-          <Select
-            items={categoryItems}
-            value={category}
-            onValueChange={(v) => setCategory(v ?? ALL)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Kategori" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>Semua Kategori</SelectItem>
-              {categories.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            items={statusItems}
-            value={status}
-            onValueChange={(v) => setStatus(v ?? ALL)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>Semua Status</SelectItem>
-              {PUBLIC_STATUSES.map((s) => (
-                <SelectItem key={s.key} value={s.key}>
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
+          {/* Filter bar */}
+          <div className="flex flex-wrap gap-2">
+            <FilterSelect items={categoryItems} value={category} onChange={setCategory} placeholder="Kategori" />
+            <FilterSelect items={statusItems} value={status} onChange={setStatus} placeholder="Status" />
+            <FilterSelect items={deadlineItems} value={deadline} onChange={setDeadline} placeholder="Deadline" />
+            <FilterSelect items={sortItems} value={sort} onChange={setSort} placeholder="Urutkan" />
+            <Button variant="outline" className="h-11 rounded-xl" onClick={resetFilters} disabled={!filtersActive && sort === "newest"}>
+              <RotateCcw className="size-4" /> Reset Filter
+            </Button>
+          </div>
+
+          {loading ? (
+            <ListSkeleton rows={6} />
+          ) : view.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border py-16 text-center">
+              <FolderSearch className="size-10 text-muted-foreground" />
+              <div>
+                <p className="text-base font-semibold">Belum Ada Proyek</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Belum ada proyek yang sesuai dengan filter yang dipilih.
+                </p>
+              </div>
+              {(filtersActive || sort !== "newest") && (
+                <Button variant="outline" onClick={resetFilters}>
+                  <RotateCcw className="size-4" /> Reset Filter
+                </Button>
+              )}
+            </div>
+          ) : (
+            <>
+              {featured && <FeaturedCard p={featured} />}
+
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-bold tracking-tight">
+                  {showFeatured ? "Proyek Lainnya" : "Hasil Pencarian"}
+                </h2>
+                <span className="text-sm text-muted-foreground tabular-nums">
+                  {meta.total} proyek tersedia
+                </span>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                {gridItems.map((p, i) => (
+                  <ProjectCard key={p.id} p={p} i={i} />
+                ))}
+              </div>
+
+              {meta.lastPage > 1 && (
+                <div className="flex items-center justify-center gap-3 pt-1">
+                  <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                    Sebelumnya
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    Halaman {page} dari {meta.lastPage}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page >= meta.lastPage}
+                    onClick={() => setPage((p) => Math.min(meta.lastPage, p + 1))}
+                  >
+                    Berikutnya
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </div>
 
-        {loading ? (
-          <ListSkeleton rows={6} />
-        ) : items.length === 0 ? (
-          <EmptyState
-            icon={FolderSearch}
-            heading="Tidak Ada Proyek"
-            message="Tidak ada proyek yang cocok dengan filter Anda. Coba ubah pencarian."
-          />
-        ) : (
-          <>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {items.map((p, i) => (
-                <Link
-                  key={p.id}
-                  href={`/projects/${p.id}`}
-                  style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
-                  className="app-reveal group rounded-[20px]"
-                >
-                  <Card className="h-full transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-0.5 group-hover:shadow-[0_14px_30px_rgba(32,31,49,0.08)]">
-                    <CardContent className="flex h-full flex-col gap-3 pt-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <Badge variant="secondary">{p.category.name}</Badge>
-                        <ProjectStatusBadge status={p.status} />
-                      </div>
-                      <h3 className="line-clamp-2 text-base font-semibold text-foreground">{p.title}</h3>
-                      <p className="line-clamp-2 text-sm text-muted-foreground">{p.description}</p>
-                      <div className="mt-auto flex items-center justify-between pt-2">
-                        <span className="text-sm text-muted-foreground">{p.umkm.name}</span>
-                        <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#5f8c00]">
-                          Lihat Detail
-                          <span className="transition-transform group-hover:translate-x-0.5">→</span>
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+        {/* RIGHT SIDEBAR */}
+        <aside className="hidden flex-col gap-4 xl:flex">
+          <RailCard title="Kategori Populer">
+            <ul className="flex flex-col gap-1">
+              {categories.slice(0, 6).map((c) => (
+                <li key={c.id}>
+                  <button
+                    onClick={() => setCategory(c.id)}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-sm transition-colors hover:bg-muted",
+                      category === c.id && "bg-muted"
+                    )}
+                  >
+                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[#eef7d6] text-[11px] font-bold text-[#5f8c00]">
+                      {initials(c.name)}
+                    </span>
+                    <span className="flex-1 font-medium">{c.name}</span>
+                  </button>
+                </li>
               ))}
-            </div>
+            </ul>
+          </RailCard>
 
-            {meta.lastPage > 1 && (
-              <div className="flex items-center justify-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  Sebelumnya
-                </Button>
-                <span className="text-sm text-muted-foreground">
-                  Halaman {page} dari {meta.lastPage}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page >= meta.lastPage}
-                  onClick={() => setPage((p) => Math.min(meta.lastPage, p + 1))}
-                >
-                  Berikutnya
-                </Button>
+          {skills.length > 0 && (
+            <RailCard title="Skill Yang Dicari">
+              <div className="flex flex-wrap gap-1.5">
+                {skills.slice(0, 10).map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => setQ(s.name)}
+                    className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground transition-colors hover:border-[#a3ce00] hover:bg-[#eef7d6] hover:text-[#5f8c00]"
+                  >
+                    {s.name}
+                  </button>
+                ))}
               </div>
-            )}
-          </>
-        )}
+            </RailCard>
+          )}
+
+          <RailCard title="Tips Melamar">
+            <ul className="flex flex-col gap-3">
+              {TIPS.map((tip) => (
+                <li key={tip.t} className="flex gap-2.5">
+                  <BadgeCheck className="mt-0.5 size-4 shrink-0 text-[#67c957]" />
+                  <div>
+                    <p className="text-sm font-medium leading-snug">{tip.t}</p>
+                    <p className="text-xs text-muted-foreground">{tip.d}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </RailCard>
+        </aside>
+        </div>
       </div>
     </AppShell>
+  );
+}
+
+function FilterSelect({
+  items,
+  value,
+  onChange,
+  placeholder,
+}: {
+  items: Record<string, string>;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <Select items={items} value={value} onValueChange={(v) => onChange(v ?? Object.keys(items)[0])}>
+      <SelectTrigger className="!h-11 min-w-[150px] rounded-xl px-3.5">
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {Object.entries(items).map(([k, label]) => (
+          <SelectItem key={k} value={k}>
+            {label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function RailCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="app-reveal rounded-[20px] border border-border bg-card p-5">
+      <h3 className="mb-3 text-sm font-bold tracking-tight">{title}</h3>
+      {children}
+    </section>
+  );
+}
+
+function Thumb({ i, className }: { i: number; className?: string }) {
+  return (
+    <div className={cn("relative overflow-hidden bg-gradient-to-br", THUMB_TONES[i % THUMB_TONES.length], className)}>
+      <div className="absolute inset-3 rounded-lg bg-white/10" />
+      <div className="absolute left-4 top-4 h-1.5 w-12 rounded-full bg-white/40" />
+      <div className="absolute bottom-4 left-4 right-4 h-8 rounded-lg bg-white/15" />
+    </div>
+  );
+}
+
+function FeaturedCard({ p }: { p: ProjectListItem }) {
+  const tech = techOf(p);
+  return (
+    <div className="app-reveal grid gap-5 overflow-hidden rounded-[24px] border border-[#d8e8b8] bg-gradient-to-br from-[#f4f9e8] to-[#eef7d6] p-6 lg:grid-cols-[1.4fr_1fr]">
+      <div className="flex flex-col">
+        <Badge className="w-fit border-transparent bg-white text-[#3f7a2e]">
+          <Flame className="mr-1 size-3 text-[#5f8c00]" /> Proyek Pilihan
+        </Badge>
+        <h3 className="mt-3 text-xl font-bold tracking-tight">{p.title}</h3>
+        <p className="mt-2 line-clamp-2 text-sm text-foreground/80">{p.description}</p>
+        {tech.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {tech.slice(0, 3).map((t) => (
+              <span key={t} className="rounded-lg border border-[#d8e8b8] bg-white/70 px-2.5 py-1 text-xs font-medium">
+                {t}
+              </span>
+            ))}
+            {tech.length > 3 && (
+              <span className="rounded-lg border border-[#d8e8b8] bg-white/70 px-2.5 py-1 text-xs font-medium">
+                +{tech.length - 3}
+              </span>
+            )}
+          </div>
+        )}
+        <div className="mt-auto pt-5">
+          {(p.projectRoles?.length ?? 0) > 0 && (
+            <>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Role Tersedia</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {p.projectRoles!.slice(0, 4).map((r) => (
+                  <span key={r.id} className="rounded-lg border border-[#d8e8b8] bg-white px-3 py-1.5 text-xs">
+                    <span className="font-semibold">{r.roleName}</span>{" "}
+                    <span className="text-muted-foreground">({r.capacity})</span>
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <Meta icon={Clock} label="Durasi" value={`${weeksOf(p)} Minggu`} />
+          <Meta icon={GraduationCap} label="Mentor" value={p.senior?.name ?? "Belum ada"} />
+          <Meta icon={Building2} label="UMKM" value={p.umkm.name} />
+          <Meta icon={Users} label="Posisi" value={`${slotsOf(p)} slot`} />
+        </div>
+        <Thumb i={3} className="h-28 w-full rounded-2xl" />
+        <Button className="self-end bg-[#201f31] text-white hover:bg-[#2c2b42]" render={<Link href={`/projects/${p.id}`} />}>
+          Lihat Detail Proyek <ArrowRight className="size-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function Meta({ icon: Icon, label, value }: { icon: typeof Clock; label: string; value: string }) {
+  return (
+    <div>
+      <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <Icon className="size-3" /> {label}
+      </p>
+      <p className="mt-0.5 truncate font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function ProjectCard({ p, i }: { p: ProjectListItem; i: number }) {
+  const meta = statusMeta(p);
+  const tech = techOf(p);
+  return (
+    <Link
+      href={`/projects/${p.id}`}
+      style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+      className="app-reveal group flex flex-col overflow-hidden rounded-[20px] border border-border bg-card transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(32,31,49,0.10)]"
+    >
+      <div className="relative">
+        <Thumb i={i} className="h-32 w-full" />
+        <Badge className={cn("absolute left-3 top-3 border", meta.className)}>{meta.label}</Badge>
+      </div>
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <h3 className="line-clamp-1 font-semibold tracking-tight">{p.title}</h3>
+        <p className="flex items-center gap-1 text-xs text-muted-foreground">
+          {p.umkm.name} <BadgeCheck className="size-3.5 text-[#67c957]" />
+        </p>
+        <p className="line-clamp-2 text-sm text-foreground/80">{p.description}</p>
+
+        {tech.length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            {tech.slice(0, 2).map((t) => (
+              <span key={t} className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                {t}
+              </span>
+            ))}
+            {tech.length > 2 && (
+              <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                +{tech.length - 2}
+              </span>
+            )}
+          </div>
+        )}
+
+        <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <Clock className="size-3.5" /> {weeksOf(p)} Minggu
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Users className="size-3.5" /> {slotsOf(p)} posisi
+          </span>
+        </div>
+
+        <div className="mt-auto flex items-center justify-between border-t border-border pt-3">
+          <span className="flex items-center gap-2 text-xs">
+            <span className="grid size-6 place-items-center rounded-full bg-[#d8f277] text-[10px] font-bold text-[#0b0b0b]">
+              {p.senior ? initials(p.senior.name) : "—"}
+            </span>
+            <span className="truncate text-muted-foreground">{p.senior?.name ?? "Belum ada mentor"}</span>
+          </span>
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#5f8c00]">
+            Detail <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+          </span>
+        </div>
+      </div>
+    </Link>
   );
 }
 

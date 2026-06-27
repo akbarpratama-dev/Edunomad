@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-27 (Redesign Jelajahi Proyek)
+
+Prompt:
+Screenshot + prompt premium → redesign halaman "telusuri projek", terutama kartunya; mirip screenshot kecuali sidebar. (Di tengah Phase 8 artifact — di-pause.)
+
+Hasil:
+Phase 8 disimpan WIP (branch feature/phase-8-artifacts 1e6a4a3). Branch baru redesign/explore-projects. Backend: browse payload diperkaya (senior+projectRoles+skills via findManyPaginatedBrowse). /projects ditulis ulang premium: header+search+filter bar+FeaturedCard+grid kartu premium (thumbnail/status/role/tech/durasi/posisi/mentor)+right sidebar (Kategori/Skill/Tips)+empty-state. Data nyata + thumbnail dekoratif. Browser-verified (featured Phase5, grid real, skill chip→search), 0 err, tsc 0, build 0. Decision D-UI-10. Sidebar navy tetap. Filter Level dihilangkan (no data).
+
+---
+
+Date:
 2026-06-26 (Dashboard Admin premium)
 
 Prompt:

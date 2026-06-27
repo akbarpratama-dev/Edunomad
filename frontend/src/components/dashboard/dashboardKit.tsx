@@ -66,7 +66,7 @@ export function Panel({ className, children }: { className?: string; children: R
 export function WelcomeHeader({ name, subtitle }: { name: string; subtitle: string }) {
   return (
     <div className="app-reveal">
-      <h1 className="text-2xl font-bold tracking-tight sm:text-[28px]">
+      <h1 className="text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">
         Selamat datang kembali, {name}! <span className="align-middle">👋</span>
       </h1>
       <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{subtitle}</p>
@@ -94,7 +94,7 @@ export function StatCard({
   return (
     <Panel className="app-reveal p-5">
       <div className="flex items-start justify-between">
-        <span className={cn("grid size-11 place-items-center rounded-2xl", tone)}>
+        <span className={cn("grid size-11 place-items-center rounded-2xl", tone)} aria-hidden="true">
           <Icon className="size-5" />
         </span>
         {sample && <SampleTag />}
@@ -102,7 +102,7 @@ export function StatCard({
       <p className="mt-3 text-3xl font-bold tabular-nums tracking-tight">{value}</p>
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
       <p className={cn("mt-1 inline-flex items-center gap-1 text-xs font-medium", trendTone)}>
-        <ArrowUpRight className="size-3" /> {trend}
+        <ArrowUpRight className="size-3" aria-hidden="true" /> {trend}
       </p>
     </Panel>
   );

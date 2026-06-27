@@ -45,7 +45,11 @@ export const projectService = {
         { description: { contains: query.q, mode: "insensitive" } },
       ];
     }
-    const { data, total } = await projectRepository.findManyPaginated(where, query.page, query.limit);
+    const { data, total } = await projectRepository.findManyPaginatedBrowse(
+      where,
+      query.page,
+      query.limit
+    );
     return { data, total, page: query.page, limit: query.limit };
   },
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth/AuthProvider";
@@ -18,6 +18,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "EduNomad",
   description: "Project collaboration platform connecting Beginners, Seniors, and UMKM through real-world projects.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#faf8f3",
+  colorScheme: "light",
 };
 
 export default function RootLayout({

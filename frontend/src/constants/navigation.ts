@@ -26,7 +26,7 @@ export interface NavItem {
 // The Dashboard entry is role-aware: ADMIN lands on /admin/dashboard (a /dashboard
 // visit redirects there), so the nav must point there too or it never highlights.
 const dashboardItem = (role?: Role): NavItem => ({
-  label: "Dashboard",
+  label: "Beranda",
   href: role === "ADMIN" ? "/admin/dashboard" : "/dashboard",
   icon: LayoutDashboard,
 });
@@ -36,7 +36,7 @@ const dashboardItem = (role?: Role): NavItem => ({
 // browses to find one, so it is intentionally excluded (docs/08 only documents
 // "Browse Projects" for Beginner and Senior).
 const BROWSE_PROJECTS: NavItem = {
-  label: "Telusuri Proyek",
+  label: "Jelajahi Proyek",
   href: "/projects",
   icon: FolderKanban,
 };
@@ -67,7 +67,7 @@ const ROLE_ITEMS: Record<Role, NavItem[]> = {
 
 const TRAILING_ITEMS: NavItem[] = [
   { label: "Sertifikat", href: "/artifacts", icon: Award },
-  { label: "Notifications", href: "/notifications", icon: Bell },
+  { label: "Notifikasi", href: "/notifications", icon: Bell },
 ];
 
 export function getNavItems(role?: Role): NavItem[] {

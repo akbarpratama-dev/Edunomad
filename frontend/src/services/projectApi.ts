@@ -42,6 +42,13 @@ export interface Category {
   slug: string;
 }
 
+export interface BrowseRole {
+  id: string;
+  roleName: string;
+  capacity: number;
+  roleSkills: { skill: { id: string; name: string } }[];
+}
+
 export interface ProjectListItem {
   id: string;
   title: string;
@@ -55,6 +62,9 @@ export interface ProjectListItem {
   createdAt: string;
   umkm: { id: string; name: string };
   category: Category;
+  // Populated only by the public browse endpoint (GET /projects).
+  senior?: { id: string; name: string } | null;
+  projectRoles?: BrowseRole[];
 }
 
 export interface Milestone {
