@@ -3,21 +3,21 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, CalendarDays, Building2, GraduationCap } from "lucide-react";
+import { ArrowLeft, CalendarDays, Building2, GraduationCap, CalendarClock } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
+import { EmptyState } from "@/components/common/EmptyState";
+import { PillTabs } from "@/components/common/PillTabs";
 import { ProjectMembersPanel } from "@/components/project/ProjectMembersPanel";
 import { DiscussionTab } from "@/components/workspace/DiscussionTab";
 import { DeliverablesTab } from "@/components/workspace/DeliverablesTab";
 import { ContributionTab } from "@/components/workspace/ContributionTab";
 import { ReviewTab } from "@/components/workspace/ReviewTab";
 import { DirectMessageDialog } from "@/components/workspace/DirectMessageDialog";
-import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
 import {
@@ -71,39 +71,26 @@ function WorkspaceInner() {
   const statusMeta = PROJECT_STATUS_META[project.status];
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="flex flex-col gap-5">
+      <div className="app-reveal">
         <Link
           href={`/projects/${id}`}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" /> Kembali ke detail proyek
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-tight">{project.title}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">
+            {project.title}
+          </h1>
           <Badge variant={statusMeta.variant} className={statusMeta.className}>
             {statusMeta.label}
           </Badge>
         </div>
+        <p className="mt-1 text-sm text-muted-foreground">Workspace proyek — kolaborasi tim & progres.</p>
       </div>
 
-      <nav className="flex gap-1 border-b border-border">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            aria-current={tab === t.key ? "page" : undefined}
-            className={cn(
-              "-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors duration-200",
-              tab === t.key
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
-            )}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
+      <PillTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Navigasi workspace" />
 
       {tab === "overview" && <OverviewTab project={project} />}
       {tab === "milestones" && <MilestonesTab project={project} />}
@@ -116,40 +103,44 @@ function WorkspaceInner() {
   );
 }
 
+function MetaRow({ icon: Icon, label, value }: { icon: typeof Building2; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-muted text-muted-foreground" aria-hidden="true">
+        <Icon className="size-4" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+        <p className="truncate text-sm font-medium">{value}</p>
+      </div>
+    </div>
+  );
+}
+
 function OverviewTab({ project }: { project: ProjectDetail }) {
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <Card className="md:col-span-2">
-        <CardContent className="space-y-4 p-6">
+      <Card className="app-reveal md:col-span-2">
+        <CardContent className="space-y-4">
           <div>
-            <h2 className="text-sm font-semibold text-muted-foreground">Deskripsi</h2>
-            <p className="mt-1 whitespace-pre-wrap text-sm">{project.description}</p>
+            <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Deskripsi</h2>
+            <p className="mt-1.5 whitespace-pre-wrap text-sm text-foreground/90">{project.description}</p>
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-muted-foreground">Ekspektasi Deliverable</h2>
-            <p className="mt-1 whitespace-pre-wrap text-sm">{project.expectedDeliverables}</p>
+            <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Ekspektasi Deliverable</h2>
+            <p className="mt-1.5 whitespace-pre-wrap text-sm text-foreground/90">{project.expectedDeliverables}</p>
           </div>
         </CardContent>
       </Card>
-      <Card>
-        <CardContent className="space-y-3 p-6 text-sm">
-          <div className="flex items-center gap-2">
-            <Building2 className="size-4 text-muted-foreground" />
-            <span className="text-muted-foreground">UMKM:</span>
-            <span className="font-medium">{project.umkm.name}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <GraduationCap className="size-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Senior:</span>
-            <span className="font-medium">{project.senior?.name ?? "Belum ada"}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CalendarDays className="size-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Deadline:</span>
-            <span className="font-medium">
-              {new Date(project.deadline).toLocaleDateString("id-ID")}
-            </span>
-          </div>
+      <Card className="app-reveal">
+        <CardContent className="space-y-3">
+          <MetaRow icon={Building2} label="UMKM" value={project.umkm.name} />
+          <MetaRow icon={GraduationCap} label="Mentor" value={project.senior?.name ?? "Belum ada"} />
+          <MetaRow
+            icon={CalendarDays}
+            label="Deadline"
+            value={new Date(project.deadline).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+          />
         </CardContent>
       </Card>
     </div>
@@ -159,28 +150,37 @@ function OverviewTab({ project }: { project: ProjectDetail }) {
 function MilestonesTab({ project }: { project: ProjectDetail }) {
   if (project.milestones.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
-        Belum ada milestone.
-      </p>
+      <EmptyState
+        icon={CalendarClock}
+        heading="Belum Ada Milestone"
+        message="Milestone proyek akan tampil di sini setelah ditetapkan."
+      />
     );
   }
   return (
-    <div className="space-y-3">
-      {project.milestones.map((m) => (
-        <Card key={m.id}>
-          <CardContent className="flex items-start justify-between gap-4 p-4">
-            <div>
-              <p className="font-medium">{m.title}</p>
+    <div className="flex flex-col gap-3">
+      {project.milestones.map((m, i) => (
+        <article
+          key={m.id}
+          style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+          className="app-reveal flex items-start justify-between gap-4 rounded-[20px] border border-border bg-card p-5"
+        >
+          <div className="flex min-w-0 gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]" aria-hidden="true">
+              <CalendarClock className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="font-semibold tracking-tight">{m.title}</p>
               {m.description && (
                 <p className="mt-0.5 text-sm text-muted-foreground">{m.description}</p>
               )}
               <p className="mt-1 text-xs text-muted-foreground">
-                Tenggat: {new Date(m.dueDate).toLocaleDateString("id-ID")}
+                Tenggat {new Date(m.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
               </p>
             </div>
-            <Badge variant="outline">{m.status}</Badge>
-          </CardContent>
-        </Card>
+          </div>
+          <Badge variant="outline" className="shrink-0">{m.status}</Badge>
+        </article>
       ))}
     </div>
   );
@@ -211,12 +211,14 @@ function MembersTab({ project }: { project: ProjectDetail }) {
   }, [members, project.senior, myId]);
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-5">
       <ProjectMembersPanel project={project} />
 
-      <Card>
-        <CardContent className="space-y-3 p-6">
-          <h3 className="text-sm font-semibold">Pesan Langsung</h3>
+      <Card className="app-reveal">
+        <CardContent className="space-y-3">
+          <h3 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Pesan Langsung
+          </h3>
           {dmTargets.length === 0 ? (
             <p className="text-sm text-muted-foreground">Belum ada anggota lain untuk dihubungi.</p>
           ) : (
