@@ -6,6 +6,8 @@ import { Star } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/common/PageHeader";
+import { EmptyState } from "@/components/common/EmptyState";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { StarRating } from "@/components/review/StarRating";
@@ -41,19 +43,18 @@ function MyReviewsInner() {
       : null;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Review Saya</h1>
-        <p className="text-sm text-muted-foreground">
-          Penilaian yang kamu terima dari mentor dan UMKM di seluruh proyek.
-        </p>
-      </div>
+    <div className="flex flex-col gap-5">
+      <PageHeader
+        title="Review Saya"
+        subtitle="Penilaian yang kamu terima dari mentor dan UMKM di seluruh proyek."
+      />
 
       {reviews.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
-          <Star className="size-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Belum ada review yang kamu terima.</p>
-        </div>
+        <EmptyState
+          icon={Star}
+          heading="Belum Ada Review"
+          message="Review dari mentor dan UMKM akan muncul di sini setelah kamu menyelesaikan kontribusi proyek."
+        />
       ) : (
         <>
           {avg && (

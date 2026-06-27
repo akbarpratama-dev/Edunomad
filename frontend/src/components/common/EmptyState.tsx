@@ -9,15 +9,22 @@ interface EmptyStateProps {
   onAction?: () => void;
 }
 
-// Empty State — docs/08-UI_Pages_Specification_v1.0.md Common UI Patterns
+// Empty State — premium dashed surface (DESIGN.md). docs/08 Common UI Patterns.
 export function EmptyState({ icon: Icon, heading, message, actionLabel, onAction }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center gap-2 py-12 text-center">
-      <Icon className="size-10 text-muted-foreground" />
-      <h3 className="text-base font-semibold text-foreground">{heading}</h3>
-      <p className="max-w-sm text-sm text-muted-foreground">{message}</p>
+    <div className="app-reveal flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border py-16 text-center">
+      <span
+        className="grid size-12 place-items-center rounded-2xl bg-muted text-muted-foreground"
+        aria-hidden="true"
+      >
+        <Icon className="size-6" />
+      </span>
+      <div>
+        <h3 className="text-base font-semibold text-foreground">{heading}</h3>
+        <p className="mx-auto mt-0.5 max-w-sm text-sm text-muted-foreground">{message}</p>
+      </div>
       {actionLabel && onAction && (
-        <Button onClick={onAction} className="mt-2">
+        <Button onClick={onAction} className="mt-1">
           {actionLabel}
         </Button>
       )}
