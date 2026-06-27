@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Bell, LogOut, User as UserIcon } from "lucide-react";
+import { Menu, Bell, LogOut, User as UserIcon, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -12,39 +12,43 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { Breadcrumbs, type BreadcrumbItem } from "@/components/layout/Breadcrumbs";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useNotificationStore } from "@/stores/notificationStore";
 import { signOut } from "@/services/auth";
+import type { Role } from "@/types/user";
 
-interface HeaderProps {
-  breadcrumbs?: BreadcrumbItem[];
-}
+const ROLE_LABEL: Record<Role, string> = {
+  BEGINNER: "Mahasiswa",
+  SENIOR: "Mentor",
+  UMKM: "UMKM",
+  ADMIN: "Admin",
+};
 
-export function Header({ breadcrumbs }: HeaderProps) {
+// Slim top bar — no breadcrumbs (each page owns its own title). Just the mobile
+// nav trigger on the left and the notification + profile controls on the right.
+export function Header() {
   const mobileNavOpen = useUIStore((s) => s.modals["mobile-nav"] ?? false);
   const openModal = useUIStore((s) => s.openModal);
   const closeModal = useUIStore((s) => s.closeModal);
   const user = useAuthStore((s) => s.user);
+  const appUser = useAuthStore((s) => s.appUser);
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-border/70 bg-background/80 px-4 backdrop-blur-sm">
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => openModal("mobile-nav")}
-          aria-label="Open menu"
-        >
-          <Menu className="size-5" />
-        </Button>
-        {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
-      </div>
+    <header className="flex h-14 items-center justify-between px-4 lg:px-8">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="md:hidden"
+        onClick={() => openModal("mobile-nav")}
+        aria-label="Open menu"
+      >
+        <Menu className="size-5" />
+      </Button>
+      <div className="hidden md:block" />
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
           <Bell className="size-5" />
           {unreadCount > 0 && (
@@ -56,11 +60,20 @@ export function Header({ breadcrumbs }: HeaderProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger>
-            <Avatar className="size-8 cursor-pointer">
-              <AvatarFallback>
-                <UserIcon className="size-4" />
-              </AvatarFallback>
-            </Avatar>
+            <span className="flex cursor-pointer items-center gap-2 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-muted">
+              <Avatar className="size-8">
+                <AvatarFallback className="bg-[#d8f277] text-[12px] font-bold text-[#0b0b0b]">
+                  {appUser?.name?.charAt(0).toUpperCase() ?? <UserIcon className="size-4" />}
+                </AvatarFallback>
+              </Avatar>
+              {appUser && (
+                <span className="hidden text-left leading-tight sm:block">
+                  <span className="block text-sm font-semibold text-foreground">{appUser.name}</span>
+                  <span className="block text-xs text-muted-foreground">{ROLE_LABEL[appUser.role]}</span>
+                </span>
+              )}
+              <ChevronDown className="hidden size-4 text-muted-foreground sm:block" />
+            </span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem disabled>{user?.email ?? "Guest"}</DropdownMenuItem>

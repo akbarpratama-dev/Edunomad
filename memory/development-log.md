@@ -1,5 +1,10 @@
 # Development Log
 
+2026-06-27 (Hapus breadcrumb header global — fix judul dobel)
+Bug (user): tiap halaman ada breadcrumb bar (mis. "Admin > Tinjau Proyek") yang dobel dengan H1 halaman. Minta header breadcrumb dihilangkan semua halaman (ref screenshot: hanya kontrol kanan-atas).
+Fix: `components/layout/Header.tsx` ditulis ulang — buang Breadcrumbs, jadi slim bar: kiri = hamburger mobile saja, kanan = notif + dropdown profil (avatar + nama + ROLE_LABEL + logout). `AppShell.tsx` tak lagi render breadcrumb (prop `breadcrumbs?` dibiarkan opsional & diabaikan agar ~15 halaman tetap kompilasi tanpa diubah); main padding atas dihapus (header kasih ruang). 
+PENTING: DropdownMenuTrigger base-ui sudah berupa <button>, jadi child profil HARUS <span> bukan <button> (sempat hydration error button-bersarang → diperbaiki). VERIFIED /admin/dashboard + /projects: tak ada breadcrumb, profil "Phase43 Admin/Admin" tampil, H1 tunggal, console 0 err. tsc 0.
+
 2026-06-27 (Redesign /projects "Jelajahi Proyek" premium — terutama kartu)
 Task: user kasih screenshot (design-refs/explore-projects.png) + prompt premium (Clay/Linear). Redesign halaman Telusuri Proyek, fokus kartu. Sidebar tetap (navy AppShell). DONE & browser-verified. Branch redesign/explore-projects (dari main). [Catatan: Phase 8 backend artifact DITUNDA — disimpan WIP di branch feature/phase-8-artifacts commit 1e6a4a3 (pdfkit/qrcode + artifactPdf.service + artifact.repository), lanjut nanti.]
 - Backend: `project.repository` += `browseInclude` (umkm+category+senior+projectRoles{roleName,capacity,roleSkills→skill}) + `findManyPaginatedBrowse`; `project.service.getProjects` pakai browse method → payload browse publik kini kaya (mentor, role slots, tech). Frontend `ProjectListItem` += optional `senior` + `projectRoles` (BrowseRole). build 0, tsc 0.
