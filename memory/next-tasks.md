@@ -1,4 +1,24 @@
 ============================================================
+⚡ ACTIVE HANDOFF (2026-06-28 #8) — UNIFY-UI sweep IN PROGRESS, branch `redesign/unify-ui`
+============================================================
+main = 2f1546d (Phase 0–7 + bento Proyek Saya + dashboard 4 role + Jelajahi Proyek premium + breadcrumb dihapus + guidelines + nav konsisten Beranda/Jelajahi Proyek/Notifikasi). Branch aktif `redesign/unify-ui` (dari main).
+
+KONTEKS: user minta SEMUA halaman pakai UI/card yang SAMA (premium). Banyak halaman masih UI lama. Pilihan user: "sapu bersih bertahap" + "merge tiap batch". 
+
+✅ BATCH 1 SELESAI (commit efdb5e3): primitive bersama di-premium-kan — `ui/card.tsx` (Card rounded-[20px]+border #e7e3d8 flat, no shadow, p-5; CardTitle font-semibold) + `common/PageHeader.tsx` (h1 28px text-pretty). Semua halaman pakai Card/PageHeader otomatis ikut premium. tsc 0, /reviews verified.
+
+➡️ LANJUTKAN sweep per-halaman ke pola premium (pakai dashboardKit Panel/StatCard/app-reveal/badge tint konsisten, header tanpa breadcrumb sudah global). Urutan batch:
+- BATCH 2: `/applications` (Beginner Lamaran), `/applications/mentor` (Senior), `/reviews` (My Reviews) — rapikan tabs jadi pill konsisten + kartu premium + empty-state.
+- BATCH 3: `/projects/[id]` detail (ProjectDetailView) + `/projects/[id]/workspace` (tab bar + tiap tab).
+- BATCH 4: `/projects/[id]/manage` + `/applicants` + `/projects/create` wizard.
+- BATCH 5: admin `/admin/projects/review` + `/admin/users/verification` + `/admin/audit-logs` (tabel→kartu/list premium).
+- BATCH 6: `/my-projects` VIEW UMKM (Content lama; Beginner sudah bento).
+Auth `/auth/*` JANGAN diubah (sistem desain terpisah, sudah rapi). Tiap batch: commit + browser-verify (login p4-beginner/p4-senior/p4-umkm/p43-admin pw TestPass123!) + tsc 0 + console 0 err, lalu merge ke main.
+
+⏸️ PHASE 8 ARTIFACT di-PAUSE: WIP di branch `feature/phase-8-artifacts` commit 1e6a4a3 (pdfkit/qrcode + artifactPdf.service + artifact.repository; belum service/controller/routes/frontend + completion gate). Lanjut SETELAH unify-UI selesai. Baca task-breakdown §8 + schema Artifact (sudah ada, no migration) + endpoints (POST /projects/:id/generate-artifacts, /artifacts/:id/regenerate, GET /artifacts/:id[/download], GET /verify/:code) + Workflow 13/14/18.
+
+--- arsip handoff #7 (Phase 7) ---
+============================================================
 ⚡ ACTIVE HANDOFF (2026-06-25 #7) — PHASE 7 SELESAI (7.1 backend + 7.2 frontend), branch `feature/phase-7-reviews`
 ============================================================
 main = 1fc2b7e (Phase 0–6 + UI redesign + perf-fix + label Sertifikat). Tag restore `ui-restore-2026-06-25`. Branch feature/phase-7-reviews = Phase 7 lengkap.

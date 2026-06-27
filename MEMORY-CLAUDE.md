@@ -1,7 +1,7 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-06-26 (main = 364c540. Phase 0-7 DONE. POST-PHASE-7 UI merged: Beginner "Proyek Saya" bento + premium per-role dashboards for ALL FOUR roles Beginner/Senior/UMKM/Admin (shared components/dashboard/dashboardKit) + endpoints GET /me/projects & /me/mentored-projects + UMKM nav drop "Telusuri Proyek" + Button nativeButton fix. NEXT = Phase 8 Artifact System).
+> Last updated: 2026-06-28 (main = 2f1546d. Phase 0-7 DONE + premium dashboards(4 role)+Jelajahi Proyek+breadcrumb removed+nav Beranda/Jelajahi Proyek/Notifikasi. NOW: UNIFY-UI sweep on branch redesign/unify-ui — batch1 done (shared Card+PageHeader premium, efdb5e3); batches 2-6 = make ~12 legacy pages match premium. Phase 8 Artifact PAUSED on feature/phase-8-artifacts 1e6a4a3).
 
 ## â­ Landing page (marketing `/`) â ADDED 2026-06-23, verified
 Built from user's Figma ("Premium SaaS Landing Page", file `nMFbzuPNcRcKgFVvMEFfaj`, node 5:2) via Figma MCP (source of truth) + skills impeccable/emil-design-eng/ui-ux-pro-max. 11 sections in `frontend/src/components/landing/` (motion.tsx, primitives.tsx, header.tsx, footer.tsx, sections/{hero,problem,how-it-works,feature-grid,project-showcase,portfolio,impact,testimonials,faq,cta}.tsx); composed in `app/page.tsx` (replaced the old `/`âlogin redirect). Stack: `motion` ^12.40.0 (NEW frontend dep, frontend/ only), animation library; landing palette scoped as `ln-*` Tailwind tokens in globals.css `@theme` (in-app docs/08 design system untouched); Manrope (via --font-sans, Black weight). [font InterâManrope across whole app, 2026-06-24] Motion = hero floating-card cluster + glow + entrance, scroll reveal/stagger (SSR-safe mounted-gate so never ships blank), CountUp stats, FAQ accordion, hover lifts â all `prefers-reduced-motion` aware. Header auth-aware (Masuk/Gabung vs Buka Dashboard). Verified: tsc clean, `npm run build` 0 errors (`/` prerendered STATIC), every section browser-screenshotted faithful to Figma. Decisions D-LP-1..4.
@@ -61,40 +61,28 @@ DRAFT â PENDING_REVIEW â RECRUITING (approve) / REJECTED â ACTIVE
 - p4-umkm / p4-senior / p4-beginner @test.edunomad.com (pw TestPass123!, VERIFIED). p43-b2 / p43-b3 (BEGINNER VERIFIED), p43-admin (ADMIN VERIFIED) added this session.
 - â ï¸ Both Phase-4 test projects ("Phase4 Recruitment Test", "Phase43 Lifecycle Browser Test") are now **COMPLETED** (consumed by E2E/browser). **A fresh RECRUITING/ACTIVE project + members must be created for Phase 5 testing.**
 - Helper scripts left in /tmp: p43-prov.sh (provision), p43-e2e.sh (lifecycle E2E), p43-setup-browser.sh (browser scenario setup).
-
 ## 📌 NEXT-SESSION INIT PROMPT
 
 ```
-Lanjutkan EduNomad ke PHASE 8 — Artifact System (task-breakdown §8; Workflow terkait — "Sertifikat" di UI, D-UI-7).
-Phase 0–7 SEMUA selesai & terverifikasi (Phase 7 Reviews & Ratings = 7.1 backend E2E 11/11 + 7.2 frontend
-browser-verified 3 role: senior/UMKM/beginner) — JANGAN bangun ulang. Baca CLAUDE.MD + MEMORY-CLAUDE.md +
-semua memory/*.md + next-tasks.md blok "⚡ ACTIVE HANDOFF 2026-06-25 #7" + DESIGN.md (kontrak visual).
+Lanjutkan EduNomad: UNIFY-UI sweep (seragamkan SEMUA halaman ke design language premium yang sama).
+Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-06-28 #8" + DESIGN.md.
 
-Branch: Phase 7 di `feature/phase-7-reviews` (sudah push 7.1; PUSH commit 7.2 + memory dulu kalau belum).
-Sebelum Phase 8: MERGE feature/phase-7-reviews → main (PR / merge --no-ff), lalu cabang
-`feature/phase-8-artifacts` dari main (GitHub Flow). Konfirmasi ke user kalau ragu soal merge/PR.
+main = 2f1546d. Branch aktif `redesign/unify-ui`. BATCH 1 SELESAI (efdb5e3): primitive bersama premium
+(ui/card.tsx Card rounded-[20px]+border #e7e3d8 flat; common/PageHeader.tsx h1 28px text-pretty) → semua
+halaman pakai Card/PageHeader otomatis ikut premium.
 
-Backend tooling beres: `npm run dev` (:3001) type-check penuh, `npm run build` 0 error. Frontend :3000.
-Kalau node_modules rebuilt & deps tak lengkap: `npm cache clean --force && rm -rf node_modules
-package-lock.json && npm install`.
+LANJUTKAN per-halaman ke pola premium (pakai dashboardKit Panel/StatCard/app-reveal, badge tint konsisten,
+tabs jadi pill border-primary, empty-state premium; header tanpa breadcrumb sudah global). Urutan:
+batch2 = /applications + /applications/mentor + /reviews; batch3 = /projects/[id] + workspace;
+batch4 = /manage + /applicants + /projects/create; batch5 = admin review/verification/audit;
+batch6 = /my-projects view UMKM. Auth /auth/* JANGAN diubah. Tiap batch: commit + browser-verify
+(p4-beginner/p4-senior/p4-umkm/p43-admin, pw TestPass123!) + tsc 0 + console 0 err, lalu merge ke main.
 
-Baca dulu (JANGAN nebak): task-breakdown.md §8 (urutan subtask exact) + docs/03 schema Artifact/
-ArtifactVersion (IMMUTABLE, no updatedAt, history per docs) + docs/04 API Artifacts endpoints + docs/06
-RBAC (siapa generate artifact — kemungkinan senior/sistem) + docs/07 Workflow (artifact per-beginner saat/
-setelah completion). Cek backend/src/prisma/schema.prisma model Artifact/ArtifactVersion (migration
-init_contributions_artifacts_reviews_domain sudah ada → kemungkinan NO migration). Lalu bangun layered
-(route→controller→service→repository→Prisma, $txn, audit kalau perlu, verifikasi tiap milestone E2E,
-update memory tiap selesai). Frontend ikut DESIGN.md (PageHeader/Card, token semantic, app-reveal,
-contrast-law: chartreuse fill+dark-text only, link hijau #5f8c00). Reuse pola service object
-(reviewApi/contributionApi/deliverableApi). Nav "Sertifikat"→/artifacts SUDAH ada tapi page /artifacts BELUM.
+Dev server: backend :3001 (npm run dev, full type-check), frontend :3000. Kalau deps tak lengkap:
+npm cache clean --force && rm -rf node_modules package-lock.json && npm install.
 
-Carry-over (D-P4.3-3) — SEKARANG waktunya: isi completion-readiness gate di
-projectLifecycle.service.requestCompletion = all deliverables APPROVED + all contributions APPROVED +
-reviews ada + artifacts generated, sebelum ACTIVE→AWAITING_COMPLETION (Workflow 15). Reviews+deliverables+
-contributions sudah ADA; tinggal artifacts (Phase 8) → gate bisa dibangun lengkap. Notifications = Phase 9.
-Reuse: projectMember.repository.isActiveMember, AuthGuard/AppShell/apiClient + workspace tab pattern.
-
-⚠️ Test data SIAP: project ACTIVE `a1a1a1a1-0000-4000-8000-000000000005` (umkm=p4-umkm, senior=p4-senior,
-members=p4-beginner+p43-b2; p43-b3=nonmember). pw TestPass123!. Sudah ada deliverable + contribution
-APPROVED + 4 review dari Phase 6/7 E2E. anon key+URL via Supabase MCP. Dev server mungkin masih jalan (:3001/:3000).
+SETELAH unify-UI: lanjut PHASE 8 Artifact (WIP di feature/phase-8-artifacts 1e6a4a3: pdfkit/qrcode +
+artifactPdf.service + artifact.repository; sisa = service/controller/routes + 4 frontend page + completion
+gate D-P4.3-3). task-breakdown §8; endpoints POST /projects/:id/generate-artifacts, /artifacts/:id/regenerate,
+GET /artifacts/:id[/download], GET /verify/:code; Workflow 13/14/18; schema Artifact sudah ada (no migration).
 ```
