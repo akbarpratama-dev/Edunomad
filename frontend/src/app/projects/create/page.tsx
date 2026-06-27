@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Trash2, Plus, Check } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +54,7 @@ type BasicForm = z.infer<typeof basicSchema>;
 
 function Stepper({ step }: { step: number }) {
   return (
-    <ol className="flex flex-wrap items-center gap-2">
+    <ol className="app-reveal flex flex-wrap items-center gap-2">
       {STEPS.map((label, i) => {
         const n = i + 1;
         const done = n < step;
@@ -62,11 +63,11 @@ function Stepper({ step }: { step: number }) {
           <li key={label} className="flex items-center gap-2">
             <span
               className={cn(
-                "flex size-7 items-center justify-center rounded-full text-sm font-semibold",
+                "flex size-7 items-center justify-center rounded-full text-sm font-semibold tabular-nums transition-colors",
                 active
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-[#d8f277] text-[#0b0b0b]"
                   : done
-                    ? "bg-accent text-accent-foreground"
+                    ? "bg-[#eef7d6] text-[#5f8c00]"
                     : "bg-muted text-muted-foreground"
               )}
             >
@@ -75,12 +76,14 @@ function Stepper({ step }: { step: number }) {
             <span
               className={cn(
                 "text-sm",
-                active ? "font-medium text-foreground" : "text-muted-foreground"
+                active ? "font-semibold text-foreground" : "text-muted-foreground"
               )}
             >
               {label}
             </span>
-            {n < STEPS.length && <span className="mx-1 h-px w-6 bg-border" />}
+            {n < STEPS.length && (
+              <span className={cn("mx-1 h-px w-6", done ? "bg-[#a3ce00]" : "bg-border")} />
+            )}
           </li>
         );
       })}
@@ -151,19 +154,22 @@ function CreateProjectContent() {
   };
 
   return (
-    <AppShell breadcrumbs={[{ label: "Proyek Saya", href: "/my-projects" }, { label: "Buat Proyek" }]}>
+    <AppShell>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Buat Proyek</h1>
+        <PageHeader
+          title="Buat Proyek"
+          subtitle="Susun proyek langkah demi langkah, lalu kirim untuk ditinjau admin."
+        />
         <Stepper step={step} />
 
         {step === 1 && (
-          <Card>
-            <CardContent className="pt-2">
+          <Card className="app-reveal">
+            <CardContent>
               <form onSubmit={handleSubmit(saveBasic)} className="flex flex-col gap-4" noValidate>
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="title">Judul Proyek</Label>
                   <Input id="title" placeholder="cth. Website Toko Online" {...register("title")} />
-                  {errors.title && <p className="text-sm text-error">{errors.title.message}</p>}
+                  {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -186,7 +192,7 @@ function CreateProjectContent() {
                     </SelectContent>
                   </Select>
                   {errors.category_id && (
-                    <p className="text-sm text-error">{errors.category_id.message}</p>
+                    <p className="text-sm text-destructive">{errors.category_id.message}</p>
                   )}
                 </div>
 
@@ -199,7 +205,7 @@ function CreateProjectContent() {
                     {...register("description")}
                   />
                   {errors.description && (
-                    <p className="text-sm text-error">{errors.description.message}</p>
+                    <p className="text-sm text-destructive">{errors.description.message}</p>
                   )}
                 </div>
 
@@ -212,7 +218,7 @@ function CreateProjectContent() {
                     {...register("expected_deliverables")}
                   />
                   {errors.expected_deliverables && (
-                    <p className="text-sm text-error">
+                    <p className="text-sm text-destructive">
                       {errors.expected_deliverables.message}
                     </p>
                   )}
@@ -223,14 +229,14 @@ function CreateProjectContent() {
                     <Label htmlFor="start_date">Tanggal Mulai</Label>
                     <Input id="start_date" type="date" {...register("start_date")} />
                     {errors.start_date && (
-                      <p className="text-sm text-error">{errors.start_date.message}</p>
+                      <p className="text-sm text-destructive">{errors.start_date.message}</p>
                     )}
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="deadline">Deadline</Label>
                     <Input id="deadline" type="date" {...register("deadline")} />
                     {errors.deadline && (
-                      <p className="text-sm text-error">{errors.deadline.message}</p>
+                      <p className="text-sm text-destructive">{errors.deadline.message}</p>
                     )}
                   </div>
                 </div>
@@ -335,9 +341,11 @@ function MilestonesStep({
 
   return (
     <div className="flex flex-col gap-4">
-      <Card>
-        <CardContent className="flex flex-col gap-4 pt-2">
-          <p className="text-sm font-semibold text-foreground">Tambah Milestone</p>
+      <Card className="app-reveal">
+        <CardContent className="flex flex-col gap-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Tambah Milestone
+          </p>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="m-title">Judul</Label>
             <Input
@@ -377,7 +385,7 @@ function MilestonesStep({
         <div className="flex flex-col gap-2">
           {milestones.map((m) => (
             <Card key={m.id}>
-              <CardContent className="flex items-start justify-between pt-2">
+              <CardContent className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-foreground">{m.title}</p>
                   {m.description && (
@@ -388,7 +396,7 @@ function MilestonesStep({
                   </p>
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => remove(m.id)}>
-                  <Trash2 className="size-4 text-error" />
+                  <Trash2 className="size-4 text-destructive" />
                 </Button>
               </CardContent>
             </Card>
@@ -470,9 +478,11 @@ function RolesStep({
 
   return (
     <div className="flex flex-col gap-4">
-      <Card>
-        <CardContent className="flex flex-col gap-4 pt-2">
-          <p className="text-sm font-semibold text-foreground">Tambah Peran</p>
+      <Card className="app-reveal">
+        <CardContent className="flex flex-col gap-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Tambah Peran
+          </p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="r-name">Nama Peran</Label>
@@ -531,7 +541,7 @@ function RolesStep({
         <div className="flex flex-col gap-2">
           {roles.map((r) => (
             <Card key={r.id}>
-              <CardContent className="flex items-start justify-between pt-2">
+              <CardContent className="flex items-start justify-between">
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium text-foreground">
                     {r.roleName}{" "}
@@ -553,7 +563,7 @@ function RolesStep({
                   )}
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => remove(r.id)}>
-                  <Trash2 className="size-4 text-error" />
+                  <Trash2 className="size-4 text-destructive" />
                 </Button>
               </CardContent>
             </Card>
@@ -591,19 +601,19 @@ function ReviewStep({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <Card>
-        <CardContent className="flex flex-col gap-3 pt-2">
-          <h2 className="text-base font-semibold text-foreground">{basic.title}</h2>
+      <Card className="app-reveal">
+        <CardContent className="flex flex-col gap-3">
+          <h2 className="text-lg font-bold tracking-tight text-foreground">{basic.title}</h2>
           <p className="text-sm text-muted-foreground">Kategori: {categoryName}</p>
           <div>
-            <p className="text-sm font-semibold text-foreground">Deskripsi</p>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Deskripsi</p>
+            <p className="mt-1 text-sm text-foreground/80 whitespace-pre-wrap">
               {basic.description}
             </p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">Hasil yang Diharapkan</p>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Hasil yang Diharapkan</p>
+            <p className="mt-1 text-sm text-foreground/80 whitespace-pre-wrap">
               {basic.expected_deliverables}
             </p>
           </div>
@@ -614,9 +624,9 @@ function ReviewStep({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="flex flex-col gap-2 pt-2">
-          <p className="text-sm font-semibold text-foreground">
+      <Card className="app-reveal">
+        <CardContent className="flex flex-col gap-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             Milestone ({milestones.length})
           </p>
           {milestones.length === 0 ? (
@@ -634,9 +644,11 @@ function ReviewStep({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="flex flex-col gap-2 pt-2">
-          <p className="text-sm font-semibold text-foreground">Peran ({roles.length})</p>
+      <Card className="app-reveal">
+        <CardContent className="flex flex-col gap-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Peran ({roles.length})
+          </p>
           {roles.length === 0 ? (
             <p className="text-sm text-muted-foreground">Belum ada peran.</p>
           ) : (
