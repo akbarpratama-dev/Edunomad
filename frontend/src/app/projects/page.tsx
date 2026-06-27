@@ -158,8 +158,8 @@ function Content() {
       <div className="flex flex-col gap-5">
         {/* Title — full width, aligned with the floating header controls */}
         <div className="app-reveal max-w-3xl pr-2">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-[28px]">Jelajahi Proyek</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">Jelajahi Proyek</h1>
+          <p className="mt-1 text-sm text-muted-foreground text-pretty">
             Temukan proyek nyata dari berbagai UMKM dan bergabung bersama mentor profesional untuk
             membangun pengalaman yang dapat dibuktikan.
           </p>
@@ -173,7 +173,10 @@ function Content() {
             <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               className="h-12 rounded-2xl pl-11"
-              placeholder="Cari proyek..."
+              placeholder="Cari proyek…"
+              autoComplete="off"
+              spellCheck={false}
+              aria-label="Cari proyek"
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />

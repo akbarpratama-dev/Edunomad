@@ -132,6 +132,7 @@
 }
 
 :root {
+  color-scheme: light; /* app is a single warm light theme */
   /* Color Palette — docs/08-UI_Pages_Specification_v1.0.md Design System */
   /* Unified brand language (Figma "Buat Akun" / landing): warm off-white,
      near-black ink, lime accent with dark text, soft warm grays, rounded. */

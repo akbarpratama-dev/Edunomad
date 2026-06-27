@@ -1,5 +1,15 @@
 # Development Log
 
+2026-06-28 (Web Interface Guidelines pass + konsistensi nav)
+Task: user jalankan skill web-design-guidelines — cek UI imbalance, perbaiki. Ambil rules dari vercel-labs/web-interface-guidelines. Fix yang diterapkan:
+- Anti-pattern `transition: all` → properti spesifik: ui/button.tsx (transition-[color,background-color,border-color,box-shadow,transform] +duration-200), ui/badge.tsx (transition-colors), ui/progress.tsx (transition-[width]).
+- Ellipsis: projects search "Cari proyek..." → "…" + autoComplete=off + spellCheck=false + aria-label.
+- color-scheme: globals.css :root `color-scheme: light`; layout.tsx export `viewport` {themeColor #faf8f3, colorScheme light}.
+- Decorative icons aria-hidden + text-pretty heading di dashboardKit (StatCard icon+trend, WelcomeHeader) + projects h1/desc.
+- KONSISTENSI NAV (imbalance nyata): label sidebar disamakan ke bahasa desain — "Dashboard"→"Beranda", "Telusuri Proyek"→"Jelajahi Proyek" (kini SAMA dgn judul halaman /projects, sebelumnya beda bikin bingung), "Notifications"→"Notifikasi".
+- Catatan (sudah dari sebelumnya): [data-app] sudah punya focus-visible global utk a/button/role-button → fokus ter-cover. Sisa minor belum: aria-hidden belum di SEMUA ikon dekoratif app-wide (baru representatif), input search belum punya `name`.
+VERIFIED browser /projects: nav Beranda/Jelajahi Proyek/…/Notifikasi konsisten + "Jelajahi Proyek" active = judul halaman; screenshot full-page menilai layout seimbang; console 0 err; tsc 0.
+
 2026-06-27 (Hapus breadcrumb header global — fix judul dobel)
 Bug (user): tiap halaman ada breadcrumb bar (mis. "Admin > Tinjau Proyek") yang dobel dengan H1 halaman. Minta header breadcrumb dihilangkan semua halaman (ref screenshot: hanya kontrol kanan-atas).
 Fix: `components/layout/Header.tsx` ditulis ulang — buang Breadcrumbs, jadi slim bar: kiri = hamburger mobile saja, kanan = notif + dropdown profil (avatar + nama + ROLE_LABEL + logout). `AppShell.tsx` tak lagi render breadcrumb (prop `breadcrumbs?` dibiarkan opsional & diabaikan agar ~15 halaman tetap kompilasi tanpa diubah); main padding atas dihapus (header kasih ruang). 
