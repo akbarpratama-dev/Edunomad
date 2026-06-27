@@ -36,19 +36,18 @@ export function Header() {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   return (
-    <header className="flex h-14 items-center justify-between px-4 lg:px-8">
+    <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-end px-4 lg:px-8">
       <Button
         variant="ghost"
         size="icon"
-        className="md:hidden"
+        className="pointer-events-auto absolute left-3 top-1/2 -translate-y-1/2 md:hidden"
         onClick={() => openModal("mobile-nav")}
         aria-label="Open menu"
       >
         <Menu className="size-5" />
       </Button>
-      <div className="hidden md:block" />
 
-      <div className="flex items-center gap-2">
+      <div className="pointer-events-auto flex items-center gap-2">
         <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
           <Bell className="size-5" />
           {unreadCount > 0 && (

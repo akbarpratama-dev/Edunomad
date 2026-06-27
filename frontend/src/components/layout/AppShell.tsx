@@ -15,9 +15,11 @@ export function AppShell({ children }: AppShellProps) {
       <div className="hidden md:block">
         <Sidebar />
       </div>
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="relative flex flex-1 flex-col overflow-hidden">
+        {/* Floating controls (notif + profile) — sit on the same row as each
+            page's title instead of in a separate breadcrumb bar. */}
         <Header />
-        <main className="flex-1 overflow-y-auto px-6 pb-8 lg:px-8">{children}</main>
+        <main className="flex-1 overflow-y-auto px-6 pt-5 pb-8 lg:px-8 lg:pt-6">{children}</main>
       </div>
     </div>
   );

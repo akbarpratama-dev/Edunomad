@@ -155,17 +155,19 @@ function Content() {
 
   return (
     <AppShell breadcrumbs={[{ label: "Jelajahi Proyek" }]}>
-      <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
-        {/* MAIN */}
-        <div className="flex min-w-0 flex-col gap-5">
-          <div className="app-reveal">
-            <h1 className="text-2xl font-bold tracking-tight sm:text-[28px]">Jelajahi Proyek</h1>
-            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Temukan proyek nyata dari berbagai UMKM dan bergabung bersama mentor profesional untuk
-              membangun pengalaman yang dapat dibuktikan.
-            </p>
-          </div>
+      <div className="flex flex-col gap-5">
+        {/* Title — full width, aligned with the floating header controls */}
+        <div className="app-reveal max-w-3xl pr-2">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-[28px]">Jelajahi Proyek</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Temukan proyek nyata dari berbagai UMKM dan bergabung bersama mentor profesional untuk
+            membangun pengalaman yang dapat dibuktikan.
+          </p>
+        </div>
 
+        <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
+          {/* MAIN */}
+          <div className="flex min-w-0 flex-col gap-5">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -299,6 +301,7 @@ function Content() {
             </ul>
           </RailCard>
         </aside>
+        </div>
       </div>
     </AppShell>
   );
@@ -317,7 +320,7 @@ function FilterSelect({
 }) {
   return (
     <Select items={items} value={value} onValueChange={(v) => onChange(v ?? Object.keys(items)[0])}>
-      <SelectTrigger className="h-11 min-w-[150px] rounded-xl">
+      <SelectTrigger className="!h-11 min-w-[150px] rounded-xl px-3.5">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
