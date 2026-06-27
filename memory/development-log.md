@@ -1,5 +1,10 @@
 # Development Log
 
+2026-06-28 (UNIFY-UI sweep — batch 1: primitive bersama premium)
+Task: user minta SEMUA halaman pakai UI/card yang sama (banyak halaman masih UI lama). Pilihan user: "sapu bersih bertahap" + "merge dulu baru lanjut". redesign/explore-projects sudah merge ke main (2f1546d). Branch baru `redesign/unify-ui`.
+- BATCH 1 (fondasi, leverage tinggi): `ui/card.tsx` Card di-premium-kan — rounded-[20px] + border 1px #e7e3d8 (ganti rounded-lg/shadow-sm/ring), --card-spacing 4→5; CardHeader/Footer rounding 20px; CardTitle font-semibold tracking-tight. `common/PageHeader.tsx` → heading sm:text-[28px] + text-pretty. EFEK: semua halaman pakai Card/PageHeader (applications, reviews, admin, detail, dll) OTOMATIS ikut premium. Verified /reviews: card radius 20px + border #e7e3d8, console 0 err, tsc 0. Commit efdb5e3.
+- BELUM (batch berikut): rapikan per-halaman (tabs, list rows, layout) ke pola premium (Panel/app-reveal/badge konsisten): batch2 applications+applications/mentor+reviews; batch3 projects/[id]+workspace; batch4 manage+applicants+create wizard; batch5 admin review/verification/audit; batch6 my-projects view UMKM. Auth /auth/* TIDAK diubah.
+
 2026-06-28 (Web Interface Guidelines pass + konsistensi nav)
 Task: user jalankan skill web-design-guidelines — cek UI imbalance, perbaiki. Ambil rules dari vercel-labs/web-interface-guidelines. Fix yang diterapkan:
 - Anti-pattern `transition: all` → properti spesifik: ui/button.tsx (transition-[color,background-color,border-color,box-shadow,transform] +duration-200), ui/badge.tsx (transition-colors), ui/progress.tsx (transition-[width]).

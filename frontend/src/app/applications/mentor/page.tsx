@@ -3,17 +3,16 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Inbox } from "lucide-react";
+import { Inbox, GraduationCap } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { EmptyState } from "@/components/common/EmptyState";
+import { PillTabs } from "@/components/common/PillTabs";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
-import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/apiClient";
 import {
   applicationApi,
@@ -22,7 +21,7 @@ import {
   type SeniorApplicationMine,
 } from "@/services/applicationApi";
 
-const TABS: { key: ApplicationStatus; label: string }[] = [
+const TAB_DEFS: { key: ApplicationStatus; label: string }[] = [
   { key: "PENDING", label: "Menunggu" },
   { key: "ACCEPTED", label: "Diterima" },
   { key: "REJECTED", label: "Ditolak" },
@@ -71,28 +70,17 @@ function Content() {
   };
 
   const visible = items.filter((a) => a.status === tab);
+  const tabs = TAB_DEFS.map((t) => ({
+    ...t,
+    count: items.filter((a) => a.status === t.key).length,
+  }));
 
   return (
-    <AppShell breadcrumbs={[{ label: "Lamaran Mentor" }]}>
-      <div className="flex flex-col gap-4">
+    <AppShell>
+      <div className="flex flex-col gap-5">
         <PageHeader title="Lamaran Mentor" subtitle="Kelola lamaran mentoring yang kamu ajukan ke proyek." />
 
-        <div className="flex gap-2 overflow-x-auto border-b border-border">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={cn(
-                "whitespace-nowrap px-4 py-2 text-sm font-medium",
-                tab === t.key
-                  ? "border-b-2 border-[#a3ce00] text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <PillTabs tabs={tabs} value={tab} onChange={setTab} ariaLabel="Filter status lamaran" />
 
         {loading ? (
           <ListSkeleton rows={4} />
@@ -104,57 +92,65 @@ function Content() {
           />
         ) : (
           <div className="flex flex-col gap-3">
-            {visible.map((a) => (
-              <Card key={a.id}>
-                <CardContent className="flex flex-col gap-2 pt-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {a.project.title}
-                      </p>
+            {visible.map((a, i) => (
+              <article
+                key={a.id}
+                style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+                className="app-reveal flex flex-col gap-3 rounded-[20px] border border-border bg-card p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span
+                      className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]"
+                      aria-hidden="true"
+                    >
+                      <GraduationCap className="size-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-semibold tracking-tight text-foreground">{a.project.title}</p>
                       <p className="text-sm text-muted-foreground">
                         {a.project.umkm.name} · {a.project.category.name}
                       </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        Dilamar {new Date(a.createdAt).toLocaleDateString("id-ID")}
+                      </p>
                     </div>
-                    <StatusBadge status={a.status} />
                   </div>
-                  {a.message && (
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      &ldquo;{a.message}&rdquo;
-                    </p>
-                  )}
-                  <p className="text-sm text-muted-foreground">
-                    Dilamar: {new Date(a.createdAt).toLocaleDateString("id-ID")}
+                  <StatusBadge status={a.status} />
+                </div>
+                {a.message && (
+                  <p className="whitespace-pre-wrap rounded-xl bg-muted/50 px-3.5 py-2.5 text-sm text-foreground/80">
+                    &ldquo;{a.message}&rdquo;
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    render={<Link href={`/projects/${a.project.id}`} />}
+                  >
+                    Lihat Proyek
+                  </Button>
+                  {a.status === "ACCEPTED" && (
+                    <Button
+                      size="sm"
+                      render={<Link href={`/projects/${a.project.id}/applicants`} />}
+                    >
+                      Kelola Lamaran Beginner
+                    </Button>
+                  )}
+                  {a.status === "PENDING" && (
                     <Button
                       variant="outline"
                       size="sm"
-                      render={<Link href={`/projects/${a.project.id}`} />}
+                      disabled={busy}
+                      onClick={() => setWithdrawing(a)}
                     >
-                      Lihat Proyek
+                      Tarik Lamaran
                     </Button>
-                    {a.status === "ACCEPTED" && (
-                      <Button
-                        size="sm"
-                        render={<Link href={`/projects/${a.project.id}/applicants`} />}
-                      >
-                        Kelola Lamaran Beginner
-                      </Button>
-                    )}
-                    {a.status === "PENDING" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={busy}
-                        onClick={() => setWithdrawing(a)}
-                      >
-                        Tarik Lamaran
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                  )}
+                </div>
+              </article>
             ))}
           </div>
         )}
