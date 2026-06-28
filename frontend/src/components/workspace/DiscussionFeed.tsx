@@ -151,35 +151,30 @@ export function DiscussionFeed({
   return (
     <section className="flex min-h-[60vh] flex-col overflow-hidden rounded-[24px] border border-border bg-card">
       {/* Thread header */}
-      <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
-        <div className="flex items-center gap-3">
-          <span className="grid size-10 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]" aria-hidden="true">
-            <MessagesSquare className="size-5" />
-          </span>
-          <div className="min-w-0">
-            <h3 className="truncate font-semibold tracking-tight text-foreground">
-              {title ?? "Diskusi Tim"}
-            </h3>
-            <div className="flex flex-wrap items-center gap-2">
-              {category && (
-                <span
-                  className={cn(
-                    "rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                    DISCUSSION_CATEGORY_META[category].className
-                  )}
-                >
-                  {DISCUSSION_CATEGORY_META[category].label}
-                </span>
-              )}
-              <p className="text-xs text-muted-foreground tabular-nums">
-                {typeof count === "number" ? `${count} pesan` : "Percakapan tim"}
-              </p>
-            </div>
+      <header className="flex items-center gap-3 border-b border-border px-5 py-4">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]" aria-hidden="true">
+          <MessagesSquare className="size-5" />
+        </span>
+        <div className="min-w-0">
+          <h3 className="truncate font-semibold tracking-tight text-foreground">
+            {title ?? "Diskusi Tim"}
+          </h3>
+          <div className="flex flex-wrap items-center gap-2">
+            {category && (
+              <span
+                className={cn(
+                  "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                  DISCUSSION_CATEGORY_META[category].className
+                )}
+              >
+                {DISCUSSION_CATEGORY_META[category].label}
+              </span>
+            )}
+            <p className="text-xs text-muted-foreground tabular-nums">
+              {typeof count === "number" ? `${count} pesan` : "Percakapan tim"}
+            </p>
           </div>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
-          <span className="size-1.5 rounded-full bg-[#67c957]" /> Langsung
-        </span>
       </header>
 
       {/* Thread body */}
