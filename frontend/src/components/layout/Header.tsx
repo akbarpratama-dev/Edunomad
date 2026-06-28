@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Menu, Bell, LogOut, User as UserIcon, ChevronDown, ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -38,7 +39,15 @@ export function Header({ backHref }: { backHref?: string }) {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   return (
-    <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between px-4 lg:px-8">
+    <header
+      className={cn(
+        "pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between px-4 lg:px-8",
+        // Back pages reserve the header band, so fill it with a solid bar — keeps
+        // the back button readable over content that scrolls underneath. Other
+        // pages stay transparent so the page title can share the row with controls.
+        backHref && "border-b border-border bg-background/85 backdrop-blur-md"
+      )}
+    >
       {/* Left controls: mobile nav + optional back, same ghost-icon style as the right cluster */}
       <div className="pointer-events-auto flex items-center gap-1">
         <Button
