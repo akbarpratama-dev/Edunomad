@@ -87,7 +87,7 @@ function Content() {
   }));
 
   return (
-    <AppShell>
+    <AppShell backHref={`/projects/${id}`}>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
         <PageHeader
           title="Pelamar Beginner"

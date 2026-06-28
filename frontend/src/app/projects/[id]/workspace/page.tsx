@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, CalendarDays, Building2, GraduationCap, CalendarClock } from "lucide-react";
+import { CalendarDays, Building2, GraduationCap, CalendarClock } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
@@ -73,13 +72,7 @@ function WorkspaceInner() {
   return (
     <div className="flex flex-col gap-5">
       <div className="app-reveal">
-        <Link
-          href={`/projects/${id}`}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" /> Kembali ke detail proyek
-        </Link>
-        <div className="mt-2 flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">
             {project.title}
           </h1>
@@ -238,9 +231,11 @@ function MembersTab({ project }: { project: ProjectDetail }) {
 }
 
 export default function WorkspacePage() {
+  const params = useParams();
+  const id = params.id as string;
   return (
     <AuthGuard>
-      <AppShell>
+      <AppShell backHref={`/projects/${id}`}>
         <WorkspaceInner />
       </AppShell>
     </AuthGuard>

@@ -154,7 +154,7 @@ function CreateProjectContent() {
   };
 
   return (
-    <AppShell>
+    <AppShell backHref="/my-projects">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         <PageHeader
           title="Buat Proyek"

@@ -360,21 +360,21 @@ function Content() {
   useEffect(load, [id]);
 
   return (
-    <AppShell>
+    <AppShell backHref="/projects">
       <div className="mx-auto w-full max-w-5xl">
         {loading ? (
           <ListSkeleton rows={5} />
         ) : error ? (
           <ErrorState message={error} onAction={load} />
         ) : project ? (
-          // lg:pt-10 clears the ~56px floating header band so the right-column
-          // action card doesn't sit under the notif/profile controls; the matching
-          // sticky lg:top-10 keeps both columns aligned and clears the header on scroll.
-          <div className="grid gap-5 lg:grid-cols-[1fr_340px] lg:pt-10">
+          <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
             <div className="min-w-0">
               <ProjectDetailView project={project} />
             </div>
-            <aside className="flex flex-col gap-4 lg:sticky lg:top-10 lg:self-start">
+            {/* Content already starts below the header (AppShell pt-16), so the
+                sticky aside uses top-0: aligned with the left column at rest, and
+                pinned to the cleared content top while scrolling. */}
+            <aside className="flex flex-col gap-4 lg:sticky lg:top-0 lg:self-start">
               <ActionPanel project={project} reload={load} />
               {(project.status === "ACTIVE" || project.status === "AWAITING_COMPLETION") && (
                 <Button

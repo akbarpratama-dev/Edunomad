@@ -1,6 +1,7 @@
 "use client";
 
-import { Menu, Bell, LogOut, User as UserIcon, ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { Menu, Bell, LogOut, User as UserIcon, ChevronDown, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,7 +28,7 @@ const ROLE_LABEL: Record<Role, string> = {
 
 // Slim top bar — no breadcrumbs (each page owns its own title). Just the mobile
 // nav trigger on the left and the notification + profile controls on the right.
-export function Header() {
+export function Header({ backHref }: { backHref?: string }) {
   const mobileNavOpen = useUIStore((s) => s.modals["mobile-nav"] ?? false);
   const openModal = useUIStore((s) => s.openModal);
   const closeModal = useUIStore((s) => s.closeModal);
@@ -36,16 +37,24 @@ export function Header() {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   return (
-    <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-end px-4 lg:px-8">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="pointer-events-auto absolute left-3 top-1/2 -translate-y-1/2 md:hidden"
-        onClick={() => openModal("mobile-nav")}
-        aria-label="Open menu"
-      >
-        <Menu className="size-5" />
-      </Button>
+    <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between px-4 lg:px-8">
+      {/* Left controls: mobile nav + optional back, same ghost-icon style as the right cluster */}
+      <div className="pointer-events-auto flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => openModal("mobile-nav")}
+          aria-label="Open menu"
+        >
+          <Menu className="size-5" />
+        </Button>
+        {backHref && (
+          <Button variant="ghost" size="icon" aria-label="Kembali" render={<Link href={backHref} />}>
+            <ArrowLeft className="size-5" />
+          </Button>
+        )}
+      </div>
 
       <div className="pointer-events-auto flex items-center gap-2">
         <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
