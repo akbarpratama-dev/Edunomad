@@ -24,10 +24,34 @@ export interface DiscussionMember {
   user: { id: string; name: string; email: string; role: string };
 }
 
+// Phase 10 — forum categories (discussions.category). Labels in Indonesian.
+export type DiscussionCategory =
+  | "ANNOUNCEMENT"
+  | "QUESTION"
+  | "IDEA"
+  | "BLOCKER"
+  | "MENTOR_REVIEW"
+  | "UPDATE";
+
+export const DISCUSSION_CATEGORY_META: Record<
+  DiscussionCategory,
+  { label: string; className: string }
+> = {
+  ANNOUNCEMENT: { label: "Pengumuman", className: "bg-[#eef7d6] text-[#5f8c00]" },
+  QUESTION: { label: "Pertanyaan", className: "bg-sky-100 text-sky-700" },
+  IDEA: { label: "Ide", className: "bg-violet-100 text-violet-700" },
+  BLOCKER: { label: "Kendala", className: "bg-rose-100 text-rose-700" },
+  MENTOR_REVIEW: { label: "Review Mentor", className: "bg-amber-100 text-amber-700" },
+  UPDATE: { label: "Pembaruan", className: "bg-zinc-100 text-zinc-700" },
+};
+
 export interface Discussion {
   id: string;
   type: DiscussionType;
   projectId: string | null;
+  title?: string | null;
+  category?: DiscussionCategory | null;
+  isPinned?: boolean;
   members: DiscussionMember[];
   _count?: { messages: number };
   updatedAt?: string;
@@ -47,9 +71,18 @@ export const discussionApi = {
     return res.data.data;
   },
 
-  async createGroupDiscussion(projectId: string, members?: string[]): Promise<Discussion> {
-    const res = await apiClient.post<Envelope<Discussion>>(`/projects/${projectId}/discussions`, {
-      members,
+  async createGroupDiscussion(
+    projectId: string,
+    input: { title: string; category: DiscussionCategory; members?: string[] }
+  ): Promise<Discussion> {
+    const res = await apiClient.post<Envelope<Discussion>>(`/projects/${projectId}/discussions`, input);
+    return res.data.data;
+  },
+
+  // Phase 10 — pin/unpin a forum topic (senior lead / UMKM owner).
+  async pinDiscussion(discussionId: string, pinned: boolean): Promise<Discussion> {
+    const res = await apiClient.post<Envelope<Discussion>>(`/discussions/${discussionId}/pin`, {
+      pinned,
     });
     return res.data.data;
   },

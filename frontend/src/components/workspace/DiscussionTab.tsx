@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
@@ -12,13 +12,36 @@ import {
   CalendarClock,
   GraduationCap,
   ArrowRight,
+  Pin,
+  PinOff,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { discussionApi, type Discussion } from "@/services/discussionApi";
+import {
+  discussionApi,
+  DISCUSSION_CATEGORY_META,
+  type Discussion,
+  type DiscussionCategory,
+} from "@/services/discussionApi";
 import {
   projectApi,
   PROJECT_STATUS_META,
@@ -33,6 +56,15 @@ const ROLE_BADGE: Record<string, { label: string; className: string }> = {
   UMKM: { label: "UMKM", className: "bg-amber-100 text-amber-700" },
   ADMIN: { label: "Admin", className: "bg-zinc-200 text-zinc-700" },
 };
+
+const CATEGORY_ORDER: DiscussionCategory[] = [
+  "ANNOUNCEMENT",
+  "QUESTION",
+  "IDEA",
+  "BLOCKER",
+  "MENTOR_REVIEW",
+  "UPDATE",
+];
 
 const AVATAR_TONES = [
   "bg-[#201f31] text-white",
@@ -67,7 +99,9 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
   const [discussions, setDiscussions] = useState<Discussion[] | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
+  const [filter, setFilter] = useState<DiscussionCategory | "ALL">("ALL");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [pinningId, setPinningId] = useState<string | null>(null);
 
   const canCreate =
     (appUser?.role === "SENIOR" && project.senior?.id === appUser.id) ||
@@ -92,27 +126,55 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
     load();
   }, [load]);
 
-  const create = async () => {
-    setCreating(true);
+  const create = async (title: string, category: DiscussionCategory) => {
+    const activeIds = members.filter((m) => m.status === "ACTIVE").map((m) => m.user.id);
+    const created = await discussionApi.createGroupDiscussion(project.id, {
+      title,
+      category,
+      members: activeIds,
+    });
+    toast.success("Diskusi dibuat");
+    setFilter("ALL");
+    await load();
+    setActiveId(created.id); // open the new topic (after load, overrides cur ?? …)
+  };
+
+  const togglePin = async (d: Discussion) => {
+    setPinningId(d.id);
     try {
-      const activeIds = members.filter((m) => m.status === "ACTIVE").map((m) => m.user.id);
-      const created = await discussionApi.createGroupDiscussion(project.id, activeIds);
-      toast.success("Diskusi dibuat");
-      setActiveId(created.id);
+      await discussionApi.pinDiscussion(d.id, !d.isPinned);
       await load();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Gagal membuat diskusi");
+      toast.error(err instanceof ApiError ? err.message : "Gagal menyematkan diskusi");
     } finally {
-      setCreating(false);
+      setPinningId(null);
     }
   };
 
   const activeMembers = members.filter((m) => m.status === "ACTIVE");
-  // Team = senior + active members, de-duplicated by user id.
   const team = [
     ...(project.senior ? [{ id: project.senior.id, name: project.senior.name, role: "SENIOR" }] : []),
     ...activeMembers.map((m) => ({ id: m.user.id, name: m.user.name, role: "BEGINNER" })),
   ].filter((t, i, arr) => arr.findIndex((x) => x.id === t.id) === i);
+
+  // Categories actually present (for the filter row).
+  const presentCategories = useMemo(() => {
+    const set = new Set<DiscussionCategory>();
+    (discussions ?? []).forEach((d) => d.category && set.add(d.category));
+    return CATEGORY_ORDER.filter((c) => set.has(c));
+  }, [discussions]);
+
+  const visible = useMemo(
+    () => (discussions ?? []).filter((d) => filter === "ALL" || d.category === filter),
+    [discussions, filter]
+  );
+
+  // Keep an in-view discussion selected when the filter changes.
+  useEffect(() => {
+    if (visible.length && !visible.some((d) => d.id === activeId)) {
+      setActiveId(visible[0].id);
+    }
+  }, [visible, activeId]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -126,7 +188,7 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
           </p>
         </div>
         {canCreate && (
-          <Button onClick={create} disabled={creating}>
+          <Button onClick={() => setCreateOpen(true)}>
             <Plus className="size-4" /> Buat Diskusi Baru
           </Button>
         )}
@@ -138,112 +200,233 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
       {discussions === null ? (
         <p className="text-sm text-muted-foreground">Memuat diskusi…</p>
       ) : discussions.length === 0 ? (
-        <EmptyDiscussions canCreate={canCreate} creating={creating} onCreate={create} />
+        <EmptyDiscussions canCreate={canCreate} onCreate={() => setCreateOpen(true)} />
       ) : (
-        <div className="grid gap-5 lg:grid-cols-[290px_minmax(0,1fr)] xl:grid-cols-[290px_minmax(0,1fr)_280px]">
-          {/* Discussion list */}
-          <div className="flex flex-col gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Daftar Diskusi
-            </p>
-            {discussions.map((d, i) => (
-              <DiscussionListCard
-                key={d.id}
-                index={i}
-                discussion={d}
-                active={d.id === activeId}
-                onSelect={() => setActiveId(d.id)}
-              />
-            ))}
-            {canCreate && (
-              <button
-                onClick={create}
-                disabled={creating}
-                className="flex items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-[#a3ce00] hover:text-foreground disabled:opacity-60"
-              >
-                <Plus className="size-4" /> Diskusi Baru
-              </button>
-            )}
-          </div>
-
-          {/* Active thread */}
-          {activeId && (
-            <DiscussionFeed
-              key={activeId}
-              channelId={activeId}
-              count={discussions.find((d) => d.id === activeId)?._count?.messages}
-            />
+        <>
+          {/* Category filter chips (real) */}
+          {presentCategories.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <FilterChip label="Semua" active={filter === "ALL"} onClick={() => setFilter("ALL")} />
+              {presentCategories.map((c) => (
+                <FilterChip
+                  key={c}
+                  label={DISCUSSION_CATEGORY_META[c].label}
+                  active={filter === c}
+                  onClick={() => setFilter(c)}
+                />
+              ))}
+            </div>
           )}
 
-          {/* Right rail (xl only — key info already in summary card) */}
-          <aside className="hidden flex-col gap-4 xl:flex">
-            <RailCard icon={<CheckCircle2 className="size-4" />} title="Milestone Berikutnya">
-              {project.milestones.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Belum ada milestone.</p>
+          <div className="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_280px]">
+            {/* Discussion list */}
+            <div className="flex flex-col gap-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Daftar Diskusi
+              </p>
+              {visible.length === 0 ? (
+                <p className="rounded-2xl border border-dashed border-border py-8 text-center text-xs text-muted-foreground">
+                  Tidak ada diskusi pada kategori ini.
+                </p>
               ) : (
-                <ul className="flex flex-col gap-3">
-                  {project.milestones.slice(0, 5).map((m) => {
-                    const done = m.status === "COMPLETED";
-                    return (
-                      <li key={m.id} className="flex items-start gap-2.5">
-                        {done ? (
-                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#5da316]" />
-                        ) : (
-                          <Circle className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p
+                visible.map((d) => (
+                  <DiscussionListCard
+                    key={d.id}
+                    discussion={d}
+                    active={d.id === activeId}
+                    canPin={canCreate}
+                    pinning={pinningId === d.id}
+                    onSelect={() => setActiveId(d.id)}
+                    onTogglePin={() => togglePin(d)}
+                  />
+                ))
+              )}
+              {canCreate && (
+                <button
+                  onClick={() => setCreateOpen(true)}
+                  className="flex items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-[#a3ce00] hover:text-foreground"
+                >
+                  <Plus className="size-4" /> Diskusi Baru
+                </button>
+              )}
+            </div>
+
+            {/* Active thread */}
+            {activeId && (
+              <DiscussionFeed
+                key={activeId}
+                channelId={activeId}
+                count={discussions.find((d) => d.id === activeId)?._count?.messages}
+                title={discussions.find((d) => d.id === activeId)?.title ?? undefined}
+                category={discussions.find((d) => d.id === activeId)?.category ?? undefined}
+              />
+            )}
+
+            {/* Right rail (xl only) */}
+            <aside className="hidden flex-col gap-4 xl:flex">
+              <RailCard icon={<CheckCircle2 className="size-4" />} title="Milestone Berikutnya">
+                {project.milestones.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Belum ada milestone.</p>
+                ) : (
+                  <ul className="flex flex-col gap-3">
+                    {project.milestones.slice(0, 5).map((m) => {
+                      const done = m.status === "COMPLETED";
+                      return (
+                        <li key={m.id} className="flex items-start gap-2.5">
+                          {done ? (
+                            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#5da316]" />
+                          ) : (
+                            <Circle className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className={cn(
+                                "text-sm",
+                                done ? "text-muted-foreground line-through" : "font-medium text-foreground"
+                              )}
+                            >
+                              {m.title}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {new Date(m.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+                            </p>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </RailCard>
+
+              <RailCard icon={<GraduationCap className="size-4" />} title="Anggota Tim">
+                {team.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Belum ada anggota.</p>
+                ) : (
+                  <ul className="flex flex-col gap-3">
+                    {team.map((t) => {
+                      const badge = ROLE_BADGE[t.role];
+                      return (
+                        <li key={t.id} className="flex items-center gap-2.5">
+                          <span
                             className={cn(
-                              "text-sm",
-                              done ? "text-muted-foreground line-through" : "font-medium text-foreground"
+                              "grid size-8 shrink-0 place-items-center rounded-full text-[12px] font-bold",
+                              toneFor(t.id)
                             )}
                           >
-                            {m.title}
-                          </p>
-                          <p className="text-[11px] text-muted-foreground">
-                            {new Date(m.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
-                          </p>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </RailCard>
-
-            <RailCard icon={<GraduationCap className="size-4" />} title="Anggota Tim">
-              {team.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Belum ada anggota.</p>
-              ) : (
-                <ul className="flex flex-col gap-3">
-                  {team.map((t) => {
-                    const badge = ROLE_BADGE[t.role];
-                    return (
-                      <li key={t.id} className="flex items-center gap-2.5">
-                        <span
-                          className={cn(
-                            "grid size-8 shrink-0 place-items-center rounded-full text-[12px] font-bold",
-                            toneFor(t.id)
-                          )}
-                        >
-                          {initials(t.name)}
-                        </span>
-                        <span className="flex-1 truncate text-sm font-medium">{t.name}</span>
-                        {badge && (
-                          <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", badge.className)}>
-                            {badge.label}
+                            {initials(t.name)}
                           </span>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </RailCard>
-          </aside>
-        </div>
+                          <span className="flex-1 truncate text-sm font-medium">{t.name}</span>
+                          {badge && (
+                            <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", badge.className)}>
+                              {badge.label}
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </RailCard>
+            </aside>
+          </div>
+        </>
       )}
+
+      <CreateDiscussionDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={create} />
     </div>
+  );
+}
+
+// ── Create discussion dialog ─────────────────────────────────────────────────
+function CreateDiscussionDialog({
+  open,
+  onOpenChange,
+  onCreate,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  onCreate: (title: string, category: DiscussionCategory) => Promise<void>;
+}) {
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState<DiscussionCategory | "">("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (title.trim().length < 3) return toast.error("Judul minimal 3 karakter");
+    if (!category) return toast.error("Pilih kategori diskusi");
+    setBusy(true);
+    try {
+      await onCreate(title.trim(), category);
+      setTitle("");
+      setCategory("");
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal membuat diskusi");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !busy && onOpenChange(o)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Buat Diskusi Baru</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="disc-title">Judul Diskusi</Label>
+            <Input
+              id="disc-title"
+              placeholder="cth. Review Landing Page Minggu Ini"
+              value={title}
+              maxLength={255}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="disc-cat">Kategori</Label>
+            <Select value={category} onValueChange={(v) => setCategory((v ?? "") as DiscussionCategory)}>
+              <SelectTrigger id="disc-cat">
+                <SelectValue placeholder="Pilih kategori" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORY_ORDER.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {DISCUSSION_CATEGORY_META[c].label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
+            Batal
+          </Button>
+          <Button onClick={submit} disabled={busy}>
+            {busy ? "Membuat…" : "Buat Diskusi"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+        active
+          ? "border-[#201f31] bg-[#201f31] text-white"
+          : "border-border bg-card text-muted-foreground hover:border-[#a3ce00] hover:text-foreground"
+      )}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -335,65 +518,80 @@ function AvatarStack({ team }: { team: { id: string; name: string }[] }) {
   );
 }
 
-// ── Discussion list card (real: message count + last activity + members) ──────
+// ── Discussion list card (real title + category + pin) ───────────────────────
 function DiscussionListCard({
   discussion,
-  index,
   active,
+  canPin,
+  pinning,
   onSelect,
+  onTogglePin,
 }: {
   discussion: Discussion;
-  index: number;
   active: boolean;
+  canPin: boolean;
+  pinning: boolean;
   onSelect: () => void;
+  onTogglePin: () => void;
 }) {
-  const memberCount = discussion.members?.length ?? 0;
   const msgCount = discussion._count?.messages ?? 0;
+  const cat = discussion.category ? DISCUSSION_CATEGORY_META[discussion.category] : null;
   return (
-    <button
-      onClick={onSelect}
-      aria-pressed={active}
+    <div
       className={cn(
-        "flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left transition-[border-color,background-color,box-shadow] duration-200",
+        "group/disc relative rounded-2xl border p-3.5 transition-[border-color,background-color,box-shadow] duration-200",
         active
           ? "border-[#a3ce00] bg-[#f6fae9] shadow-[0_8px_24px_rgba(32,31,49,0.06)]"
           : "border-border bg-card hover:border-foreground/15 hover:bg-muted/40"
       )}
     >
-      <span
-        className={cn(
-          "grid size-10 shrink-0 place-items-center rounded-xl",
-          active ? "bg-[#d8f277] text-[#0b0b0b]" : "bg-muted text-muted-foreground"
-        )}
-        aria-hidden="true"
-      >
-        <MessagesSquare className="size-5" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-foreground">
-          Diskusi Tim{discussion._count ? ` ${index + 1}` : ""}
-        </p>
-        <p className="truncate text-xs text-muted-foreground">
-          {memberCount} anggota · {timeAgo(discussion.updatedAt) || "Aktif"}
-        </p>
-      </div>
-      <span className="grid min-w-7 shrink-0 place-items-center rounded-full bg-muted px-1.5 text-xs font-semibold tabular-nums text-muted-foreground">
-        {msgCount}
-      </span>
-    </button>
+      <button onClick={onSelect} aria-pressed={active} className="flex w-full items-start gap-3 text-left">
+        <span
+          className={cn(
+            "grid size-10 shrink-0 place-items-center rounded-xl",
+            active ? "bg-[#d8f277] text-[#0b0b0b]" : "bg-muted text-muted-foreground"
+          )}
+          aria-hidden="true"
+        >
+          <MessagesSquare className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 truncate text-sm font-semibold text-foreground">
+            {discussion.isPinned && <Pin className="size-3 shrink-0 text-[#5f8c00]" />}
+            {discussion.title ?? "Diskusi Tim"}
+          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            {cat && (
+              <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", cat.className)}>
+                {cat.label}
+              </span>
+            )}
+            <span className="text-[11px] text-muted-foreground">
+              {timeAgo(discussion.updatedAt) || "Aktif"}
+            </span>
+          </div>
+        </div>
+        <span className="grid min-w-7 shrink-0 place-items-center rounded-full bg-muted px-1.5 text-xs font-semibold tabular-nums text-muted-foreground">
+          {msgCount}
+        </span>
+      </button>
+      {canPin && (
+        <button
+          onClick={onTogglePin}
+          disabled={pinning}
+          title={discussion.isPinned ? "Lepas sematan" : "Sematkan"}
+          aria-label={discussion.isPinned ? "Lepas sematan" : "Sematkan"}
+          className="absolute right-2 top-2 hidden size-7 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-card hover:text-foreground group-hover/disc:grid disabled:opacity-50"
+        >
+          {discussion.isPinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
+        </button>
+      )}
+    </div>
   );
 }
 
 // ── Empty state ──────────────────────────────────────────────────────────────
-function EmptyDiscussions({
-  canCreate,
-  creating,
-  onCreate,
-}: {
-  canCreate: boolean;
-  creating: boolean;
-  onCreate: () => void;
-}) {
+function EmptyDiscussions({ canCreate, onCreate }: { canCreate: boolean; onCreate: () => void }) {
   return (
     <div className="app-reveal flex flex-col items-center gap-3 rounded-[24px] border border-dashed border-border py-16 text-center">
       <span className="grid size-14 place-items-center rounded-2xl bg-[#eef7d6] text-[#5f8c00]" aria-hidden="true">
@@ -406,7 +604,7 @@ function EmptyDiscussions({
         </p>
       </div>
       {canCreate ? (
-        <Button onClick={onCreate} disabled={creating} className="mt-1">
+        <Button onClick={onCreate} className="mt-1">
           <Plus className="size-4" /> Buat Diskusi Baru
         </Button>
       ) : (

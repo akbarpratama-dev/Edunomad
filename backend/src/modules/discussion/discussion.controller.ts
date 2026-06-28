@@ -19,9 +19,24 @@ export const discussionController = {
       const discussion = await discussionService.createGroupDiscussion(
         req.user!.id,
         req.params.id,
+        { title: req.body.title, category: req.body.category },
         req.body.members
       );
       res.status(201).json(successResponse(discussion, "Discussion created"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // POST /discussions/:id/pin
+  async pin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const discussion = await discussionService.pinDiscussion(
+        req.user!.id,
+        req.params.id,
+        req.body.pinned
+      );
+      res.json(successResponse(discussion, "Discussion updated"));
     } catch (err) {
       next(err);
     }

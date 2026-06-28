@@ -8,7 +8,12 @@ import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { discussionApi, type DiscussionMessage } from "@/services/discussionApi";
+import {
+  discussionApi,
+  DISCUSSION_CATEGORY_META,
+  type DiscussionMessage,
+  type DiscussionCategory,
+} from "@/services/discussionApi";
 
 // Role → display badge (DESIGN.md: Mentor green accent-tint, Mahasiswa sky, UMKM amber).
 const ROLE_BADGE: Record<string, { label: string; className: string }> = {
@@ -53,7 +58,17 @@ function ToolButton({ icon: Icon, label }: { icon: typeof Paperclip; label: stri
 // Group-discussion thread: premium comment cards (avatar + name + role badge +
 // body + time) with a composer. Mentor (SENIOR) messages get the green accent.
 // Live via Supabase Realtime (re-pull on INSERT; server resolves sender + RLS).
-export function DiscussionFeed({ channelId, count }: { channelId: string; count?: number }) {
+export function DiscussionFeed({
+  channelId,
+  count,
+  title,
+  category,
+}: {
+  channelId: string;
+  count?: number;
+  title?: string;
+  category?: DiscussionCategory;
+}) {
   const myId = useAuthStore((s) => s.user?.id);
   const myName = useAuthStore((s) => s.appUser?.name ?? "");
   const [messages, setMessages] = useState<DiscussionMessage[] | null>(null);
@@ -141,14 +156,28 @@ export function DiscussionFeed({ channelId, count }: { channelId: string; count?
           <span className="grid size-10 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]" aria-hidden="true">
             <MessagesSquare className="size-5" />
           </span>
-          <div>
-            <h3 className="font-semibold tracking-tight text-foreground">Diskusi Tim</h3>
-            <p className="text-xs text-muted-foreground tabular-nums">
-              {typeof count === "number" ? `${count} pesan` : "Percakapan tim"}
-            </p>
+          <div className="min-w-0">
+            <h3 className="truncate font-semibold tracking-tight text-foreground">
+              {title ?? "Diskusi Tim"}
+            </h3>
+            <div className="flex flex-wrap items-center gap-2">
+              {category && (
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                    DISCUSSION_CATEGORY_META[category].className
+                  )}
+                >
+                  {DISCUSSION_CATEGORY_META[category].label}
+                </span>
+              )}
+              <p className="text-xs text-muted-foreground tabular-nums">
+                {typeof count === "number" ? `${count} pesan` : "Percakapan tim"}
+              </p>
+            </div>
           </div>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
           <span className="size-1.5 rounded-full bg-[#67c957]" /> Langsung
         </span>
       </header>

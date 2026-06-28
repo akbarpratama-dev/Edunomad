@@ -298,6 +298,12 @@ model Discussion {
   id        String   @id @default(uuid()) @db.Uuid
   projectId String?  @map("project_id") @db.Uuid
   type      String   @db.VarChar(20)
+  // Phase 10 (Discussion Forum Upgrade): forum metadata for GROUP discussions;
+  // null for DIRECT chats. category allowed values validated at the Zod layer
+  // (ANNOUNCEMENT|QUESTION|IDEA|BLOCKER|MENTOR_REVIEW|UPDATE).
+  title     String?  @db.VarChar(255)
+  category  String?  @db.VarChar(30)
+  isPinned  Boolean  @default(false) @map("is_pinned")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
 

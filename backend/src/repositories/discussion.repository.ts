@@ -32,7 +32,8 @@ export const discussionRepository = {
         members: { include: memberUserSelect },
         _count: { select: { messages: true } },
       },
-      orderBy: { updatedAt: "desc" },
+      // Pinned topics float to the top, then most-recent activity.
+      orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
     });
   },
 
@@ -49,11 +50,16 @@ export const discussionRepository = {
       .then((c) => c > 0);
   },
 
-  // Create a GROUP discussion + its members in one transaction (Workflow 7).
-  createGroup(projectId: string, memberUserIds: string[]) {
+  // Create a GROUP discussion (forum topic) + its members in one transaction
+  // (Workflow 7). Phase 10: persists title + category.
+  createGroup(
+    projectId: string,
+    memberUserIds: string[],
+    meta: { title: string; category: string }
+  ) {
     return prisma.$transaction(async (tx) => {
       const discussion = await tx.discussion.create({
-        data: { projectId, type: DiscussionType.GROUP },
+        data: { projectId, type: DiscussionType.GROUP, title: meta.title, category: meta.category },
       });
       await tx.discussionMember.createMany({
         data: memberUserIds.map((userId) => ({ discussionId: discussion.id, userId })),
@@ -63,6 +69,15 @@ export const discussionRepository = {
         where: { id: discussion.id },
         include: { members: { include: memberUserSelect }, _count: { select: { messages: true } } },
       });
+    });
+  },
+
+  // Phase 10: pin/unpin a forum topic.
+  updatePin(id: string, isPinned: boolean) {
+    return prisma.discussion.update({
+      where: { id },
+      data: { isPinned },
+      include: { members: { include: memberUserSelect }, _count: { select: { messages: true } } },
     });
   },
 

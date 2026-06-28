@@ -27,10 +27,11 @@ export const discussionService = {
 
   // POST /projects/:id/discussions — only the assigned senior or the UMKM owner
   // may create (docs/06: Senior/UMKM "Create discussions"; beginners "join").
-  // `title` is ignored (no column). Membership = creator + senior + validated members.
+  // Phase 10: persists title + category. Membership = creator + senior + members.
   async createGroupDiscussion(
     userId: string,
     projectId: string,
+    meta: { title: string; category: string },
     memberIds: string[] = []
   ) {
     const project = await projectRepository.findRawById(projectId);
@@ -57,7 +58,21 @@ export const discussionService = {
     if (project.seniorId) memberSet.add(project.seniorId); // senior auto-included
     for (const id of memberIds) memberSet.add(id);
 
-    return discussionRepository.createGroup(projectId, [...memberSet]);
+    return discussionRepository.createGroup(projectId, [...memberSet], meta);
+  },
+
+  // POST /discussions/:id/pin — only the project's senior lead or UMKM owner.
+  async pinDiscussion(userId: string, discussionId: string, pinned: boolean) {
+    const discussion = await discussionRepository.findById(discussionId);
+    if (!discussion || discussion.type !== DiscussionType.GROUP || !discussion.projectId) {
+      throw new NotFoundError("Discussion not found");
+    }
+    const project = await projectRepository.findRawById(discussion.projectId);
+    if (!project) throw new NotFoundError("Project not found");
+    if (project.seniorId !== userId && project.umkmId !== userId) {
+      throw new ForbiddenError("Only the project's senior or UMKM owner can pin a discussion");
+    }
+    return discussionRepository.updatePin(discussionId, pinned);
   },
 
   // GET /discussions/:id/messages — discussion members only.
