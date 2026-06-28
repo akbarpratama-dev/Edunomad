@@ -136,15 +136,9 @@ function Content() {
                   </div>
                   <StatusBadge status={item.status} />
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" render={<Link href={`/projects/${item.id}`} />}>
-                    Lihat Detail
-                  </Button>
+                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
                   {item.status === "DRAFT" && (
                     <>
-                      <Button size="sm" disabled={busy} onClick={() => submit(item)}>
-                        Kirim untuk Ditinjau
-                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
@@ -153,8 +147,14 @@ function Content() {
                       >
                         Hapus
                       </Button>
+                      <Button size="sm" disabled={busy} onClick={() => submit(item)}>
+                        Kirim untuk Ditinjau
+                      </Button>
                     </>
                   )}
+                  <Button variant="outline" size="sm" render={<Link href={`/projects/${item.id}`} />}>
+                    Lihat Detail
+                  </Button>
                 </div>
               </article>
             ))}
