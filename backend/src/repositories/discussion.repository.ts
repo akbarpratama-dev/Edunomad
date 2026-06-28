@@ -51,7 +51,7 @@ export const discussionRepository = {
   },
 
   // Create a GROUP discussion (forum topic) + its members in one transaction
-  // (Workflow 7). Phase 10: persists title + category.
+  // (Workflow 7). Phase 12: persists title + category.
   createGroup(
     projectId: string,
     memberUserIds: string[],
@@ -72,7 +72,7 @@ export const discussionRepository = {
     });
   },
 
-  // Phase 10: pin/unpin a forum topic.
+  // Phase 12: pin/unpin a forum topic.
   updatePin(id: string, isPinned: boolean) {
     return prisma.discussion.update({
       where: { id },

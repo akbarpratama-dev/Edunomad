@@ -24,7 +24,7 @@ export interface DiscussionMember {
   user: { id: string; name: string; email: string; role: string };
 }
 
-// Phase 10 — forum categories (discussions.category). Labels in Indonesian.
+// Phase 12 — forum categories (discussions.category). Labels in Indonesian.
 export type DiscussionCategory =
   | "ANNOUNCEMENT"
   | "QUESTION"
@@ -79,7 +79,7 @@ export const discussionApi = {
     return res.data.data;
   },
 
-  // Phase 10 — pin/unpin a forum topic (senior lead / UMKM owner).
+  // Phase 12 — pin/unpin a forum topic (senior lead / UMKM owner).
   async pinDiscussion(discussionId: string, pinned: boolean): Promise<Discussion> {
     const res = await apiClient.post<Envelope<Discussion>>(`/discussions/${discussionId}/pin`, {
       pinned,

@@ -1,6 +1,17 @@
 # Decisions
 
 Date:
+2026-06-28 (Phase 12 — Discussion Forum Upgrade, user-approved scope override)
+
+Decision (D-P12-1):
+User meminta upgrade backend agar fitur forum diskusi (dari mockup reference) benar-benar berfungsi. Docs MVP MENGUNCI diskusi sebagai group-chat datar (07 Workflow 7) + EKSPLISIT "Discussion attachment not supported in MVP" (03 baris 495, 06 baris 588). Saya STOP dulu, jelaskan tabrakan dengan locked docs + MVP-protection, lalu via AskUserQuestion user pilih **"Full forum (incl. attachments)"** → otorisasi override resmi + amandemen locked docs. Dikerjakan sebagai **Phase 12** (BUKAN 10 — "Phase 10: Dashboards/Polish" sudah ada di task-breakdown; hindari tabrakan nomor) di branch `feature/phase-10-discussion-forum`, bertahap 12.1–12.5: 12.1 title+category+pin (DONE), 12.2 threaded replies, 12.3 reactions, 12.4 attachments (Supabase Storage — override aturan "no attachments"), 12.5 views.
+12.1 detail: migration `phase12_discussion_forum_metadata` (discussions += title VARCHAR(255), category VARCHAR(30), is_pinned BOOLEAN) di-apply ke LIVE DB via Supabase MCP + dicatat di `_prisma_migrations` (prisma history sinkron). category VARCHAR divalidasi Zod (ANNOUNCEMENT|QUESTION|IDEA|BLOCKER|MENTOR_REVIEW|UPDATE) — konsisten konvensi "no DB enum". Create discussion kini WAJIB title+category (senior lead/UMKM owner); list pinned-first; POST /discussions/:id/pin. Frontend Diskusi tab: dialog create, filter chips kategori REAL, badge+judul di kartu & header thread, toggle pin.
+Reason:
+Locked docs menang KECUALI user secara eksplisit menyetujui mengubahnya. User memilih full-forum → saya wajib (a) override hanya yang disetujui, (b) amandemen SEMUA doc terkait (03/04/06/07 + task-breakdown) menandai aturan lama superseded, (c) bangun bertahap supaya tiap irisan verified, bukan one-shot besar yang rapuh.
+Impact:
+Diskusi naik dari chat → forum. Docs 03/04/06/07 di-amandemen (aturan "no attachments MVP" ditandai superseded oleh 12.4). Migration live + prisma history sinkron. Nomor migration/komentar kode internal sempat "phase10" lalu di-renumber ke "phase12" (folder, checksum, _prisma_migrations row di-update). Sisa 12.2–12.5 menyusul. Phase 8 Artifact tetap pending.
+
+Date:
 2026-06-28 (Unify-UI sweep — one premium design language)
 
 Decision (D-UI-11):

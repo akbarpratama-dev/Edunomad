@@ -576,6 +576,12 @@ SUBMITTED
 - ✅ Assigned senior auto-included
 - ✅ Accepted beginners included
 
+**Phase 12 (Discussion Forum Upgrade — user-approved) additions:**
+- ✅ Create a discussion topic (title + category): **senior lead or UMKM owner only** (beginners post messages/replies, not new topics)
+- ✅ Pin / unpin a topic: **senior lead or UMKM owner only** (`POST /discussions/:id/pin`)
+- ✅ Reply to a message (12.2), react to a message (12.3), attach file/image/link (12.4): **any discussion member**
+- ✅ Topic categories: `ANNOUNCEMENT|QUESTION|IDEA|BLOCKER|MENTOR_REVIEW|UPDATE`
+
 #### Direct Messages
 
 **Access:** Project members ↔ Senior
@@ -585,7 +591,7 @@ SUBMITTED
 - ✅ Send DM between member and senior
 
 **Not Supported:**
-- ❌ File attachments (MVP)
+- ❌ ~~File attachments (MVP)~~ — **superseded by Phase 12.4** (forum upgrade): file/image/link attachments supported on discussion messages via Supabase Storage. (DM attachments remain optional/out-of-scope; forum group messages only.)
 - ❌ Group voice/video calls
 
 ---

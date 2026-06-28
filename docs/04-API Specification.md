@@ -807,16 +807,38 @@ GET /projects/:id/discussions
 POST /projects/:id/discussions
 ```
 
-**Access:** Authenticated  
-**Description:** Create new group discussion for project.  
-**Body:**
+**Access:** Senior lead or UMKM owner (Phase 12)  
+**Description:** Create new group discussion (forum topic) for project.  
+**Body (Phase 12 — `title` + `category` now required & persisted):**
 ```json
 {
-  "title": "string",
+  "title": "string (3–255)",
+  "category": "ANNOUNCEMENT|QUESTION|IDEA|BLOCKER|MENTOR_REVIEW|UPDATE",
   "members": ["uuid"]
 }
 ```
 **Response:** Created discussion object
+
+---
+
+#### Pin / Unpin Discussion (Phase 12)
+```
+POST /discussions/:id/pin
+```
+
+**Access:** Senior lead or UMKM owner  
+**Description:** Pin or unpin a forum topic (pinned topics sort first).  
+**Body:**
+```json
+{ "pinned": true }
+```
+**Response:** Updated discussion object
+
+> **Phase 12 (Discussion Forum Upgrade — user-approved) roadmap of new endpoints:**
+> 12.2 `POST /discussions/:id/messages` accepts optional `parent_id` (threaded reply);
+> 12.3 `POST /messages/:id/reactions` + `DELETE /messages/:id/reactions` (toggle);
+> 12.4 `POST /messages/:id/attachments` (+ Supabase Storage signed upload) and
+> attachments embedded in message payloads; 12.5 `POST /discussions/:id/view` (track unique views).
 
 ---
 

@@ -1370,6 +1370,39 @@
 6. **Update task status** setelah selesai (`[x]`)
 7. **Update memory files** sesuai CLAUDE.MD (current-status, development-log, next-tasks, decisions)
 
+---
+
+# PHASE 12: Discussion Forum Upgrade (post-MVP, user-approved)
+
+> Approved override of the original minimal discussion model (flat group chat).
+> Upgrades GROUP discussions into a full forum. Distinct from "PHASE 10:
+> Dashboards, Profiles & Polish" above. Migration label: `phase12_discussion_forum_metadata`.
+> Decision D-P12-1. Built incrementally on branch `feature/phase-10-discussion-forum`.
+
+## 12.1 — Titles, Categories & Pin ✅ DONE & verified
+- Migration: `discussions` += `title` VARCHAR(255), `category` VARCHAR(30), `is_pinned` BOOLEAN.
+- `constants/discussionCategory` (ANNOUNCEMENT|QUESTION|IDEA|BLOCKER|MENTOR_REVIEW|UPDATE).
+- Create requires+persists title+category (senior lead / UMKM owner); list pinned-first;
+  `POST /discussions/:id/pin` (senior lead / UMKM owner).
+- Frontend Diskusi tab: create dialog (title+category), real category filter chips,
+  category badges + titles on cards & thread header, pin/unpin toggle.
+
+## 12.2 — Threaded Replies (NEXT)
+- `discussion_messages.parent_id` (self FK, one level). `POST /discussions/:id/messages`
+  accepts optional `parent_id`. Feed renders nested replies; "Balas" composer.
+
+## 12.3 — Reactions
+- New `message_reactions` (message_id, user_id, emoji; unique). Toggle endpoints + realtime + counts.
+
+## 12.4 — Attachments (Supabase Storage)
+- New `discussion_attachments` (message_id, type FILE|IMAGE|LINK, url, file_path, file_name,
+  file_size). Supabase Storage bucket + signed upload + RLS; store URL/path only. Overrides
+  the "no attachments in MVP" rule (docs/03, docs/06 amended).
+
+## 12.5 — Views
+- New `discussion_views` (discussion_id, user_id; unique). `POST /discussions/:id/view`;
+  expose unique view count on topics.
+
 ### Dependency Rules:
 
 - Phase 0 harus selesai sebelum phase lain

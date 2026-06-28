@@ -4,7 +4,7 @@ import { DISCUSSION_CATEGORIES } from "../constants/discussionCategory";
 export const discussionIdParamSchema = z.object({ id: z.string().uuid() });
 export const userIdParamSchema = z.object({ id: z.string().uuid() });
 
-// POST /projects/:id/discussions. Phase 10 (docs/03 amended): GROUP discussions
+// POST /projects/:id/discussions. Phase 12 (docs/03 amended): GROUP discussions
 // are forum topics — `title` + `category` are required and persisted. `members`
 // are participant user ids added alongside the auto-included project senior.
 export const createGroupDiscussionSchema = z.object({

@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-28 (Redesign Diskusi + Phase 12 backend forum upgrade 12.1)
+
+Prompt:
+(1) "redesign page diskusi proyek jadi seperti [reference forum]" + detail panjang (Linear/Slack/Notion). (2) "ok, buat phase upgrade backend ini agar works". (3) Pilih scope via AskUserQuestion → "Full forum (incl. attachments)".
+
+Hasil:
+(1) Diskusi tab di-redesign premium master-detail (data nyata) → merged main b821b5c; fitur tanpa backend dihilangkan jujur. (2)+(3) Cek locked docs: diskusi sengaja minimal + "no attachments MVP" eksplisit → STOP, jelaskan, user otorisasi override. Bangun **Phase 12** (renumber dari 10) bertahap di feature/phase-10-discussion-forum. **12.1 (title+category+pin) SELESAI & verified E2E**: migration live (discussions +3 kolom) + prisma sync, backend layered (create wajib title+category, pin endpoint senior/UMKM), frontend (dialog create, filter chips kategori real, badge+judul, pin). DB persist confirmed. Docs 03/04/06/07 + task-breakdown di-amandemen (D-P12-1). Sisa 12.2 threaded replies, 12.3 reactions, 12.4 attachments (Supabase Storage), 12.5 views. Branch belum merge.
+
+---
+
+Date:
 2026-06-28 (Unify-UI sweep — batches 2–6, SELESAI)
 
 Prompt:

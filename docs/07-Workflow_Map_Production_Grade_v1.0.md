@@ -373,6 +373,14 @@ Project Flow:
 
 ## Workflow 7: Discussion
 
+> **Phase 12 amendment (Discussion Forum Upgrade — user-approved).** Group
+> discussions are upgraded from a flat team chat into a **forum board**: each
+> topic has a **title** + **category** (Pengumuman/Pertanyaan/Ide/Kendala/Review
+> Mentor/Pembaruan) and can be **pinned** (senior lead / UMKM owner). Within a
+> topic, members post messages that support **threaded replies**, **reactions**,
+> and **attachments** (file/image/link via Supabase Storage), and topics track
+> **unique views**. Delivered in sub-phases 12.1–12.5. Access/roles per docs/06.
+
 ### Group Discussion
 
 ```

@@ -453,12 +453,26 @@ deleted_at TIMESTAMP NULL
 | `id` | UUID | Primary Key |
 | `project_id` | UUID FK NULL | Foreign Key to projects |
 | `type` | VARCHAR(20) | Discussion type (see below) |
+| `title` | VARCHAR(255) NULL | **Phase 12:** forum topic title (GROUP; null for DIRECT) |
+| `category` | VARCHAR(30) NULL | **Phase 12:** forum category (see below; null for DIRECT) |
+| `is_pinned` | BOOLEAN | **Phase 12:** topic pinned to top (default false) |
 | `created_at` | TIMESTAMP | Creation date |
 | `updated_at` | TIMESTAMP | Last update date |
 
 **Types:**
 - `GROUP`
 - `DIRECT`
+
+**Categories (Phase 12 — Discussion Forum Upgrade; VARCHAR, validated at Zod):**
+- `ANNOUNCEMENT` (Pengumuman) · `QUESTION` (Pertanyaan) · `IDEA` (Ide) · `BLOCKER` (Kendala) · `MENTOR_REVIEW` (Review Mentor) · `UPDATE` (Pembaruan)
+
+> **Phase 12 amendment:** the original MVP discussion model was a flat group chat.
+> The user explicitly approved upgrading discussions into a full forum. Columns
+> above were added in sub-phase 12.1 (migration `phase10_discussion_forum_metadata`).
+> Subsequent sub-phases add: 12.2 threaded replies (`discussion_messages.parent_id`),
+> 12.3 reactions (`message_reactions` table), 12.4 attachments (`discussion_attachments`
+> table + Supabase Storage — **overrides the "no attachments in MVP" rule below**),
+> 12.5 views (`discussion_views` table).
 
 ---
 
@@ -492,7 +506,7 @@ deleted_at TIMESTAMP NULL
 | `created_at` | TIMESTAMP | Creation date |
 | `updated_at` | TIMESTAMP | Last update date |
 
-**Business Rule:** Discussion attachment not supported in MVP
+**Business Rule:** ~~Discussion attachment not supported in MVP~~ — **superseded by Phase 12.4** (Discussion Forum Upgrade, user-approved): attachments (file/image/link) are supported via the `discussion_attachments` table + Supabase Storage (store URL/path only).
 
 ---
 

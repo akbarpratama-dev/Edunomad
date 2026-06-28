@@ -27,7 +27,7 @@ export const discussionService = {
 
   // POST /projects/:id/discussions — only the assigned senior or the UMKM owner
   // may create (docs/06: Senior/UMKM "Create discussions"; beginners "join").
-  // Phase 10: persists title + category. Membership = creator + senior + members.
+  // Phase 12: persists title + category. Membership = creator + senior + members.
   async createGroupDiscussion(
     userId: string,
     projectId: string,

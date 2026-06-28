@@ -29,7 +29,7 @@ router.post(
   discussionController.sendMessage
 );
 
-// Phase 10: pin/unpin a forum topic (senior lead / UMKM owner — enforced in service).
+// Phase 12: pin/unpin a forum topic (senior lead / UMKM owner — enforced in service).
 router.post(
   "/:id/pin",
   authMiddleware,

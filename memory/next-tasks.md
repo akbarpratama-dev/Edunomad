@@ -1,4 +1,20 @@
 ============================================================
+⚡ ACTIVE HANDOFF (2026-06-28 #10) — PHASE 12 Discussion Forum Upgrade IN PROGRESS (12.1 done)
+============================================================
+main = b821b5c (Phase 0–7 + unify-UI + Diskusi tab premium redesign). Branch aktif `feature/phase-10-discussion-forum` (belum merge). D-P12-1: user otorisasi FULL forum upgrade (override locked "no attachments MVP").
+
+✅ 12.1 (title+category+pin) SELESAI & verified E2E. Migration `phase12_discussion_forum_metadata` di LIVE DB (discussions += title/category/is_pinned) + prisma history sync. Backend: constants/discussionCategory; create wajib title+category (senior lead/UMKM owner); list pinned-first; POST /discussions/:id/pin. Frontend Diskusi tab: dialog create, filter chips kategori real, badge+judul, toggle pin. Docs 03/04/06/07 + task-breakdown amended. backend build 0, tsc 0, console 0, DB persist confirmed.
+
+➡️ LANJUTKAN sub-phase berikut (urut), tiap irisan: migration via Supabase MCP apply_migration + record di _prisma_migrations (checksum sha256) + prisma generate; backend layered; frontend wiring; verify E2E + tsc/build 0; commit. Cek task-breakdown §PHASE 12.
+- **12.2 Threaded Replies**: `discussion_messages.parent_id` (self FK 1 level). sendMessage terima parent_id; feed render balasan nested + composer "Balas". Realtime sudah ada.
+- **12.3 Reactions**: tabel baru `message_reactions` (message_id, user_id, emoji; unique). Toggle endpoint + count di feed + realtime.
+- **12.4 Attachments**: tabel `discussion_attachments` (message_id, type FILE|IMAGE|LINK, url, file_path, file_name, file_size) + Supabase Storage bucket + signed upload + RLS; simpan URL/path saja (FILE STORAGE rule). Override "no attachments MVP" (sudah di-amandemen di docs). Frontend composer toolbar attach/image kini fungsional (ganti placeholder "Segera hadir").
+- **12.5 Views**: tabel `discussion_views` (discussion_id, user_id; unique). POST /discussions/:id/view; tampilkan unique view count.
+Setelah semua: merge feature/phase-10-discussion-forum → main. Test: p4-senior/umkm/beginner + p43-admin pw TestPass123!; project ACTIVE a1a1a1a1-…0005 (sudah ada diskusi "Review Landing Page Minggu Ini"/MENTOR_REVIEW pinned).
+⚠️ tsc TS2882 CSS-ambient = transient saat .next/types regen → settle ~2s, re-run.
+
+--- arsip handoff #9 ---
+============================================================
 ⚡ ACTIVE HANDOFF (2026-06-28 #9) — RESUME PHASE 8 ARTIFACT (unify-UI sweep SELESAI)
 ============================================================
 main = ee0f045 (Phase 0–7 + unify-UI sweep penuh: semua halaman authed satu bahasa desain premium). Tidak ada branch unify aktif lagi — `redesign/unify-ui` sudah merged habis ke main (batch 1–6).

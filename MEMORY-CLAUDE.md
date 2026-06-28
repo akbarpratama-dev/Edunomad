@@ -1,7 +1,7 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-06-28 (main = ee0f045. Phase 0-7 DONE + **UNIFY-UI SWEEP COMPLETE** — all authed pages now share ONE premium design language via shared primitives Card/PageHeader/PillTabs/EmptyState + app-reveal; 6 batches merged to main; auth /auth/* untouched; D-UI-11. NEXT = resume PHASE 8 Artifact on feature/phase-8-artifacts 1e6a4a3 + completion gate D-P4.3-3).
+> Last updated: 2026-06-28 (main = b821b5c. Phase 0-7 + UNIFY-UI sweep + **Diskusi tab premium redesign** all merged. NOW: **PHASE 12 Discussion Forum Upgrade IN PROGRESS** on branch `feature/phase-10-discussion-forum` (D-P12-1, user-approved full-forum override of locked "no attachments MVP"). **12.1 title+category+pin DONE & verified**; remaining 12.2 threaded replies / 12.3 reactions / 12.4 attachments(Supabase Storage) / 12.5 views. See next-tasks handoff #10. Phase 8 Artifact still pending.)
 
 ## â­ Landing page (marketing `/`) â ADDED 2026-06-23, verified
 Built from user's Figma ("Premium SaaS Landing Page", file `nMFbzuPNcRcKgFVvMEFfaj`, node 5:2) via Figma MCP (source of truth) + skills impeccable/emil-design-eng/ui-ux-pro-max. 11 sections in `frontend/src/components/landing/` (motion.tsx, primitives.tsx, header.tsx, footer.tsx, sections/{hero,problem,how-it-works,feature-grid,project-showcase,portfolio,impact,testimonials,faq,cta}.tsx); composed in `app/page.tsx` (replaced the old `/`âlogin redirect). Stack: `motion` ^12.40.0 (NEW frontend dep, frontend/ only), animation library; landing palette scoped as `ln-*` Tailwind tokens in globals.css `@theme` (in-app docs/08 design system untouched); Manrope (via --font-sans, Black weight). [font InterâManrope across whole app, 2026-06-24] Motion = hero floating-card cluster + glow + entrance, scroll reveal/stagger (SSR-safe mounted-gate so never ships blank), CountUp stats, FAQ accordion, hover lifts â all `prefers-reduced-motion` aware. Header auth-aware (Masuk/Gabung vs Buka Dashboard). Verified: tsc clean, `npm run build` 0 errors (`/` prerendered STATIC), every section browser-screenshotted faithful to Figma. Decisions D-LP-1..4.
@@ -64,6 +64,23 @@ DRAFT â PENDING_REVIEW â RECRUITING (approve) / REJECTED â ACTIVE
 ## 📌 NEXT-SESSION INIT PROMPT
 
 ```
+Lanjutkan EduNomad: PHASE 12 — Discussion Forum Upgrade (lanjut sub-phase 12.2+).
+Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-06-28 #10"
++ DESIGN.md + task-breakdown §PHASE 12 + decisions D-P12-1.
+
+main = b821b5c. Branch aktif feature/phase-10-discussion-forum (belum merge). 12.1 (title+category+pin) SELESAI
+& verified. LANJUTKAN bertahap: 12.2 threaded replies (discussion_messages.parent_id) → 12.3 reactions
+(message_reactions table) → 12.4 attachments (discussion_attachments + Supabase Storage bucket+signed upload+RLS,
+override "no attachments MVP") → 12.5 views (discussion_views table). Tiap irisan: migration via Supabase MCP
+apply_migration + record _prisma_migrations (sha256 checksum) + prisma generate; backend layered
+(validator→repo→service→controller→routes); frontend wiring (DiscussionTab/DiscussionFeed/discussionApi);
+verify E2E browser + tsc/build 0 + console 0; commit. Setelah semua → merge ke main.
+Test: p4-senior/umkm/beginner + p43-admin pw TestPass123!; project ACTIVE a1a1a1a1-0000-4000-8000-000000000005
+(ada diskusi "Review Landing Page Minggu Ini"/MENTOR_REVIEW pinned). tsc TS2882 CSS = transient, settle ~2s re-run.
+
+(Pending lain: PHASE 8 Artifact di feature/phase-8-artifacts 1e6a4a3.)
+
+=== arsip init prompt #9 (Phase 8) ===
 Lanjutkan EduNomad: resume PHASE 8 — Artifact System (UI label "Sertifikat", D-UI-7).
 Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-06-28 #9"
 + DESIGN.md + task-breakdown §8.
