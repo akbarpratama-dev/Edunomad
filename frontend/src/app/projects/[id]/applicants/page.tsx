@@ -13,7 +13,7 @@ import { PillTabs } from "@/components/common/PillTabs";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { EmptyState } from "@/components/common/EmptyState";
-import { initials } from "@/components/dashboard/dashboardKit";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { ApiError } from "@/lib/apiClient";
 import { projectApi, type ProjectDetail } from "@/services/projectApi";
 import {
@@ -116,12 +116,10 @@ function Content() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-start gap-3">
-                    <span
-                      className="grid size-11 shrink-0 place-items-center rounded-full bg-sky-200 text-sm font-bold text-sky-900"
-                      aria-hidden="true"
-                    >
-                      {initials(app.beginner.name)}
-                    </span>
+                    <UserAvatar
+                      name={app.beginner.name}
+                      className="size-11 shrink-0 bg-sky-200 text-sm font-bold text-sky-900"
+                    />
                     <div className="min-w-0">
                       <p className="font-semibold tracking-tight text-foreground">{app.beginner.name}</p>
                       <p className="text-sm text-muted-foreground">

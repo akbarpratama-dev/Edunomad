@@ -8,6 +8,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import {
   discussionApi,
   DISCUSSION_CATEGORY_META,
@@ -34,10 +35,6 @@ function toneFor(id: string) {
   let h = 0;
   for (const c of id) h = (h * 31 + c.charCodeAt(0)) % AVATAR_TONES.length;
   return AVATAR_TONES[h];
-}
-
-function initials(name: string) {
-  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 }
 
 // Disabled composer affordance — kept honest (no upload/emoji backend yet).
@@ -203,15 +200,10 @@ export function DiscussionFeed({
                       : "bg-card"
                 )}
               >
-                <span
-                  className={cn(
-                    "grid size-9 shrink-0 place-items-center rounded-full text-[13px] font-bold",
-                    toneFor(m.sender.id)
-                  )}
-                  aria-hidden="true"
-                >
-                  {initials(m.sender.name)}
-                </span>
+                <UserAvatar
+                  name={m.sender.name}
+                  className={cn("size-9 shrink-0 text-[13px] font-bold", toneFor(m.sender.id))}
+                />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold text-foreground">{m.sender.name}</span>
@@ -245,12 +237,10 @@ export function DiscussionFeed({
       <form onSubmit={submit} className="border-t border-border p-4">
         <div className="flex flex-col gap-2 rounded-2xl border border-border bg-secondary/60 p-2 focus-within:border-[#a3ce00]">
           <div className="flex items-start gap-2.5">
-            <span
-              className="mt-1 grid size-8 shrink-0 place-items-center rounded-full bg-[#d8f277] text-[12px] font-bold text-[#0b0b0b]"
-              aria-hidden="true"
-            >
-              {initials(myName) || "?"}
-            </span>
+            <UserAvatar
+              name={myName || "?"}
+              className="mt-1 size-8 shrink-0 bg-[#d8f277] text-[12px] font-bold text-[#0b0b0b]"
+            />
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}

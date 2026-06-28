@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { cn } from "@/lib/utils";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { projectApi, type Category, type ProjectListItem, type ProjectStatus } from "@/services/projectApi";
 import { fetchSkills, type Skill } from "@/services/skillApi";
 
@@ -470,9 +471,16 @@ function ProjectCard({ p, i }: { p: ProjectListItem; i: number }) {
 
         <div className="mt-auto flex items-center justify-between border-t border-border pt-3">
           <span className="flex items-center gap-2 text-xs">
-            <span className="grid size-6 place-items-center rounded-full bg-[#d8f277] text-[10px] font-bold text-[#0b0b0b]">
-              {p.senior ? initials(p.senior.name) : "—"}
-            </span>
+            {p.senior ? (
+              <UserAvatar
+                name={p.senior.name}
+                className="size-6 text-[10px] font-bold text-[#0b0b0b]"
+              />
+            ) : (
+              <span className="grid size-6 place-items-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground">
+                —
+              </span>
+            )}
             <span className="truncate text-muted-foreground">{p.senior?.name ?? "Belum ada mentor"}</span>
           </span>
           <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#5f8c00]">

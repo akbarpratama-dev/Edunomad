@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import {
   discussionApi,
   DISCUSSION_CATEGORY_META,
@@ -77,9 +78,6 @@ function toneFor(id: string) {
   let h = 0;
   for (const c of id) h = (h * 31 + c.charCodeAt(0)) % AVATAR_TONES.length;
   return AVATAR_TONES[h];
-}
-function initials(name: string) {
-  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 }
 function timeAgo(iso?: string) {
   if (!iso) return "";
@@ -307,14 +305,10 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
                       const badge = ROLE_BADGE[t.role];
                       return (
                         <li key={t.id} className="flex items-center gap-2.5">
-                          <span
-                            className={cn(
-                              "grid size-8 shrink-0 place-items-center rounded-full text-[12px] font-bold",
-                              toneFor(t.id)
-                            )}
-                          >
-                            {initials(t.name)}
-                          </span>
+                          <UserAvatar
+                            name={t.name}
+                            className={cn("size-8 shrink-0 text-[12px] font-bold", toneFor(t.id))}
+                          />
                           <span className="flex-1 truncate text-sm font-medium">{t.name}</span>
                           {badge && (
                             <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", badge.className)}>
@@ -494,16 +488,11 @@ function AvatarStack({ team }: { team: { id: string; name: string }[] }) {
     <div className="flex items-center">
       <div className="flex -space-x-2">
         {shown.map((t) => (
-          <span
+          <UserAvatar
             key={t.id}
-            title={t.name}
-            className={cn(
-              "grid size-8 place-items-center rounded-full text-[11px] font-bold ring-2 ring-card",
-              toneFor(t.id)
-            )}
-          >
-            {initials(t.name)}
-          </span>
+            name={t.name}
+            className={cn("size-8 text-[11px] font-bold ring-2 ring-card", toneFor(t.id))}
+          />
         ))}
         {extra > 0 && (
           <span className="grid size-8 place-items-center rounded-full bg-muted text-[11px] font-bold text-muted-foreground ring-2 ring-card">

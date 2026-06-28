@@ -14,7 +14,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { EmptyState } from "@/components/common/EmptyState";
-import { initials } from "@/components/dashboard/dashboardKit";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { ApiError } from "@/lib/apiClient";
 import { projectApi, type ProjectDetail } from "@/services/projectApi";
 import {
@@ -121,12 +121,10 @@ function Content() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-start gap-3">
-                    <span
-                      className="grid size-11 shrink-0 place-items-center rounded-full bg-[#d8f277] text-sm font-bold text-[#0b0b0b]"
-                      aria-hidden="true"
-                    >
-                      {initials(app.senior.name)}
-                    </span>
+                    <UserAvatar
+                      name={app.senior.name}
+                      className="size-11 shrink-0 bg-[#d8f277] text-sm font-bold text-[#0b0b0b]"
+                    />
                     <div className="min-w-0">
                       <p className="font-semibold tracking-tight text-foreground">{app.senior.name}</p>
                       {app.senior.profile?.headline && (

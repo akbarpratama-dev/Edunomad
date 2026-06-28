@@ -5,6 +5,7 @@ import { Menu, Bell, LogOut, User as UserIcon, ChevronDown, ArrowLeft } from "lu
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -69,11 +70,18 @@ export function Header({ backHref }: { backHref?: string }) {
         <DropdownMenu>
           <DropdownMenuTrigger>
             <span className="flex cursor-pointer items-center gap-2 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-muted">
-              <Avatar className="size-8">
-                <AvatarFallback className="bg-[#d8f277] text-[12px] font-bold text-[#0b0b0b]">
-                  {appUser?.name?.charAt(0).toUpperCase() ?? <UserIcon className="size-4" />}
-                </AvatarFallback>
-              </Avatar>
+              {appUser ? (
+                <UserAvatar
+                  name={appUser.name}
+                  className="size-8 bg-[#d8f277] text-[12px] font-bold text-[#0b0b0b]"
+                />
+              ) : (
+                <Avatar className="size-8">
+                  <AvatarFallback className="bg-[#d8f277] text-[#0b0b0b]">
+                    <UserIcon className="size-4" />
+                  </AvatarFallback>
+                </Avatar>
+              )}
               {appUser && (
                 <span className="hidden text-left leading-tight sm:block">
                   <span className="block text-sm font-semibold text-foreground">{appUser.name}</span>

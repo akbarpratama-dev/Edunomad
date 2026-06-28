@@ -18,7 +18,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { PillTabs } from "@/components/common/PillTabs";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { EmptyState } from "@/components/common/EmptyState";
-import { initials } from "@/components/dashboard/dashboardKit";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { Inbox } from "lucide-react";
 import { adminApi, type VerificationRequestItem } from "@/services/adminApi";
 
@@ -102,12 +102,10 @@ function Content() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-start gap-3">
-                    <span
-                      className="grid size-11 shrink-0 place-items-center rounded-full bg-violet-200 text-sm font-bold text-violet-900"
-                      aria-hidden="true"
-                    >
-                      {initials(item.user.name)}
-                    </span>
+                    <UserAvatar
+                      name={item.user.name}
+                      className="size-11 shrink-0 bg-violet-200 text-sm font-bold text-violet-900"
+                    />
                     <div className="min-w-0">
                       <p className="flex items-center gap-2 font-semibold tracking-tight text-foreground">
                         {item.user.name}
