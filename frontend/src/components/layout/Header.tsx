@@ -30,7 +30,7 @@ const ROLE_LABEL: Record<Role, string> = {
 
 // Slim top bar — no breadcrumbs (each page owns its own title). Just the mobile
 // nav trigger on the left and the notification + profile controls on the right.
-export function Header({ backHref }: { backHref?: string }) {
+export function Header({ backHref, scrolled }: { backHref?: string; scrolled?: boolean }) {
   const mobileNavOpen = useUIStore((s) => s.modals["mobile-nav"] ?? false);
   const openModal = useUIStore((s) => s.openModal);
   const closeModal = useUIStore((s) => s.closeModal);
@@ -41,11 +41,12 @@ export function Header({ backHref }: { backHref?: string }) {
   return (
     <header
       className={cn(
-        "pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between px-4 lg:px-8",
-        // Back pages reserve the header band, so fill it with a solid bar — keeps
-        // the back button readable over content that scrolls underneath. Other
-        // pages stay transparent so the page title can share the row with controls.
-        backHref && "border-b border-border bg-background/85 backdrop-blur-md"
+        "pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between px-4 lg:px-8 transition-colors duration-200",
+        // Fill the bar (matching page bg, frosted) once content scrolls under it,
+        // so the notif/profile/back controls stay readable instead of overlapping
+        // the scrolled content. Back pages keep it filled (band is reserved); other
+        // pages stay transparent at the top so the title can share the row.
+        (backHref || scrolled) && "border-b border-border bg-background/85 backdrop-blur-md"
       )}
     >
       {/* Left controls: mobile nav + optional back, same ghost-icon style as the right cluster */}
