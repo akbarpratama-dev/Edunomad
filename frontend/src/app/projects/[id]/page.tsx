@@ -367,11 +367,14 @@ function Content() {
         ) : error ? (
           <ErrorState message={error} onAction={load} />
         ) : project ? (
-          <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
+          // lg:pt-10 clears the ~56px floating header band so the right-column
+          // action card doesn't sit under the notif/profile controls; the matching
+          // sticky lg:top-10 keeps both columns aligned and clears the header on scroll.
+          <div className="grid gap-5 lg:grid-cols-[1fr_340px] lg:pt-10">
             <div className="min-w-0">
               <ProjectDetailView project={project} />
             </div>
-            <aside className="flex flex-col gap-4 lg:sticky lg:top-2 lg:self-start">
+            <aside className="flex flex-col gap-4 lg:sticky lg:top-10 lg:self-start">
               <ActionPanel project={project} reload={load} />
               {(project.status === "ACTIVE" || project.status === "AWAITING_COMPLETION") && (
                 <Button
