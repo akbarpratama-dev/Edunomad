@@ -136,35 +136,36 @@ function Content() {
                   </div>
                   <StatusBadge status={item.status} />
                 </div>
-                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
-                  {item.status === "DRAFT" && (
-                    <>
+                {(item.status === "DRAFT" ||
+                  item.status === "ACTIVE" ||
+                  item.status === "AWAITING_COMPLETION") && (
+                  <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
+                    {item.status === "DRAFT" && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={busy}
+                          onClick={() => setDeleting(item)}
+                        >
+                          Hapus
+                        </Button>
+                        <Button size="sm" disabled={busy} onClick={() => submit(item)}>
+                          Kirim untuk Ditinjau
+                        </Button>
+                      </>
+                    )}
+                    {(item.status === "ACTIVE" || item.status === "AWAITING_COMPLETION") && (
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={busy}
-                        onClick={() => setDeleting(item)}
+                        render={<Link href={`/my-projects/${item.id}/workspace?tab=discussion`} />}
                       >
-                        Hapus
+                        <MessageSquare className="size-4" /> Diskusi
                       </Button>
-                      <Button size="sm" disabled={busy} onClick={() => submit(item)}>
-                        Kirim untuk Ditinjau
-                      </Button>
-                    </>
-                  )}
-                  {(item.status === "ACTIVE" || item.status === "AWAITING_COMPLETION") && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      render={<Link href={`/my-projects/${item.id}/workspace?tab=discussion`} />}
-                    >
-                      <MessageSquare className="size-4" /> Diskusi
-                    </Button>
-                  )}
-                  <Button variant="outline" size="sm" render={<Link href={`/my-projects/${item.id}`} />}>
-                    Lihat Detail
-                  </Button>
-                </div>
+                    )}
+                  </div>
+                )}
               </article>
             ))}
           </div>
@@ -251,25 +252,20 @@ function SeniorView() {
                   </div>
                   <StatusBadge status={item.status} />
                 </div>
-                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
-                  <Button variant="outline" size="sm" render={<Link href={`/my-projects/${item.id}`} />}>
-                    Lihat Detail
-                  </Button>
-                  {(item.status === "ACTIVE" || item.status === "AWAITING_COMPLETION") && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        render={<Link href={`/my-projects/${item.id}/workspace?tab=discussion`} />}
-                      >
-                        <MessageSquare className="size-4" /> Diskusi
-                      </Button>
-                      <Button size="sm" render={<Link href={`/my-projects/${item.id}/workspace`} />}>
-                        Buka Workspace
-                      </Button>
-                    </>
-                  )}
-                </div>
+                {(item.status === "ACTIVE" || item.status === "AWAITING_COMPLETION") && (
+                  <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      render={<Link href={`/my-projects/${item.id}/workspace?tab=discussion`} />}
+                    >
+                      <MessageSquare className="size-4" /> Diskusi
+                    </Button>
+                    <Button size="sm" render={<Link href={`/my-projects/${item.id}/workspace`} />}>
+                      Buka Workspace
+                    </Button>
+                  </div>
+                )}
               </article>
             ))}
           </div>
