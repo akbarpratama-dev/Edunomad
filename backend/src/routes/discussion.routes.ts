@@ -41,6 +41,14 @@ router.post(
   discussionController.pin
 );
 
+// Phase 12.5: record a unique view (members only — enforced in service).
+router.post(
+  "/:id/view",
+  authMiddleware,
+  validateRequest({ params: discussionIdParamSchema }),
+  discussionController.recordView
+);
+
 // Phase 12.4: signed upload URL for an attachment (members only — enforced in service).
 router.post(
   "/:id/attachments/upload-url",

@@ -56,7 +56,7 @@ export interface Discussion {
   category?: DiscussionCategory | null;
   isPinned?: boolean;
   members: DiscussionMember[];
-  _count?: { messages: number };
+  _count?: { messages: number; views?: number };
   updatedAt?: string;
 }
 
@@ -138,6 +138,11 @@ export const discussionApi = {
       }
     );
     return res.data.data;
+  },
+
+  // Phase 12.5 — record a unique view of a discussion (idempotent).
+  async recordView(discussionId: string): Promise<void> {
+    await apiClient.post(`/discussions/${discussionId}/view`).catch(() => undefined);
   },
 
   // Phase 12.4 — mint a signed upload URL for an attachment.

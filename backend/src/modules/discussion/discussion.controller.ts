@@ -75,6 +75,16 @@ export const discussionController = {
     }
   },
 
+  // POST /discussions/:id/view
+  async recordView(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await discussionService.recordView(req.user!.id, req.params.id);
+      res.json(successResponse(result, "View recorded"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
   // POST /discussions/:id/attachments/upload-url
   async createUploadUrl(req: Request, res: Response, next: NextFunction) {
     try {

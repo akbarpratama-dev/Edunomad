@@ -1,5 +1,14 @@
 # Development Log
 
+2026-07-01 (PHASE 12.5 — Views; PHASE 12 SELESAI)
+Task: unique view count per topik diskusi (sub-phase terakhir Phase 12).
+- MIGRATION `20260701030000_phase12_5_views` (Supabase MCP → LIVE DB; _prisma_migrations 4f223735…): tabel discussion_views (id, discussion_id FK CASCADE, user_id FK CASCADE, created_at) + unique(discussion_id,user_id). Tanpa RLS/publication (count dibaca via Express). prisma generate.
+- schema.prisma: model DiscussionView (relasi discussion saja) + Discussion.views[].
+- BACKEND (build 0): repo recordView (upsert compound discussionId_userId, idempotent) + _count.views ditambah di semua list discussion (listGroupForUser/createGroup/updatePin). service.recordView (assertMember). controller.recordView. route POST /discussions/:id/view (authMiddleware, tanpa requireVerified — view = read-side).
+- FRONTEND (tsc 0): discussionApi Discussion._count.views? + recordView(discussionId) (best-effort). DiscussionTab: effect recordView(activeId) → load() (refresh count) saat topik dibuka; pass views ke DiscussionFeed. DiscussionFeed header: "{count} pesan · {views} dilihat".
+- VERIFIED E2E browser (p4-senior): buka topik → header "1 pesan · 1 dilihat" (view tercatat unik). console 0. Decision D-P12-7.
+- **PHASE 12 SELESAI (12.1–12.5).** NEXT: merge feature/phase-10-discussion-forum → main (+ tetap ada page.tsx landing M sejak lama; Phase 8 Artifact masih pending). UNCOMMITTED→commit.
+
 2026-07-01 (PHASE 12.4 — Attachments, Supabase Storage)
 Task: lampiran file/gambar/link di message diskusi (override locked "no attachments MVP", docs sudah diamandemen).
 - STORAGE: bucket privat `discussion-attachments` (10MB limit) via execute_sql insert storage.buckets. Akses HANYA via signed URL (admin service role) → tak perlu storage.objects RLS.

@@ -54,7 +54,7 @@ export const discussionRepository = {
       },
       include: {
         members: { include: memberUserSelect },
-        _count: { select: { messages: true } },
+        _count: { select: { messages: true, views: true } },
       },
       // Pinned topics float to the top, then most-recent activity.
       orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
@@ -91,7 +91,7 @@ export const discussionRepository = {
       });
       return tx.discussion.findUnique({
         where: { id: discussion.id },
-        include: { members: { include: memberUserSelect }, _count: { select: { messages: true } } },
+        include: { members: { include: memberUserSelect }, _count: { select: { messages: true, views: true } } },
       });
     });
   },
@@ -101,7 +101,7 @@ export const discussionRepository = {
     return prisma.discussion.update({
       where: { id },
       data: { isPinned },
-      include: { members: { include: memberUserSelect }, _count: { select: { messages: true } } },
+      include: { members: { include: memberUserSelect }, _count: { select: { messages: true, views: true } } },
     });
   },
 
@@ -190,6 +190,15 @@ export const discussionRepository = {
     }
     await prisma.messageReaction.create({ data: { messageId, discussionId, userId, emoji } });
     return { reacted: true };
+  },
+
+  // Phase 12.5: record a unique view (idempotent per discussion+user).
+  recordView(discussionId: string, userId: string) {
+    return prisma.discussionView.upsert({
+      where: { discussionId_userId: { discussionId, userId } },
+      create: { discussionId, userId },
+      update: {},
+    });
   },
 
   // Insert a message (or reply when parentId set) with optional attachments

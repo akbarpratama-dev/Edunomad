@@ -220,11 +220,13 @@ function Bubble({
 export function DiscussionFeed({
   channelId,
   count,
+  views,
   title,
   category,
 }: {
   channelId: string;
   count?: number;
+  views?: number;
   title?: string;
   category?: DiscussionCategory;
 }) {
@@ -393,6 +395,7 @@ export function DiscussionFeed({
             )}
             <p className="text-xs text-muted-foreground tabular-nums">
               {typeof count === "number" ? `${count} pesan` : "Percakapan tim"}
+              {typeof views === "number" && views > 0 ? ` · ${views} dilihat` : ""}
             </p>
           </div>
         </div>

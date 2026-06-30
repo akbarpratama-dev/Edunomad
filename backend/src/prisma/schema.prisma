@@ -311,8 +311,22 @@ model Discussion {
 
   members  DiscussionMember[]
   messages DiscussionMessage[]
+  views    DiscussionView[]
 
   @@map("discussions")
+}
+
+// Phase 12.5: one row per (discussion, user) — unique-viewer view tracking.
+model DiscussionView {
+  id           String   @id @default(uuid()) @db.Uuid
+  discussionId String   @map("discussion_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+
+  @@unique([discussionId, userId])
+  @@map("discussion_views")
 }
 
 model DiscussionMember {

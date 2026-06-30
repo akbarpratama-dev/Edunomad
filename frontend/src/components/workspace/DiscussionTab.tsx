@@ -168,6 +168,12 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
     }
   }, [visible, activeId]);
 
+  // Phase 12.5: record a unique view of the opened topic, then refresh counts.
+  useEffect(() => {
+    if (!activeId) return;
+    discussionApi.recordView(activeId).then(() => load());
+  }, [activeId, load]);
+
   return (
     <div className="flex flex-col gap-5">
       {/* Header */}
@@ -243,6 +249,7 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
                 key={activeId}
                 channelId={activeId}
                 count={discussions.find((d) => d.id === activeId)?._count?.messages}
+                views={discussions.find((d) => d.id === activeId)?._count?.views}
                 title={discussions.find((d) => d.id === activeId)?.title ?? undefined}
                 category={discussions.find((d) => d.id === activeId)?.category ?? undefined}
               />

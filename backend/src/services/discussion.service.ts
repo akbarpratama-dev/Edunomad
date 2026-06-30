@@ -100,6 +100,13 @@ export const discussionService = {
     return { data, meta: { page, limit, total, lastPage: Math.max(1, Math.ceil(total / limit)) } };
   },
 
+  // Phase 12.5 — POST /discussions/:id/view (members only). Idempotent.
+  async recordView(userId: string, discussionId: string) {
+    await assertDiscussionMember(discussionId, userId);
+    await discussionRepository.recordView(discussionId, userId);
+    return { ok: true };
+  },
+
   // Phase 12.4 — POST /discussions/:id/attachments/upload-url (members only).
   async getUploadUrl(userId: string, discussionId: string, fileName: string) {
     await assertDiscussionMember(discussionId, userId);
