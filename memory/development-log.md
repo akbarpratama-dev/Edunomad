@@ -1,5 +1,16 @@
 # Development Log
 
+2026-07-01 (PHASE 12.4 — Attachments, Supabase Storage)
+Task: lampiran file/gambar/link di message diskusi (override locked "no attachments MVP", docs sudah diamandemen).
+- STORAGE: bucket privat `discussion-attachments` (10MB limit) via execute_sql insert storage.buckets. Akses HANYA via signed URL (admin service role) → tak perlu storage.objects RLS.
+- MIGRATION `20260701020000_phase12_4_attachments` (Supabase MCP → LIVE DB; _prisma_migrations 9b08f56c…): tabel discussion_attachments (id, message_id FK CASCADE, type VARCHAR(10) FILE|IMAGE|LINK, url TEXT, file_path TEXT, file_name, file_size INT, created_at) + index message_id. TIDAK perlu RLS/publication (dibaca via Express API, bukan PostgREST; realtime message INSERT existing sudah men-trigger re-pull). prisma generate.
+- schema.prisma: model DiscussionAttachment (relasi message saja) + DiscussionMessage.attachments[].
+- CONTEXT7: konfirmasi supabase-js storage createSignedUploadUrl/uploadToSignedUrl/createSignedUrl.
+- BACKEND (build 0): constants/attachmentType. services/storage.service (createUploadUrl path=`${discId}/${uuid}-${safeName}`; signDownload TTL 1h; supabaseAdmin). validator: uploadUrlSchema (fileName+fileSize≤10MB), attachmentInputSchema (LINK→url / FILE|IMAGE→filePath refine), sendMessageSchema diubah (message optional default "" + attachments[] + refine "pesan ATAU lampiran"). repo: include attachments di message+replies; createMessage(+attachments nested create); hapus messageSenderSelect (unused). service: signAttachments (filePath→signed url) di getMessages+sendMessage echo; getUploadUrl; sendMessage(+attachments). controller: createUploadUrl + sendMessage attachments. route POST /discussions/:id/attachments/upload-url (authVerified).
+- FRONTEND (tsc 0): discussionApi AttachmentType/DiscussionAttachment + DiscussionMessage.attachments + getUploadUrl + uploadAttachment(file→signed→{type IMAGE if image else FILE,filePath,fileName,fileSize}) + sendMessage(+attachments). DiscussionFeed: Bubble render attachments (IMAGE=<img>, FILE/LINK=chip link signed url); composer Paperclip/ImageIcon jadi fungsional (hidden file input multiple, accept image utk gambar) → upload stage pending chip (X hapus) → send sertakan attachments; message boleh kosong kalau ada lampiran; "Mengunggah…" indicator; Smile tetap disabled.
+- VERIFIED E2E browser (p4-senior): upload .txt → chip "📄 edunomad-attach-test.txt 1 KB" muncul di pesan (attachment-only, signed download link); upload sukses ke Storage; console 0. Decision D-P12-6.
+- NEXT 12.5 views. UNCOMMITTED→commit.
+
 2026-07-01 (PHASE 12.3 — Reactions)
 Task: lanjut 12.3 (emoji reactions di message diskusi).
 - MIGRATION `20260701010000_phase12_3_reactions` (Supabase MCP apply → LIVE DB; _prisma_migrations checksum e6705186…): tabel message_reactions (id, message_id FK, discussion_id FK [denormal utk realtime/RLS], user_id FK, emoji VARCHAR(16), created_at) + unique(message_id,user_id,emoji) + index. RLS: enable + policy select is_discussion_member(discussion_id). Publication += message_reactions, replica identity full. prisma generate.

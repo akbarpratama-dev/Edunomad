@@ -1,4 +1,7 @@
 import { apiClient } from "@/lib/apiClient";
+import { supabase } from "@/lib/supabase/client";
+
+const ATTACHMENT_BUCKET = "discussion-attachments";
 
 interface Envelope<T> {
   success: boolean;
@@ -65,6 +68,19 @@ export interface MessageReaction {
   userId: string;
 }
 
+export type AttachmentType = "FILE" | "IMAGE" | "LINK";
+
+// Phase 12.4. On read, FILE/IMAGE `url` is a short-lived signed download URL;
+// `filePath`/`fileName`/`fileSize` describe the stored object. LINK carries `url`.
+export interface DiscussionAttachment {
+  id?: string;
+  type: AttachmentType;
+  url?: string | null;
+  filePath?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
+}
+
 export interface DiscussionMessage {
   id: string;
   message: string;
@@ -73,6 +89,7 @@ export interface DiscussionMessage {
   parentId?: string | null; // Phase 12.2: set on replies
   replies?: DiscussionMessage[]; // top-level messages carry their one-level replies
   reactions?: MessageReaction[]; // Phase 12.3
+  attachments?: DiscussionAttachment[]; // Phase 12.4
 }
 
 export const discussionApi = {
@@ -109,13 +126,47 @@ export const discussionApi = {
   async sendMessage(
     discussionId: string,
     message: string,
-    parentId?: string
+    parentId?: string,
+    attachments?: DiscussionAttachment[]
   ): Promise<DiscussionMessage> {
     const res = await apiClient.post<Envelope<DiscussionMessage>>(
       `/discussions/${discussionId}/messages`,
-      { message, ...(parentId ? { parentId } : {}) }
+      {
+        message,
+        ...(parentId ? { parentId } : {}),
+        ...(attachments && attachments.length ? { attachments } : {}),
+      }
     );
     return res.data.data;
+  },
+
+  // Phase 12.4 — mint a signed upload URL for an attachment.
+  async getUploadUrl(
+    discussionId: string,
+    fileName: string,
+    fileSize: number
+  ): Promise<{ path: string; token: string; signedUrl: string }> {
+    const res = await apiClient.post<Envelope<{ path: string; token: string; signedUrl: string }>>(
+      `/discussions/${discussionId}/attachments/upload-url`,
+      { fileName, fileSize }
+    );
+    return res.data.data;
+  },
+
+  // Phase 12.4 — upload a file to Storage via a signed URL, returning the
+  // attachment descriptor to attach to a message.
+  async uploadAttachment(discussionId: string, file: File): Promise<DiscussionAttachment> {
+    const { path, token } = await this.getUploadUrl(discussionId, file.name, file.size);
+    const { error } = await supabase.storage
+      .from(ATTACHMENT_BUCKET)
+      .uploadToSignedUrl(path, token, file);
+    if (error) throw error;
+    return {
+      type: file.type.startsWith("image/") ? "IMAGE" : "FILE",
+      filePath: path,
+      fileName: file.name,
+      fileSize: file.size,
+    };
   },
 
   // Phase 12.3 — toggle an emoji reaction on a message.

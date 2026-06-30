@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Send, Paperclip, ImageIcon, Smile, SmilePlus, MessagesSquare } from "lucide-react";
+import { Send, Paperclip, ImageIcon, Smile, SmilePlus, MessagesSquare, FileText, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
@@ -16,6 +16,7 @@ import {
   type DiscussionMessage,
   type DiscussionCategory,
   type MessageReaction,
+  type DiscussionAttachment,
 } from "@/services/discussionApi";
 
 // Group flat reaction rows into { emoji, count, mine } for chip rendering.
@@ -118,14 +119,49 @@ function Bubble({
             })}
           </time>
         </div>
-        <p
-          className={cn(
-            "mt-1.5 whitespace-pre-wrap break-words leading-relaxed text-foreground/90",
-            compact ? "text-sm" : "text-[15px]"
-          )}
-        >
-          {m.message}
-        </p>
+        {m.message && (
+          <p
+            className={cn(
+              "mt-1.5 whitespace-pre-wrap break-words leading-relaxed text-foreground/90",
+              compact ? "text-sm" : "text-[15px]"
+            )}
+          >
+            {m.message}
+          </p>
+        )}
+
+        {/* Attachments (Phase 12.4) */}
+        {m.attachments && m.attachments.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {m.attachments.map((a, idx) =>
+              a.type === "IMAGE" && a.url ? (
+                <a key={a.id ?? idx} href={a.url} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={a.url}
+                    alt={a.fileName ?? "Gambar"}
+                    className="max-h-48 rounded-lg border border-border object-cover"
+                  />
+                </a>
+              ) : (
+                <a
+                  key={a.id ?? idx}
+                  href={a.url ?? "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex max-w-full items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm transition-colors hover:bg-muted/50"
+                >
+                  <FileText className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="truncate">{a.fileName ?? a.url}</span>
+                  {typeof a.fileSize === "number" && a.fileSize > 0 && (
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {Math.ceil(a.fileSize / 1024)} KB
+                    </span>
+                  )}
+                </a>
+              )
+            )}
+          </div>
+        )}
 
         {/* Reactions (Phase 12.3) */}
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -200,6 +236,10 @@ export function DiscussionFeed({
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyDraft, setReplyDraft] = useState("");
   const [replySending, setReplySending] = useState(false);
+  const [pending, setPending] = useState<DiscussionAttachment[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
 
@@ -265,16 +305,35 @@ export function DiscussionFeed({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const text = draft.trim();
-    if (!text || sending) return;
+    if ((!text && pending.length === 0) || sending || uploading) return;
     setSending(true);
     try {
-      await discussionApi.sendMessage(channelId, text);
+      await discussionApi.sendMessage(channelId, text, undefined, pending.length ? pending : undefined);
       setDraft("");
+      setPending([]);
       await load();
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Gagal mengirim pesan");
     } finally {
       setSending(false);
+    }
+  };
+
+  // Phase 12.4 — upload picked files to Storage and stage them for the next send.
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const att = await discussionApi.uploadAttachment(channelId, file);
+        setPending((p) => [...p, att]);
+      }
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal mengunggah lampiran");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (imageInputRef.current) imageInputRef.current.value = "";
     }
   };
 
@@ -419,7 +478,43 @@ export function DiscussionFeed({
 
       {/* Composer */}
       <form onSubmit={submit} className="border-t border-border px-5 py-4">
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          hidden
+          onChange={(e) => handleFiles(e.target.files)}
+        />
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          hidden
+          onChange={(e) => handleFiles(e.target.files)}
+        />
         <div className="flex flex-col gap-2 rounded-2xl border border-border bg-secondary/60 p-2 focus-within:border-[#a3ce00]">
+          {pending.length > 0 && (
+            <div className="flex flex-wrap gap-2 px-1">
+              {pending.map((a, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2 py-1 text-xs"
+                >
+                  {a.type === "IMAGE" ? <ImageIcon className="size-3.5" /> : <FileText className="size-3.5" />}
+                  <span className="max-w-[160px] truncate">{a.fileName}</span>
+                  <button
+                    type="button"
+                    aria-label="Hapus lampiran"
+                    onClick={() => setPending((p) => p.filter((_, j) => j !== i))}
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
           <div className="flex items-start gap-2.5">
             <UserAvatar
               name={myName || "?"}
@@ -438,11 +533,34 @@ export function DiscussionFeed({
           </div>
           <div className="flex items-center justify-between pl-1">
             <div className="flex items-center gap-0.5">
-              <ToolButton icon={Paperclip} label="Lampirkan file" />
-              <ToolButton icon={ImageIcon} label="Sisipkan gambar" />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading || sending}
+                title="Lampirkan file"
+                aria-label="Lampirkan file"
+                className="grid size-9 place-items-center rounded-xl text-muted-foreground transition-colors hover:bg-muted disabled:opacity-60"
+              >
+                <Paperclip className="size-[18px]" />
+              </button>
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                disabled={uploading || sending}
+                title="Sisipkan gambar"
+                aria-label="Sisipkan gambar"
+                className="grid size-9 place-items-center rounded-xl text-muted-foreground transition-colors hover:bg-muted disabled:opacity-60"
+              >
+                <ImageIcon className="size-[18px]" />
+              </button>
               <ToolButton icon={Smile} label="Emoji" />
+              {uploading && <span className="text-xs text-muted-foreground">Mengunggah…</span>}
             </div>
-            <Button type="submit" size="sm" disabled={sending || !draft.trim()}>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={sending || uploading || (!draft.trim() && pending.length === 0)}
+            >
               <Send className="size-4" /> Kirim Komentar
             </Button>
           </div>

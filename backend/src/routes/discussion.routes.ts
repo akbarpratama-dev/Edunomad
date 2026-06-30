@@ -10,6 +10,7 @@ import {
   pinDiscussionSchema,
   messageIdParamSchema,
   toggleReactionSchema,
+  uploadUrlSchema,
 } from "../validators/discussion.validator";
 
 // Mounted at /discussions. Absolute-path group-discussion message actions
@@ -38,6 +39,15 @@ router.post(
   requireVerified,
   validateRequest({ params: discussionIdParamSchema, body: pinDiscussionSchema }),
   discussionController.pin
+);
+
+// Phase 12.4: signed upload URL for an attachment (members only — enforced in service).
+router.post(
+  "/:id/attachments/upload-url",
+  authMiddleware,
+  requireVerified,
+  validateRequest({ params: discussionIdParamSchema, body: uploadUrlSchema }),
+  discussionController.createUploadUrl
 );
 
 // Phase 12.3: toggle an emoji reaction on a message (members only — enforced in service).

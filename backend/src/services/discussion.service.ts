@@ -1,9 +1,23 @@
-import { discussionRepository } from "../repositories/discussion.repository";
+import { discussionRepository, type AttachmentInput } from "../repositories/discussion.repository";
 import { projectRepository } from "../repositories/project.repository";
 import { projectMemberRepository } from "../repositories/projectMember.repository";
 import { ForbiddenError, NotFoundError, BusinessRuleError } from "../utils/errors";
 import { MemberStatus } from "../constants/applicationStatus";
 import { DiscussionType } from "../constants/discussionType";
+import { storageService } from "./storage.service";
+
+// Phase 12.4 — replace each stored attachment's filePath with a fresh signed
+// download URL (LINK attachments keep their own url). Mutates the plain objects
+// returned by Prisma.
+type WithAttachments = { attachments?: { url: string | null; filePath: string | null }[] };
+async function signAttachments(items: WithAttachments[]) {
+  const all = items.flatMap((m) => m.attachments ?? []);
+  await Promise.all(
+    all.map(async (a) => {
+      if (a.filePath) a.url = await storageService.signDownload(a.filePath);
+    })
+  );
+}
 
 // The set of users allowed in a project's communication (docs/06 Discussion Rules):
 // the assigned senior, the UMKM owner, and ACTIVE members (accepted beginners).
@@ -82,13 +96,26 @@ export const discussionService = {
       discussionRepository.listMessages(discussionId, page, limit),
       discussionRepository.countMessages(discussionId),
     ]);
+    await signAttachments([...data, ...data.flatMap((m) => m.replies ?? [])]);
     return { data, meta: { page, limit, total, lastPage: Math.max(1, Math.ceil(total / limit)) } };
+  },
+
+  // Phase 12.4 — POST /discussions/:id/attachments/upload-url (members only).
+  async getUploadUrl(userId: string, discussionId: string, fileName: string) {
+    await assertDiscussionMember(discussionId, userId);
+    return storageService.createUploadUrl(discussionId, fileName);
   },
 
   // POST /discussions/:id/messages — discussion members only. `parentId` (Phase
   // 12.2) makes this a one-level reply: the parent must belong to this discussion
-  // and itself be top-level (no reply-to-a-reply).
-  async sendMessage(userId: string, discussionId: string, message: string, parentId?: string | null) {
+  // and itself be top-level (no reply-to-a-reply). `attachments` (Phase 12.4).
+  async sendMessage(
+    userId: string,
+    discussionId: string,
+    message: string,
+    parentId?: string | null,
+    attachments?: AttachmentInput[]
+  ) {
     await assertDiscussionMember(discussionId, userId);
     if (parentId) {
       const parent = await discussionRepository.findMessageById(parentId);
@@ -99,7 +126,15 @@ export const discussionService = {
         throw new BusinessRuleError("Balasan hanya satu tingkat");
       }
     }
-    return discussionRepository.createMessage(discussionId, userId, message, parentId ?? null);
+    const created = await discussionRepository.createMessage(
+      discussionId,
+      userId,
+      message,
+      parentId ?? null,
+      attachments
+    );
+    await signAttachments([created]);
+    return created;
   },
 
   // POST /discussions/messages/:messageId/reactions — toggle, members only.

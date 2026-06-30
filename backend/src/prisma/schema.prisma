@@ -341,12 +341,31 @@ model DiscussionMessage {
 
   discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
   sender     User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  parent     DiscussionMessage?  @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies    DiscussionMessage[] @relation("MessageReplies")
-  reactions  MessageReaction[]
+  parent      DiscussionMessage?  @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     DiscussionMessage[] @relation("MessageReplies")
+  reactions   MessageReaction[]
+  attachments DiscussionAttachment[]
 
   @@index([parentId])
   @@map("discussion_messages")
+}
+
+// Phase 12.4: file/image/link attachment on a discussion message. Files live in
+// Supabase Storage (private bucket); only path/url + metadata stored here.
+model DiscussionAttachment {
+  id        String   @id @default(uuid()) @db.Uuid
+  messageId String   @map("message_id") @db.Uuid
+  type      String   @db.VarChar(10) // FILE | IMAGE | LINK
+  url       String?  // LINK url; FILE/IMAGE signed at read time
+  filePath  String?  @map("file_path") // storage object path for FILE/IMAGE
+  fileName  String?  @map("file_name") @db.VarChar(255)
+  fileSize  Int?     @map("file_size")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  message DiscussionMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("discussion_attachments")
 }
 
 // Phase 12.3: emoji reaction on a discussion message. discussion_id denormalised

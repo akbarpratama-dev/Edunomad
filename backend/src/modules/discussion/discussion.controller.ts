@@ -66,9 +66,24 @@ export const discussionController = {
         req.user!.id,
         req.params.id,
         req.body.message,
-        req.body.parentId
+        req.body.parentId,
+        req.body.attachments
       );
       res.status(201).json(successResponse(msg, "Message sent"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // POST /discussions/:id/attachments/upload-url
+  async createUploadUrl(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await discussionService.getUploadUrl(
+        req.user!.id,
+        req.params.id,
+        req.body.fileName
+      );
+      res.json(successResponse(result, "Upload URL created"));
     } catch (err) {
       next(err);
     }

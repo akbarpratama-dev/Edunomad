@@ -7,17 +7,17 @@ const memberUserSelect = {
   user: { select: { id: true, name: true, email: true, role: true } },
 } satisfies Prisma.DiscussionMemberInclude;
 
-const messageSenderSelect = {
-  sender: { select: { id: true, name: true, role: true } },
-} satisfies Prisma.DiscussionMessageInclude;
-
 // Phase 12.3: lightweight reaction rows (emoji + who) for client-side grouping.
+// Phase 12.4: attachment rows (filePath signed to a url at read time in the service).
 const reactionSelect = {
   reactions: { select: { emoji: true, userId: true } },
+  attachments: {
+    select: { id: true, type: true, url: true, filePath: true, fileName: true, fileSize: true },
+  },
 } satisfies Prisma.DiscussionMessageInclude;
 
-// Phase 12.2/12.3: a top-level message carries its one-level replies + reactions
-// (each reply also carries its reactions).
+// Phase 12.2/12.3/12.4: a top-level message carries its one-level replies +
+// reactions + attachments (each reply too).
 const messageWithRepliesInclude = {
   sender: { select: { id: true, name: true, role: true } },
   ...reactionSelect,
@@ -26,6 +26,14 @@ const messageWithRepliesInclude = {
     orderBy: { createdAt: "asc" },
   },
 } satisfies Prisma.DiscussionMessageInclude;
+
+interface AttachmentInput {
+  type: string;
+  url?: string;
+  filePath?: string;
+  fileName?: string;
+  fileSize?: number;
+}
 
 export const discussionRepository = {
   // Is this user an ACTIVE project member (BR participant set, alongside senior/UMKM owner)?
@@ -184,16 +192,41 @@ export const discussionRepository = {
     return { reacted: true };
   },
 
-  // Insert a message (or reply when parentId set) and bump the discussion's
-  // updatedAt (recency ordering).
-  createMessage(discussionId: string, senderId: string, message: string, parentId?: string | null) {
+  // Insert a message (or reply when parentId set) with optional attachments
+  // (Phase 12.4) and bump the discussion's updatedAt (recency ordering).
+  createMessage(
+    discussionId: string,
+    senderId: string,
+    message: string,
+    parentId?: string | null,
+    attachments?: AttachmentInput[]
+  ) {
     return prisma.$transaction(async (tx) => {
       const created = await tx.discussionMessage.create({
-        data: { discussionId, senderId, message, parentId: parentId ?? null },
-        include: messageSenderSelect,
+        data: {
+          discussionId,
+          senderId,
+          message,
+          parentId: parentId ?? null,
+          attachments:
+            attachments && attachments.length
+              ? {
+                  create: attachments.map((a) => ({
+                    type: a.type,
+                    url: a.url ?? null,
+                    filePath: a.filePath ?? null,
+                    fileName: a.fileName ?? null,
+                    fileSize: a.fileSize ?? null,
+                  })),
+                }
+              : undefined,
+        },
+        include: messageWithRepliesInclude,
       });
       await tx.discussion.update({ where: { id: discussionId }, data: { updatedAt: new Date() } });
       return created;
     });
   },
 };
+
+export type { AttachmentInput };
