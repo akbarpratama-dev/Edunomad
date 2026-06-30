@@ -146,7 +146,7 @@ export function DiscussionFeed({
   };
 
   return (
-    <section className="flex min-h-[60vh] flex-col overflow-hidden rounded-[24px] border border-border bg-card">
+    <section className="flex min-h-[60vh] flex-col overflow-hidden rounded-[20px] border border-border bg-card">
       {/* Thread header */}
       <header className="flex items-center gap-3 border-b border-border px-5 py-4">
         <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]" aria-hidden="true">
@@ -234,7 +234,7 @@ export function DiscussionFeed({
       </div>
 
       {/* Composer */}
-      <form onSubmit={submit} className="border-t border-border p-4">
+      <form onSubmit={submit} className="border-t border-border px-5 py-4">
         <div className="flex flex-col gap-2 rounded-2xl border border-border bg-secondary/60 p-2 focus-within:border-[#a3ce00]">
           <div className="flex items-start gap-2.5">
             <UserAvatar

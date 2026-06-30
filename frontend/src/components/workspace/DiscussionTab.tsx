@@ -209,12 +209,9 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
 
           <div className="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_280px]">
             {/* Discussion list */}
-            <div className="flex flex-col gap-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Daftar Diskusi
-              </p>
+            <div className="flex flex-col gap-4">
               {visible.length === 0 ? (
-                <p className="rounded-2xl border border-dashed border-border py-8 text-center text-xs text-muted-foreground">
+                <p className="rounded-[20px] border border-dashed border-border py-8 text-center text-xs text-muted-foreground">
                   Tidak ada diskusi pada kategori ini.
                 </p>
               ) : (
@@ -233,7 +230,7 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
               {canCreate && (
                 <button
                   onClick={() => setCreateOpen(true)}
-                  className="flex items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-[#a3ce00] hover:text-foreground"
+                  className="flex items-center justify-center gap-1.5 rounded-[20px] border border-dashed border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-[#a3ce00] hover:text-foreground"
                 >
                   <Plus className="size-4" /> Diskusi Baru
                 </button>
@@ -436,7 +433,7 @@ function DiscussionListCard({
   return (
     <div
       className={cn(
-        "group/disc relative rounded-2xl border p-3.5 transition-[border-color,background-color,box-shadow] duration-200",
+        "group/disc relative rounded-[20px] border p-4 transition-[border-color,background-color,box-shadow] duration-200",
         active
           ? "border-[#a3ce00] bg-[#f6fae9] shadow-[0_8px_24px_rgba(32,31,49,0.06)]"
           : "border-border bg-card hover:border-foreground/15 hover:bg-muted/40"
