@@ -11,6 +11,15 @@ const messageSenderSelect = {
   sender: { select: { id: true, name: true, role: true } },
 } satisfies Prisma.DiscussionMessageInclude;
 
+// Phase 12.2: a top-level message carries its one-level replies (each with sender).
+const messageWithRepliesInclude = {
+  sender: { select: { id: true, name: true, role: true } },
+  replies: {
+    include: { sender: { select: { id: true, name: true, role: true } } },
+    orderBy: { createdAt: "asc" },
+  },
+} satisfies Prisma.DiscussionMessageInclude;
+
 export const discussionRepository = {
   // Is this user an ACTIVE project member (BR participant set, alongside senior/UMKM owner)?
   async isActiveProjectMember(projectId: string, userId: string) {
@@ -130,25 +139,36 @@ export const discussionRepository = {
     });
   },
 
+  // Top-level messages only (replies are nested under their parent).
   countMessages(discussionId: string) {
-    return prisma.discussionMessage.count({ where: { discussionId } });
+    return prisma.discussionMessage.count({ where: { discussionId, parentId: null } });
   },
 
+  // Top-level messages with their replies (Phase 12.2).
   listMessages(discussionId: string, page: number, limit: number) {
     return prisma.discussionMessage.findMany({
-      where: { discussionId },
-      include: messageSenderSelect,
+      where: { discussionId, parentId: null },
+      include: messageWithRepliesInclude,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * limit,
       take: limit,
     });
   },
 
-  // Insert a message and bump the discussion's updatedAt (recency ordering).
-  createMessage(discussionId: string, senderId: string, message: string) {
+  // Minimal lookup to validate a reply's parent (same discussion, top-level).
+  findMessageById(id: string) {
+    return prisma.discussionMessage.findUnique({
+      where: { id },
+      select: { id: true, discussionId: true, parentId: true },
+    });
+  },
+
+  // Insert a message (or reply when parentId set) and bump the discussion's
+  // updatedAt (recency ordering).
+  createMessage(discussionId: string, senderId: string, message: string, parentId?: string | null) {
     return prisma.$transaction(async (tx) => {
       const created = await tx.discussionMessage.create({
-        data: { discussionId, senderId, message },
+        data: { discussionId, senderId, message, parentId: parentId ?? null },
         include: messageSenderSelect,
       });
       await tx.discussion.update({ where: { id: discussionId }, data: { updatedAt: new Date() } });

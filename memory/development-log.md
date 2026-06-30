@@ -1,5 +1,13 @@
 # Development Log
 
+2026-07-01 (PHASE 12.2 — Threaded Replies)
+Task: lanjut sub-phase 12.2 (balasan satu tingkat di group discussion).
+- MIGRATION `20260701000000_phase12_2_threaded_replies` via Supabase MCP apply_migration ke LIVE DB: discussion_messages += parent_id UUID null + FK self (ON DELETE CASCADE) + index. Recorded di _prisma_migrations (checksum sha256 file = 8e1cd910…, konfirmasi algoritma = plain sha256 file via cek 12.1=3317534…). prisma generate OK. schema.prisma DiscussionMessage += parentId + relation self "MessageReplies" (parent/replies) + @@index.
+- BACKEND (build 0): validator sendMessageSchema += parentId uuid optional (shared group+DM; DM abaikan). repo: messageWithRepliesInclude (replies+sender, orderBy asc); listMessages where parentId null + include replies; countMessages where parentId null (top-level); findMessageById (validasi parent); createMessage(+parentId). service.sendMessage(+parentId): validasi parent ada+same discussion+top-level (one level), else NotFound/BusinessRule. controller pass req.body.parentId.
+- FRONTEND (tsc 0): discussionApi DiscussionMessage += parentId?/replies?; sendMessage(+parentId). DiscussionFeed: komponen Bubble (reuse top-level+compact reply, mentor green/own tint); render replies nested (indent ml-6/11 + border-l); tombol "Balas" → composer inline (textarea+Batal+Balas) → sendMessage(parentId) → load(). Realtime existing (INSERT discussion_id) cover replies.
+- VERIFIED E2E browser (p4-senior, "Diskusi Tim"): Balas → balasan muncul nested 1 tingkat (indent+border), persist server, header "1 pesan" tetap (count top-level). console 0 err. Decision D-P12-4.
+- NEXT 12.3 reactions (message_reactions). UNCOMMITTED→akan commit.
+
 2026-06-30 (Auth redirect race fix — "selalu dilempar ke /auth/login")
 Task: user minta cek semua role flow + perbaiki auto-redirect yg bikin tiap akses page lain dilempar ke satu page terus. Via AskUserQuestion user konfirmasi target redirect = /auth/login. CLAUDE.md: baca docs (RBAC/role flow) + Context7 utk perilaku library.
 - AUDIT role flow: AuthProvider(root) → onAuthStateChange INITIAL_SESSION → fetchMe (/auth/me) → store appUser. Tiap page protected = <AuthGuard [allowedRoles]>. RBAC allowedRoles per page SUDAH sesuai docs/06 (admin/* ADMIN, applications BEGINNER, applications/mentor SENIOR, my-projects UMKM+BEGINNER, reviews BEGINNER, projects/create+manage UMKM, applicants SENIOR). Nav role-filtered via getNavItems(role) — benar.

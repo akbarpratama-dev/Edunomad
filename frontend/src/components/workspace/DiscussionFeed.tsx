@@ -52,6 +52,59 @@ function ToolButton({ icon: Icon, label }: { icon: typeof Paperclip; label: stri
   );
 }
 
+// One comment card (top-level or a compact reply). Mentor (SENIOR) gets the
+// green accent; the viewer's own messages get a subtle tint.
+function Bubble({ m, myId, compact }: { m: DiscussionMessage; myId?: string; compact?: boolean }) {
+  const badge = ROLE_BADGE[m.sender.role];
+  const isMentor = m.sender.role === "SENIOR";
+  const mine = m.sender.id === myId;
+  return (
+    <article
+      className={cn(
+        "flex gap-3 rounded-2xl transition-colors",
+        compact ? "p-3" : "p-4",
+        isMentor ? "border-l-2 border-[#a3ce00] bg-[#f6fae9]" : mine ? "bg-muted/40" : "bg-card"
+      )}
+    >
+      <UserAvatar
+        name={m.sender.name}
+        className={cn(
+          "shrink-0 font-bold",
+          compact ? "size-7 text-[11px]" : "size-9 text-[13px]",
+          toneFor(m.sender.id)
+        )}
+      />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-semibold text-foreground">{m.sender.name}</span>
+          {badge && (
+            <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", badge.className)}>
+              {badge.label}
+            </span>
+          )}
+          {mine && <span className="text-[11px] text-muted-foreground">· Anda</span>}
+          <time className="ml-auto text-xs text-muted-foreground">
+            {new Date(m.createdAt).toLocaleString("id-ID", {
+              day: "numeric",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </time>
+        </div>
+        <p
+          className={cn(
+            "mt-1.5 whitespace-pre-wrap break-words leading-relaxed text-foreground/90",
+            compact ? "text-sm" : "text-[15px]"
+          )}
+        >
+          {m.message}
+        </p>
+      </div>
+    </article>
+  );
+}
+
 // Group-discussion thread: premium comment cards (avatar + name + role badge +
 // body + time) with a composer. Mentor (SENIOR) messages get the green accent.
 // Live via Supabase Realtime (re-pull on INSERT; server resolves sender + RLS).
@@ -71,6 +124,9 @@ export function DiscussionFeed({
   const [messages, setMessages] = useState<DiscussionMessage[] | null>(null);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [replyDraft, setReplyDraft] = useState("");
+  const [replySending, setReplySending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
 
@@ -138,6 +194,22 @@ export function DiscussionFeed({
     }
   };
 
+  const submitReply = async (parentId: string) => {
+    const text = replyDraft.trim();
+    if (!text || replySending) return;
+    setReplySending(true);
+    try {
+      await discussionApi.sendMessage(channelId, text, parentId);
+      setReplyDraft("");
+      setReplyTo(null);
+      await load();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal mengirim balasan");
+    } finally {
+      setReplySending(false);
+    }
+  };
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -183,52 +255,71 @@ export function DiscussionFeed({
             Belum ada pesan. Mulai percakapan dengan tim.
           </p>
         ) : (
-          messages.map((m, i) => {
-            const badge = ROLE_BADGE[m.sender.role];
-            const isMentor = m.sender.role === "SENIOR";
-            const mine = m.sender.id === myId;
-            return (
-              <article
-                key={m.id}
-                style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
-                className={cn(
-                  "app-reveal flex gap-3 rounded-2xl p-4 transition-colors",
-                  isMentor
-                    ? "border-l-2 border-[#a3ce00] bg-[#f6fae9]"
-                    : mine
-                      ? "bg-muted/40"
-                      : "bg-card"
-                )}
-              >
-                <UserAvatar
-                  name={m.sender.name}
-                  className={cn("size-9 shrink-0 text-[13px] font-bold", toneFor(m.sender.id))}
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-foreground">{m.sender.name}</span>
-                    {badge && (
-                      <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", badge.className)}>
-                        {badge.label}
-                      </span>
-                    )}
-                    {mine && <span className="text-[11px] text-muted-foreground">· Anda</span>}
-                    <time className="ml-auto text-xs text-muted-foreground">
-                      {new Date(m.createdAt).toLocaleString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </time>
-                  </div>
-                  <p className="mt-1.5 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground/90">
-                    {m.message}
-                  </p>
+          messages.map((m, i) => (
+            <div key={m.id} style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }} className="app-reveal flex flex-col gap-2">
+              <Bubble m={m} myId={myId} />
+
+              {/* One-level replies (Phase 12.2) */}
+              {m.replies && m.replies.length > 0 && (
+                <div className="ml-6 flex flex-col gap-2 border-l-2 border-border pl-3 sm:ml-11">
+                  {m.replies.map((r) => (
+                    <Bubble key={r.id} m={r} myId={myId} compact />
+                  ))}
                 </div>
-              </article>
-            );
-          })
+              )}
+
+              {/* Reply trigger / inline composer */}
+              <div className="ml-6 sm:ml-11">
+                {replyTo === m.id ? (
+                  <div className="flex flex-col gap-2 rounded-2xl border border-border bg-secondary/60 p-2 focus-within:border-[#a3ce00]">
+                    <textarea
+                      value={replyDraft}
+                      onChange={(e) => setReplyDraft(e.target.value)}
+                      rows={2}
+                      maxLength={5000}
+                      disabled={replySending}
+                      autoFocus
+                      placeholder={`Balas ${m.sender.name}…`}
+                      className="resize-none bg-transparent px-1.5 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                    />
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={replySending}
+                        onClick={() => {
+                          setReplyTo(null);
+                          setReplyDraft("");
+                        }}
+                      >
+                        Batal
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={replySending || !replyDraft.trim()}
+                        onClick={() => submitReply(m.id)}
+                      >
+                        <Send className="size-4" /> Balas
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReplyTo(m.id);
+                      setReplyDraft("");
+                    }}
+                    className="text-xs font-semibold text-[#5f8c00] transition-colors hover:underline"
+                  >
+                    Balas
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
         )}
         <div ref={bottomRef} />
       </div>

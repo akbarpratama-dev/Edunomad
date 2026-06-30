@@ -21,6 +21,7 @@ export const pinDiscussionSchema = z.object({
 // POST /discussions/:id/messages and POST /direct-chat/:id/messages.
 export const sendMessageSchema = z.object({
   message: z.string().min(1, "Message cannot be empty").max(5000),
+  parentId: z.string().uuid().optional(), // Phase 12.2: one-level reply target (group only)
 });
 
 // GET .../messages pagination.

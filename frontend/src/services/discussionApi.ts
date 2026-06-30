@@ -62,6 +62,8 @@ export interface DiscussionMessage {
   message: string;
   createdAt: string;
   sender: { id: string; name: string; role: string };
+  parentId?: string | null; // Phase 12.2: set on replies
+  replies?: DiscussionMessage[]; // top-level messages carry their one-level replies
 }
 
 export const discussionApi = {
@@ -95,10 +97,14 @@ export const discussionApi = {
     return res.data;
   },
 
-  async sendMessage(discussionId: string, message: string): Promise<DiscussionMessage> {
+  async sendMessage(
+    discussionId: string,
+    message: string,
+    parentId?: string
+  ): Promise<DiscussionMessage> {
     const res = await apiClient.post<Envelope<DiscussionMessage>>(
       `/discussions/${discussionId}/messages`,
-      { message }
+      { message, ...(parentId ? { parentId } : {}) }
     );
     return res.data.data;
   },

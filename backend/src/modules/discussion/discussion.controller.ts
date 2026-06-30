@@ -65,7 +65,8 @@ export const discussionController = {
       const msg = await discussionService.sendMessage(
         req.user!.id,
         req.params.id,
-        req.body.message
+        req.body.message,
+        req.body.parentId
       );
       res.status(201).json(successResponse(msg, "Message sent"));
     } catch (err) {

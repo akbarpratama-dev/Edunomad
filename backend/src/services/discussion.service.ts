@@ -85,10 +85,21 @@ export const discussionService = {
     return { data, meta: { page, limit, total, lastPage: Math.max(1, Math.ceil(total / limit)) } };
   },
 
-  // POST /discussions/:id/messages — discussion members only.
-  async sendMessage(userId: string, discussionId: string, message: string) {
+  // POST /discussions/:id/messages — discussion members only. `parentId` (Phase
+  // 12.2) makes this a one-level reply: the parent must belong to this discussion
+  // and itself be top-level (no reply-to-a-reply).
+  async sendMessage(userId: string, discussionId: string, message: string, parentId?: string | null) {
     await assertDiscussionMember(discussionId, userId);
-    return discussionRepository.createMessage(discussionId, userId, message);
+    if (parentId) {
+      const parent = await discussionRepository.findMessageById(parentId);
+      if (!parent || parent.discussionId !== discussionId) {
+        throw new NotFoundError("Pesan yang dibalas tidak ditemukan");
+      }
+      if (parent.parentId !== null) {
+        throw new BusinessRuleError("Balasan hanya satu tingkat");
+      }
+    }
+    return discussionRepository.createMessage(discussionId, userId, message, parentId ?? null);
   },
 };
 

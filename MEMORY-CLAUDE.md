@@ -1,7 +1,7 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-07-01 (main = b821b5c. Phase 0-7 + UNIFY-UI sweep + Diskusi tab premium redesign merged. Branch `feature/phase-10-discussion-forum` = PHASE 12 (12.1 done) PLUS a UX-hardening batch this session — see "⚡ UX batch" below. Remaining 12.2-12.5 + Phase 8 Artifact still pending.)
+> Last updated: 2026-07-01 (main = b821b5c. Phase 0-7 + UNIFY-UI sweep + Diskusi tab premium redesign merged. Branch `feature/phase-10-discussion-forum` = PHASE 12 (12.1 done) PLUS a UX-hardening batch this session — see "⚡ UX batch" below. 12.2 threaded replies also DONE (2026-07-01, D-P12-4). Remaining 12.3-12.5 + Phase 8 Artifact still pending.)
 
 ## ⚡ UX batch (2026-06-30→07-01, branch feature/phase-10-discussion-forum) — committed
 Bug fixes + flow upgrades on top of Phase 12 work. All tsc 0 + Playwright-verified (p4-senior).
@@ -81,7 +81,8 @@ main = b821b5c. Branch aktif feature/phase-10-discussion-forum (belum merge). 12
 & verified. CATATAN: branch ini juga sudah berisi "⚡ UX batch" (auth redirect fix D-AUTH-1, back-to-landing,
 reactStrictMode off, senior "Proyek Mentoring" D-P12-2, flow stay-in-namespace /my-projects/:id* D-P12-3) —
 semua committed, tsc 0, Playwright-verified. Lihat blok "⚡ UX batch" di atas + decisions D-AUTH-1/D-P12-2/D-P12-3.
-LANJUTKAN bertahap: 12.2 threaded replies (discussion_messages.parent_id) → 12.3 reactions
+✅ 12.2 threaded replies DONE & verified (2026-07-01, D-P12-4: parent_id self FK, one-level; backend+DiscussionFeed Bubble/nested/inline Balas; E2E OK).
+LANJUTKAN bertahap: 12.3 reactions
 (message_reactions table) → 12.4 attachments (discussion_attachments + Supabase Storage bucket+signed upload+RLS,
 override "no attachments MVP") → 12.5 views (discussion_views table). Tiap irisan: migration via Supabase MCP
 apply_migration + record _prisma_migrations (sha256 checksum) + prisma generate; backend layered

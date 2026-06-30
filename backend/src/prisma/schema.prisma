@@ -335,12 +335,16 @@ model DiscussionMessage {
   discussionId String   @map("discussion_id") @db.Uuid
   senderId     String   @map("sender_id") @db.Uuid
   message      String
+  parentId     String?  @map("parent_id") @db.Uuid // Phase 12.2: one-level reply (null = top-level)
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
 
   discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
   sender     User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  parent     DiscussionMessage?  @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    DiscussionMessage[] @relation("MessageReplies")
 
+  @@index([parentId])
   @@map("discussion_messages")
 }
 
