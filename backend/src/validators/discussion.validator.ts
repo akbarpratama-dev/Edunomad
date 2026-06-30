@@ -1,8 +1,15 @@
 import { z } from "zod";
 import { DISCUSSION_CATEGORIES } from "../constants/discussionCategory";
+import { REACTION_EMOJIS } from "../constants/reactionEmoji";
 
 export const discussionIdParamSchema = z.object({ id: z.string().uuid() });
 export const userIdParamSchema = z.object({ id: z.string().uuid() });
+export const messageIdParamSchema = z.object({ messageId: z.string().uuid() });
+
+// POST /discussions/messages/:messageId/reactions — toggle a curated emoji.
+export const toggleReactionSchema = z.object({
+  emoji: z.enum(REACTION_EMOJIS),
+});
 
 // POST /projects/:id/discussions. Phase 12 (docs/03 amended): GROUP discussions
 // are forum topics — `title` + `category` are required and persisted. `members`

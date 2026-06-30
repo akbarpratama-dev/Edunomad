@@ -101,6 +101,14 @@ export const discussionService = {
     }
     return discussionRepository.createMessage(discussionId, userId, message, parentId ?? null);
   },
+
+  // POST /discussions/messages/:messageId/reactions — toggle, members only.
+  async toggleReaction(userId: string, messageId: string, emoji: string) {
+    const msg = await discussionRepository.findMessageById(messageId);
+    if (!msg) throw new NotFoundError("Pesan tidak ditemukan");
+    await assertDiscussionMember(msg.discussionId, userId);
+    return discussionRepository.toggleReaction(messageId, msg.discussionId, userId, emoji);
+  },
 };
 
 async function assertParticipant(

@@ -57,6 +57,14 @@ export interface Discussion {
   updatedAt?: string;
 }
 
+// Phase 12.3 — curated reaction set (must match backend REACTION_EMOJIS).
+export const REACTION_EMOJIS = ["👍", "❤️", "🎉", "✅", "👀", "🙌"] as const;
+
+export interface MessageReaction {
+  emoji: string;
+  userId: string;
+}
+
 export interface DiscussionMessage {
   id: string;
   message: string;
@@ -64,6 +72,7 @@ export interface DiscussionMessage {
   sender: { id: string; name: string; role: string };
   parentId?: string | null; // Phase 12.2: set on replies
   replies?: DiscussionMessage[]; // top-level messages carry their one-level replies
+  reactions?: MessageReaction[]; // Phase 12.3
 }
 
 export const discussionApi = {
@@ -105,6 +114,15 @@ export const discussionApi = {
     const res = await apiClient.post<Envelope<DiscussionMessage>>(
       `/discussions/${discussionId}/messages`,
       { message, ...(parentId ? { parentId } : {}) }
+    );
+    return res.data.data;
+  },
+
+  // Phase 12.3 — toggle an emoji reaction on a message.
+  async toggleReaction(messageId: string, emoji: string): Promise<{ reacted: boolean }> {
+    const res = await apiClient.post<Envelope<{ reacted: boolean }>>(
+      `/discussions/messages/${messageId}/reactions`,
+      { emoji }
     );
     return res.data.data;
   },

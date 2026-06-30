@@ -11,11 +11,18 @@ const messageSenderSelect = {
   sender: { select: { id: true, name: true, role: true } },
 } satisfies Prisma.DiscussionMessageInclude;
 
-// Phase 12.2: a top-level message carries its one-level replies (each with sender).
+// Phase 12.3: lightweight reaction rows (emoji + who) for client-side grouping.
+const reactionSelect = {
+  reactions: { select: { emoji: true, userId: true } },
+} satisfies Prisma.DiscussionMessageInclude;
+
+// Phase 12.2/12.3: a top-level message carries its one-level replies + reactions
+// (each reply also carries its reactions).
 const messageWithRepliesInclude = {
   sender: { select: { id: true, name: true, role: true } },
+  ...reactionSelect,
   replies: {
-    include: { sender: { select: { id: true, name: true, role: true } } },
+    include: { sender: { select: { id: true, name: true, role: true } }, ...reactionSelect },
     orderBy: { createdAt: "asc" },
   },
 } satisfies Prisma.DiscussionMessageInclude;
@@ -161,6 +168,20 @@ export const discussionRepository = {
       where: { id },
       select: { id: true, discussionId: true, parentId: true },
     });
+  },
+
+  // Phase 12.3: toggle an emoji reaction (add if absent, remove if present).
+  async toggleReaction(messageId: string, discussionId: string, userId: string, emoji: string) {
+    const existing = await prisma.messageReaction.findUnique({
+      where: { messageId_userId_emoji: { messageId, userId, emoji } },
+      select: { id: true },
+    });
+    if (existing) {
+      await prisma.messageReaction.delete({ where: { id: existing.id } });
+      return { reacted: false };
+    }
+    await prisma.messageReaction.create({ data: { messageId, discussionId, userId, emoji } });
+    return { reacted: true };
   },
 
   // Insert a message (or reply when parentId set) and bump the discussion's

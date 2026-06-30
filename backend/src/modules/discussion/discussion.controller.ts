@@ -73,4 +73,18 @@ export const discussionController = {
       next(err);
     }
   },
+
+  // POST /discussions/messages/:messageId/reactions
+  async toggleReaction(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await discussionService.toggleReaction(
+        req.user!.id,
+        req.params.messageId,
+        req.body.emoji
+      );
+      res.json(successResponse(result, "Reaction toggled"));
+    } catch (err) {
+      next(err);
+    }
+  },
 };

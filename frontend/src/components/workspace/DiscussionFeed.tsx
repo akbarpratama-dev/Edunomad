@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Send, Paperclip, ImageIcon, Smile, MessagesSquare } from "lucide-react";
+import { Send, Paperclip, ImageIcon, Smile, SmilePlus, MessagesSquare } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
@@ -12,9 +12,23 @@ import { UserAvatar } from "@/components/common/UserAvatar";
 import {
   discussionApi,
   DISCUSSION_CATEGORY_META,
+  REACTION_EMOJIS,
   type DiscussionMessage,
   type DiscussionCategory,
+  type MessageReaction,
 } from "@/services/discussionApi";
+
+// Group flat reaction rows into { emoji, count, mine } for chip rendering.
+function groupReactions(reactions: MessageReaction[] | undefined, myId?: string) {
+  const map = new Map<string, { count: number; mine: boolean }>();
+  for (const r of reactions ?? []) {
+    const g = map.get(r.emoji) ?? { count: 0, mine: false };
+    g.count += 1;
+    if (r.userId === myId) g.mine = true;
+    map.set(r.emoji, g);
+  }
+  return [...map.entries()].map(([emoji, v]) => ({ emoji, ...v }));
+}
 
 // Role → display badge (DESIGN.md: Mentor green accent-tint, Mahasiswa sky, UMKM amber).
 const ROLE_BADGE: Record<string, { label: string; className: string }> = {
@@ -54,10 +68,22 @@ function ToolButton({ icon: Icon, label }: { icon: typeof Paperclip; label: stri
 
 // One comment card (top-level or a compact reply). Mentor (SENIOR) gets the
 // green accent; the viewer's own messages get a subtle tint.
-function Bubble({ m, myId, compact }: { m: DiscussionMessage; myId?: string; compact?: boolean }) {
+function Bubble({
+  m,
+  myId,
+  onReact,
+  compact,
+}: {
+  m: DiscussionMessage;
+  myId?: string;
+  onReact: (emoji: string) => void;
+  compact?: boolean;
+}) {
   const badge = ROLE_BADGE[m.sender.role];
   const isMentor = m.sender.role === "SENIOR";
   const mine = m.sender.id === myId;
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const groups = groupReactions(m.reactions, myId);
   return (
     <article
       className={cn(
@@ -100,6 +126,53 @@ function Bubble({ m, myId, compact }: { m: DiscussionMessage; myId?: string; com
         >
           {m.message}
         </p>
+
+        {/* Reactions (Phase 12.3) */}
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          {groups.map((g) => (
+            <button
+              key={g.emoji}
+              type="button"
+              onClick={() => onReact(g.emoji)}
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors",
+                g.mine
+                  ? "border-[#a3ce00] bg-[#f6fae9] text-foreground"
+                  : "border-border bg-card text-muted-foreground hover:bg-muted/50"
+              )}
+            >
+              <span>{g.emoji}</span>
+              <span className="tabular-nums">{g.count}</span>
+            </button>
+          ))}
+          <div className="relative">
+            <button
+              type="button"
+              aria-label="Tambah reaksi"
+              onClick={() => setPickerOpen((o) => !o)}
+              className="grid size-6 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-muted/50"
+            >
+              <SmilePlus className="size-3.5" />
+            </button>
+            {pickerOpen && (
+              <div className="absolute left-0 z-10 mt-1 flex gap-0.5 rounded-xl border border-border bg-card p-1 shadow-md">
+                {REACTION_EMOJIS.map((e) => (
+                  <button
+                    key={e}
+                    type="button"
+                    onClick={() => {
+                      onReact(e);
+                      setPickerOpen(false);
+                    }}
+                    className="rounded-md px-1.5 py-1 text-base leading-none hover:bg-muted"
+                  >
+                    {e}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </article>
   );
@@ -165,6 +238,17 @@ export function DiscussionFeed({
           },
           () => active && load()
         )
+        // Phase 12.3: reaction add/remove (denormalised discussion_id lets us filter).
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "message_reactions",
+            filter: `discussion_id=eq.${channelId}`,
+          },
+          () => active && load()
+        )
         .subscribe();
       cleanupRef.current = () => supabase.removeChannel(channel);
     })();
@@ -207,6 +291,15 @@ export function DiscussionFeed({
       toast.error(err instanceof ApiError ? err.message : "Gagal mengirim balasan");
     } finally {
       setReplySending(false);
+    }
+  };
+
+  const react = async (messageId: string, emoji: string) => {
+    try {
+      await discussionApi.toggleReaction(messageId, emoji);
+      await load();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal memberi reaksi");
     }
   };
 
@@ -257,13 +350,13 @@ export function DiscussionFeed({
         ) : (
           messages.map((m, i) => (
             <div key={m.id} style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }} className="app-reveal flex flex-col gap-2">
-              <Bubble m={m} myId={myId} />
+              <Bubble m={m} myId={myId} onReact={(emoji) => react(m.id, emoji)} />
 
               {/* One-level replies (Phase 12.2) */}
               {m.replies && m.replies.length > 0 && (
                 <div className="ml-6 flex flex-col gap-2 border-l-2 border-border pl-3 sm:ml-11">
                   {m.replies.map((r) => (
-                    <Bubble key={r.id} m={r} myId={myId} compact />
+                    <Bubble key={r.id} m={r} myId={myId} onReact={(emoji) => react(r.id, emoji)} compact />
                   ))}
                 </div>
               )}

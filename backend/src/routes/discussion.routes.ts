@@ -8,6 +8,8 @@ import {
   sendMessageSchema,
   messagesQuerySchema,
   pinDiscussionSchema,
+  messageIdParamSchema,
+  toggleReactionSchema,
 } from "../validators/discussion.validator";
 
 // Mounted at /discussions. Absolute-path group-discussion message actions
@@ -36,6 +38,15 @@ router.post(
   requireVerified,
   validateRequest({ params: discussionIdParamSchema, body: pinDiscussionSchema }),
   discussionController.pin
+);
+
+// Phase 12.3: toggle an emoji reaction on a message (members only — enforced in service).
+router.post(
+  "/messages/:messageId/reactions",
+  authMiddleware,
+  requireVerified,
+  validateRequest({ params: messageIdParamSchema, body: toggleReactionSchema }),
+  discussionController.toggleReaction
 );
 
 export default router;

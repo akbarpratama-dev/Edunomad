@@ -1,5 +1,14 @@
 # Development Log
 
+2026-07-01 (PHASE 12.3 — Reactions)
+Task: lanjut 12.3 (emoji reactions di message diskusi).
+- MIGRATION `20260701010000_phase12_3_reactions` (Supabase MCP apply → LIVE DB; _prisma_migrations checksum e6705186…): tabel message_reactions (id, message_id FK, discussion_id FK [denormal utk realtime/RLS], user_id FK, emoji VARCHAR(16), created_at) + unique(message_id,user_id,emoji) + index. RLS: enable + policy select is_discussion_member(discussion_id). Publication += message_reactions, replica identity full. prisma generate.
+- schema.prisma: model MessageReaction (relasi `message` saja; userId/discussionId scalar utk hindari lebarkan User/Discussion) + DiscussionMessage.reactions[]. D-P12-5 (denormal discussion_id).
+- BACKEND (build 0): constants/reactionEmoji (👍❤️🎉✅👀🙌). validator toggleReactionSchema (enum) + messageIdParamSchema. repo: include reactions {emoji,userId} di message+replies; toggleReaction (findUnique compound → delete/create). service.toggleReaction (findMessageById → assertMember). controller + route POST /discussions/messages/:messageId/reactions (authVerified).
+- FRONTEND (tsc 0): discussionApi REACTION_EMOJIS + MessageReaction + DiscussionMessage.reactions + toggleReaction(messageId,emoji). DiscussionFeed: groupReactions (emoji→count,mine); Bubble reaction chips (mine highlight, klik toggle) + picker SmilePlus; react() → toggle+load; realtime listener message_reactions filter discussion_id (event *). Reaksi di parent + reply.
+- VERIFIED E2E browser (p4-senior): react 🎉 → chip "🎉 1" highlight (mine), persist via server (RLS read OK); toggle off → chip hilang. console 0.
+- NEXT 12.4 attachments. UNCOMMITTED→commit.
+
 2026-07-01 (PHASE 12.2 — Threaded Replies)
 Task: lanjut sub-phase 12.2 (balasan satu tingkat di group discussion).
 - MIGRATION `20260701000000_phase12_2_threaded_replies` via Supabase MCP apply_migration ke LIVE DB: discussion_messages += parent_id UUID null + FK self (ON DELETE CASCADE) + index. Recorded di _prisma_migrations (checksum sha256 file = 8e1cd910…, konfirmasi algoritma = plain sha256 file via cek 12.1=3317534…). prisma generate OK. schema.prisma DiscussionMessage += parentId + relation self "MessageReplies" (parent/replies) + @@index.

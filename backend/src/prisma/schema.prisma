@@ -343,9 +343,28 @@ model DiscussionMessage {
   sender     User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
   parent     DiscussionMessage?  @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies    DiscussionMessage[] @relation("MessageReplies")
+  reactions  MessageReaction[]
 
   @@index([parentId])
   @@map("discussion_messages")
+}
+
+// Phase 12.3: emoji reaction on a discussion message. discussion_id denormalised
+// for realtime/RLS gating. userId/discussionId kept as scalars (no back-relation
+// needed) to avoid widening User/Discussion models.
+model MessageReaction {
+  id           String   @id @default(uuid()) @db.Uuid
+  messageId    String   @map("message_id") @db.Uuid
+  discussionId String   @map("discussion_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  emoji        String   @db.VarChar(16)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  message DiscussionMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@map("message_reactions")
 }
 
 // status: DRAFT | SUBMITTED | REVISION_REQUESTED | APPROVED
