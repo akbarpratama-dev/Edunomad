@@ -1,24 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { toast } from "sonner";
 import {
   MessagesSquare,
   Plus,
   CheckCircle2,
   Circle,
-  Users,
-  CalendarClock,
   GraduationCap,
-  ArrowRight,
   Pin,
   PinOff,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -45,7 +40,6 @@ import {
 } from "@/services/discussionApi";
 import {
   projectApi,
-  PROJECT_STATUS_META,
   type ProjectDetail,
   type ProjectMember,
 } from "@/services/projectApi";
@@ -191,9 +185,6 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
           </Button>
         )}
       </div>
-
-      {/* Project summary card */}
-      <ProjectSummaryCard project={project} team={team} />
 
       {discussions === null ? (
         <p className="text-sm text-muted-foreground">Memuat diskusi…</p>
@@ -421,89 +412,6 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
     >
       {label}
     </button>
-  );
-}
-
-// ── Project summary card (real data) ─────────────────────────────────────────
-function ProjectSummaryCard({
-  project,
-  team,
-}: {
-  project: ProjectDetail;
-  team: { id: string; name: string; role: string }[];
-}) {
-  const statusMeta = PROJECT_STATUS_META[project.status];
-  return (
-    <section className="flex flex-col gap-4 rounded-[24px] border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-start gap-4">
-        <span
-          className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#eef7d6] text-[#5f8c00]"
-          aria-hidden="true"
-        >
-          <MessagesSquare className="size-6" />
-        </span>
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-bold tracking-tight text-foreground">{project.title}</h3>
-            <Badge variant={statusMeta.variant} className={statusMeta.className}>
-              {statusMeta.label}
-            </Badge>
-          </div>
-          <p className="mt-0.5 text-sm text-muted-foreground">Bersama {project.umkm.name}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <GraduationCap className="size-3.5" /> Mentor: {project.senior?.name ?? "Belum ada"}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <CalendarClock className="size-3.5" />
-              {new Date(project.deadline).toLocaleDateString("id-ID", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4 sm:flex-col sm:items-end">
-        <AvatarStack team={team} />
-        <Button
-          variant="outline"
-          size="sm"
-          render={<Link href={`/projects/${project.id}`} />}
-          className="shrink-0"
-        >
-          Lihat Detail Proyek <ArrowRight className="size-4" />
-        </Button>
-      </div>
-    </section>
-  );
-}
-
-function AvatarStack({ team }: { team: { id: string; name: string }[] }) {
-  const shown = team.slice(0, 5);
-  const extra = team.length - shown.length;
-  return (
-    <div className="flex items-center">
-      <div className="flex -space-x-2">
-        {shown.map((t) => (
-          <UserAvatar
-            key={t.id}
-            name={t.name}
-            className={cn("size-8 text-[11px] font-bold ring-2 ring-card", toneFor(t.id))}
-          />
-        ))}
-        {extra > 0 && (
-          <span className="grid size-8 place-items-center rounded-full bg-muted text-[11px] font-bold text-muted-foreground ring-2 ring-card">
-            +{extra}
-          </span>
-        )}
-      </div>
-      <span className="ml-2.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
-        <Users className="size-3.5" /> {team.length}
-      </span>
-    </div>
   );
 }
 
