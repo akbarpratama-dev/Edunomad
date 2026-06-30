@@ -228,8 +228,6 @@ function BeginnerApplyDialog({ project }: { project: ProjectDetail }) {
 // Role-appropriate action panel for the project detail page.
 function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () => void }) {
   const appUser = useAuthStore((s) => s.appUser)!;
-  const pathname = usePathname();
-  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
   const isOwner = appUser.role === "UMKM" && project.umkm.id === appUser.id;
   const isLeadSenior = appUser.role === "SENIOR" && project.senior?.id === appUser.id;
   const recruiting = project.status === "RECRUITING";
@@ -250,7 +248,7 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
               onDone={reload}
             />
           )}
-          <Button render={<Link href={`${base}/${project.id}/manage`} />}>
+          <Button render={<Link href={`/my-projects/${project.id}/manage`} />}>
             Kelola Lamaran Senior
           </Button>
           <Button variant="outline" render={<Link href="/my-projects" />}>
@@ -288,7 +286,7 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
               onDone={reload}
             />
           )}
-          <Button render={<Link href={`${base}/${project.id}/applicants`} />}>
+          <Button render={<Link href={`/my-projects/${project.id}/applicants`} />}>
             Kelola Lamaran Beginner
           </Button>
         </CardContent>
@@ -385,7 +383,7 @@ function Content() {
               {(project.status === "ACTIVE" || project.status === "AWAITING_COMPLETION") && (
                 <Button
                   className="app-reveal w-full"
-                  render={<Link href={`${base}/${project.id}/workspace`} />}
+                  render={<Link href={`/my-projects/${project.id}/workspace`} />}
                 >
                   Buka Workspace
                 </Button>
