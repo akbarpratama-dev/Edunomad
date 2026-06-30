@@ -1,7 +1,16 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-06-28 (main = b821b5c. Phase 0-7 + UNIFY-UI sweep + **Diskusi tab premium redesign** all merged. NOW: **PHASE 12 Discussion Forum Upgrade IN PROGRESS** on branch `feature/phase-10-discussion-forum` (D-P12-1, user-approved full-forum override of locked "no attachments MVP"). **12.1 title+category+pin DONE & verified**; remaining 12.2 threaded replies / 12.3 reactions / 12.4 attachments(Supabase Storage) / 12.5 views. See next-tasks handoff #10. Phase 8 Artifact still pending.)
+> Last updated: 2026-07-01 (main = b821b5c. Phase 0-7 + UNIFY-UI sweep + Diskusi tab premium redesign merged. Branch `feature/phase-10-discussion-forum` = PHASE 12 (12.1 done) PLUS a UX-hardening batch this session — see "⚡ UX batch" below. Remaining 12.2-12.5 + Phase 8 Artifact still pending.)
+
+## ⚡ UX batch (2026-06-30→07-01, branch feature/phase-10-discussion-forum) — committed
+Bug fixes + flow upgrades on top of Phase 12 work. All tsc 0 + Playwright-verified (p4-senior).
+- **Auth redirect race fix (D-AUTH-1)** — false bounce to /auth/login right after sign-in (SIGNED_IN event lagging the nav). AuthGuard now re-checks `supabase.auth.getSession()` before redirecting; AuthProvider holds `isLoading` true through the app-user fetch on a fresh session; useRequireSession same recheck. Context7-grounded (signInWithPassword resolves & dispatches SIGNED_IN separately).
+- **Back-to-landing** — `AuthCard` shows "← Kembali ke beranda" (→ `/`, prop `backHref` default "/") on login + every register step.
+- **Dev perf** — `reactStrictMode:false` in `next.config.ts`: kills dev-only double-fetch (StrictMode double-invoke). Production unchanged. (Latency profiling: first-visit ~3.8s = Next dev compile [gone in prod]; clean 3-parallel API ~686ms; remote DB ap-south-1.)
+- **Senior "Proyek Mentoring" (D-P12-2)** — new SENIOR sidebar item → `/my-projects` (SeniorView via `projectApi.mentoredProjects()`); guard now allows SENIOR. Gives mentor a sidebar path to the per-project workspace Diskusi tab (same board as students — discussion stays a workspace tab per docs/08).
+- **Stay-in-namespace flow (D-P12-3)** — from /my-projects, opening a project keeps you under `/my-projects/:id*`. Detail + workspace + manage + applicants pages are base-aware via `usePathname` (`base = startsWith("/my-projects") ? "/my-projects" : "/projects"`) for backHref + internal links. New nested routes are thin re-exports of the same components: `app/my-projects/[id]/{page,workspace/page,manage/page,applicants/page}.tsx`. Workspace deep-links a tab via `?tab=discussion` (reads `window.location.search`, register `?role=` pattern, avoids Suspense). my-projects cards + senior/beginner dashboards + BeginnerProjectBoard now link `/my-projects/...`. Jelajahi Proyek stays `/projects/:id` (discovery/apply). NOTE: same workspace now reachable at both `/projects/:id/workspace` and `/my-projects/:id/workspace` — same component, not a new screen.
+- Still uncommitted/untouched: `frontend/src/app/page.tsx` (landing, stale M from earlier session — intentionally left).
 
 ## â­ Landing page (marketing `/`) â ADDED 2026-06-23, verified
 Built from user's Figma ("Premium SaaS Landing Page", file `nMFbzuPNcRcKgFVvMEFfaj`, node 5:2) via Figma MCP (source of truth) + skills impeccable/emil-design-eng/ui-ux-pro-max. 11 sections in `frontend/src/components/landing/` (motion.tsx, primitives.tsx, header.tsx, footer.tsx, sections/{hero,problem,how-it-works,feature-grid,project-showcase,portfolio,impact,testimonials,faq,cta}.tsx); composed in `app/page.tsx` (replaced the old `/`âlogin redirect). Stack: `motion` ^12.40.0 (NEW frontend dep, frontend/ only), animation library; landing palette scoped as `ln-*` Tailwind tokens in globals.css `@theme` (in-app docs/08 design system untouched); Manrope (via --font-sans, Black weight). [font InterâManrope across whole app, 2026-06-24] Motion = hero floating-card cluster + glow + entrance, scroll reveal/stagger (SSR-safe mounted-gate so never ships blank), CountUp stats, FAQ accordion, hover lifts â all `prefers-reduced-motion` aware. Header auth-aware (Masuk/Gabung vs Buka Dashboard). Verified: tsc clean, `npm run build` 0 errors (`/` prerendered STATIC), every section browser-screenshotted faithful to Figma. Decisions D-LP-1..4.
@@ -69,7 +78,10 @@ Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTI
 + DESIGN.md + task-breakdown §PHASE 12 + decisions D-P12-1.
 
 main = b821b5c. Branch aktif feature/phase-10-discussion-forum (belum merge). 12.1 (title+category+pin) SELESAI
-& verified. LANJUTKAN bertahap: 12.2 threaded replies (discussion_messages.parent_id) → 12.3 reactions
+& verified. CATATAN: branch ini juga sudah berisi "⚡ UX batch" (auth redirect fix D-AUTH-1, back-to-landing,
+reactStrictMode off, senior "Proyek Mentoring" D-P12-2, flow stay-in-namespace /my-projects/:id* D-P12-3) —
+semua committed, tsc 0, Playwright-verified. Lihat blok "⚡ UX batch" di atas + decisions D-AUTH-1/D-P12-2/D-P12-3.
+LANJUTKAN bertahap: 12.2 threaded replies (discussion_messages.parent_id) → 12.3 reactions
 (message_reactions table) → 12.4 attachments (discussion_attachments + Supabase Storage bucket+signed upload+RLS,
 override "no attachments MVP") → 12.5 views (discussion_views table). Tiap irisan: migration via Supabase MCP
 apply_migration + record _prisma_migrations (sha256 checksum) + prisma generate; backend layered

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { Inbox } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
@@ -42,6 +42,8 @@ function StatusBadge({ status }: { status: ApplicationStatus }) {
 
 function Content() {
   const { id } = useParams<{ id: string }>();
+  const pathname = usePathname();
+  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
   const [tab, setTab] = useState<TabKey>("PENDING");
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [items, setItems] = useState<BeginnerApplicant[]>([]);
@@ -87,7 +89,7 @@ function Content() {
   }));
 
   return (
-    <AppShell backHref={`/projects/${id}`}>
+    <AppShell backHref={`${base}/${id}`}>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
         <PageHeader
           title="Pelamar Beginner"

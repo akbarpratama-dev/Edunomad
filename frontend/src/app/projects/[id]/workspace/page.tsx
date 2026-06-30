@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { CalendarDays, Building2, GraduationCap, CalendarClock } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
@@ -50,6 +50,14 @@ function WorkspaceInner() {
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabKey>("overview");
+
+  // Deep-link a tab via ?tab=discussion (e.g. "Diskusi" shortcut from Proyek
+  // Mentoring / Proyek Saya). Read client-side to skip a Suspense boundary,
+  // matching the register page's ?role= pattern.
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("tab");
+    if (t && TABS.some((tab) => tab.key === t)) setTab(t as TabKey);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -233,9 +241,12 @@ function MembersTab({ project }: { project: ProjectDetail }) {
 export default function WorkspacePage() {
   const params = useParams();
   const id = params.id as string;
+  // Back goes to the section you came from (/my-projects/:id or /projects/:id).
+  const pathname = usePathname();
+  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
   return (
     <AuthGuard>
-      <AppShell backHref={`/projects/${id}`}>
+      <AppShell backHref={`${base}/${id}`}>
         <WorkspaceInner />
       </AppShell>
     </AuthGuard>

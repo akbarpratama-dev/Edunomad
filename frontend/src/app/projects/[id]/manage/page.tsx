@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { Inbox, BadgeCheck } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
@@ -35,6 +35,8 @@ function StatusBadge({ status }: { status: ApplicationStatus }) {
 
 function Content() {
   const { id } = useParams<{ id: string }>();
+  const pathname = usePathname();
+  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [items, setItems] = useState<SeniorApplicant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +77,7 @@ function Content() {
   };
 
   return (
-    <AppShell backHref={`/projects/${id}`}>
+    <AppShell backHref={`${base}/${id}`}>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
         <PageHeader
           title="Lamaran Senior"
@@ -100,7 +102,7 @@ function Content() {
               <p className="text-sm text-muted-foreground">
                 {project.senior.name} adalah mentor proyek ini. Lamaran lain otomatis ditolak.
               </p>
-              <Button variant="outline" className="w-fit" render={<Link href={`/projects/${id}`} />}>
+              <Button variant="outline" className="w-fit" render={<Link href={`${base}/${id}`} />}>
                 Lihat Proyek
               </Button>
             </CardContent>

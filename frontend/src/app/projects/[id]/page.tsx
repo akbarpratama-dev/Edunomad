@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
@@ -228,6 +228,8 @@ function BeginnerApplyDialog({ project }: { project: ProjectDetail }) {
 // Role-appropriate action panel for the project detail page.
 function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () => void }) {
   const appUser = useAuthStore((s) => s.appUser)!;
+  const pathname = usePathname();
+  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
   const isOwner = appUser.role === "UMKM" && project.umkm.id === appUser.id;
   const isLeadSenior = appUser.role === "SENIOR" && project.senior?.id === appUser.id;
   const recruiting = project.status === "RECRUITING";
@@ -248,7 +250,7 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
               onDone={reload}
             />
           )}
-          <Button render={<Link href={`/projects/${project.id}/manage`} />}>
+          <Button render={<Link href={`${base}/${project.id}/manage`} />}>
             Kelola Lamaran Senior
           </Button>
           <Button variant="outline" render={<Link href="/my-projects" />}>
@@ -286,7 +288,7 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
               onDone={reload}
             />
           )}
-          <Button render={<Link href={`/projects/${project.id}/applicants`} />}>
+          <Button render={<Link href={`${base}/${project.id}/applicants`} />}>
             Kelola Lamaran Beginner
           </Button>
         </CardContent>
@@ -342,6 +344,10 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
 function Content() {
   const params = useParams<{ id: string }>();
   const id = params.id;
+  // Same page serves /projects/:id (from browse) and /my-projects/:id (from the
+  // user's own projects). Keep navigation inside whichever section you came from.
+  const pathname = usePathname();
+  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -360,7 +366,7 @@ function Content() {
   useEffect(load, [id]);
 
   return (
-    <AppShell backHref="/projects">
+    <AppShell backHref={base}>
       <div className="mx-auto w-full max-w-5xl">
         {loading ? (
           <ListSkeleton rows={5} />
@@ -379,7 +385,7 @@ function Content() {
               {(project.status === "ACTIVE" || project.status === "AWAITING_COMPLETION") && (
                 <Button
                   className="app-reveal w-full"
-                  render={<Link href={`/projects/${project.id}/workspace`} />}
+                  render={<Link href={`${base}/${project.id}/workspace`} />}
                 >
                   Buka Workspace
                 </Button>

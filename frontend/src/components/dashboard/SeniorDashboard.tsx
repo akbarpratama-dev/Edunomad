@@ -130,7 +130,7 @@ export function SeniorDashboard() {
                 <ProjectMiniRow
                   key={p.id}
                   project={p}
-                  href={`/projects/${p.id}/workspace`}
+                  href={`/my-projects/${p.id}/workspace`}
                   subtitle={`Untuk ${p.umkm.name}`}
                 />
               ))}

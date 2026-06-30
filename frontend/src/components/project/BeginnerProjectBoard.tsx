@@ -181,7 +181,7 @@ export function BeginnerProjectBoard() {
 
   const { project, roleName, members, deliverables } = data;
   const activeMembers = members.filter((m) => m.status === "ACTIVE");
-  const workspace = `/projects/${project.id}/workspace`;
+  const workspace = `/my-projects/${project.id}/workspace`;
   const teamAvatars = [
     ...(project.senior ? [project.senior.name] : []),
     ...activeMembers.map((m) => m.user.name),

@@ -148,7 +148,7 @@ function ProjectRow({ membership }: { membership: MyMembership }) {
   const team = p.projectMembers.map((m) => m.user.name);
   return (
     <Link
-      href={`/projects/${p.id}/workspace`}
+      href={`/my-projects/${p.id}/workspace`}
       className="group -m-2 flex flex-col gap-3 rounded-2xl p-2 transition-colors hover:bg-muted/50 sm:flex-row"
     >
       <div className="relative hidden h-24 w-36 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-[#201f31] to-[#3a3850] sm:block">
