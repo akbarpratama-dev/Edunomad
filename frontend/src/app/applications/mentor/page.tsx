@@ -134,7 +134,7 @@ function Content() {
                   {a.status === "ACCEPTED" && (
                     <Button
                       size="sm"
-                      render={<Link href={`/projects/${a.project.id}/applicants`} />}
+                      render={<Link href={`/my-projects/${a.project.id}/applicants`} />}
                     >
                       Kelola Lamaran Beginner
                     </Button>

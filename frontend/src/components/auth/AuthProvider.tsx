@@ -34,11 +34,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // calls inside an onAuthStateChange handler can deadlock the auth client.
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!active) return;
+      // Whether we already have the app user (role/status) loaded. On a FRESH
+      // session (initial load / sign-in) it's null, so we re-enter the loading
+      // state to keep AuthGuard waiting until the app user resolves — otherwise
+      // the guard would see authenticated-but-no-appUser and bounce a logged-in
+      // user to /auth/register/role. On a background TOKEN_REFRESHED event the
+      // app user is already present, so we refetch silently (no "Memuat…" flash).
+      const hadAppUser = useAuthStore.getState().appUser;
       setSession(session);
       if (session) {
+        if (!hadAppUser) setLoading(true);
         setTimeout(async () => {
           if (!active) return;
           await loadAppUser();
+          if (!active) return;
           setLoading(false);
         }, 0);
       } else {

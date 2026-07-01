@@ -1,4 +1,7 @@
 import { apiClient } from "@/lib/apiClient";
+import { supabase } from "@/lib/supabase/client";
+
+const ATTACHMENT_BUCKET = "discussion-attachments";
 
 interface Envelope<T> {
   success: boolean;
@@ -24,13 +27,58 @@ export interface DiscussionMember {
   user: { id: string; name: string; email: string; role: string };
 }
 
+// Phase 12 — forum categories (discussions.category). Labels in Indonesian.
+export type DiscussionCategory =
+  | "ANNOUNCEMENT"
+  | "QUESTION"
+  | "IDEA"
+  | "BLOCKER"
+  | "MENTOR_REVIEW"
+  | "UPDATE";
+
+export const DISCUSSION_CATEGORY_META: Record<
+  DiscussionCategory,
+  { label: string; className: string }
+> = {
+  ANNOUNCEMENT: { label: "Pengumuman", className: "bg-[#eef7d6] text-[#5f8c00]" },
+  QUESTION: { label: "Pertanyaan", className: "bg-sky-100 text-sky-700" },
+  IDEA: { label: "Ide", className: "bg-violet-100 text-violet-700" },
+  BLOCKER: { label: "Kendala", className: "bg-rose-100 text-rose-700" },
+  MENTOR_REVIEW: { label: "Review Mentor", className: "bg-amber-100 text-amber-700" },
+  UPDATE: { label: "Pembaruan", className: "bg-zinc-100 text-zinc-700" },
+};
+
 export interface Discussion {
   id: string;
   type: DiscussionType;
   projectId: string | null;
+  title?: string | null;
+  category?: DiscussionCategory | null;
+  isPinned?: boolean;
   members: DiscussionMember[];
-  _count?: { messages: number };
+  _count?: { messages: number; views?: number };
   updatedAt?: string;
+}
+
+// Phase 12.3 — curated reaction set (must match backend REACTION_EMOJIS).
+export const REACTION_EMOJIS = ["👍", "❤️", "🎉", "✅", "👀", "🙌"] as const;
+
+export interface MessageReaction {
+  emoji: string;
+  userId: string;
+}
+
+export type AttachmentType = "FILE" | "IMAGE" | "LINK";
+
+// Phase 12.4. On read, FILE/IMAGE `url` is a short-lived signed download URL;
+// `filePath`/`fileName`/`fileSize` describe the stored object. LINK carries `url`.
+export interface DiscussionAttachment {
+  id?: string;
+  type: AttachmentType;
+  url?: string | null;
+  filePath?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
 }
 
 export interface DiscussionMessage {
@@ -38,6 +86,10 @@ export interface DiscussionMessage {
   message: string;
   createdAt: string;
   sender: { id: string; name: string; role: string };
+  parentId?: string | null; // Phase 12.2: set on replies
+  replies?: DiscussionMessage[]; // top-level messages carry their one-level replies
+  reactions?: MessageReaction[]; // Phase 12.3
+  attachments?: DiscussionAttachment[]; // Phase 12.4
 }
 
 export const discussionApi = {
@@ -47,9 +99,18 @@ export const discussionApi = {
     return res.data.data;
   },
 
-  async createGroupDiscussion(projectId: string, members?: string[]): Promise<Discussion> {
-    const res = await apiClient.post<Envelope<Discussion>>(`/projects/${projectId}/discussions`, {
-      members,
+  async createGroupDiscussion(
+    projectId: string,
+    input: { title: string; category: DiscussionCategory; members?: string[] }
+  ): Promise<Discussion> {
+    const res = await apiClient.post<Envelope<Discussion>>(`/projects/${projectId}/discussions`, input);
+    return res.data.data;
+  },
+
+  // Phase 12 — pin/unpin a forum topic (senior lead / UMKM owner).
+  async pinDiscussion(discussionId: string, pinned: boolean): Promise<Discussion> {
+    const res = await apiClient.post<Envelope<Discussion>>(`/discussions/${discussionId}/pin`, {
+      pinned,
     });
     return res.data.data;
   },
@@ -62,10 +123,62 @@ export const discussionApi = {
     return res.data;
   },
 
-  async sendMessage(discussionId: string, message: string): Promise<DiscussionMessage> {
+  async sendMessage(
+    discussionId: string,
+    message: string,
+    parentId?: string,
+    attachments?: DiscussionAttachment[]
+  ): Promise<DiscussionMessage> {
     const res = await apiClient.post<Envelope<DiscussionMessage>>(
       `/discussions/${discussionId}/messages`,
-      { message }
+      {
+        message,
+        ...(parentId ? { parentId } : {}),
+        ...(attachments && attachments.length ? { attachments } : {}),
+      }
+    );
+    return res.data.data;
+  },
+
+  // Phase 12.5 — record a unique view of a discussion (idempotent).
+  async recordView(discussionId: string): Promise<void> {
+    await apiClient.post(`/discussions/${discussionId}/view`).catch(() => undefined);
+  },
+
+  // Phase 12.4 — mint a signed upload URL for an attachment.
+  async getUploadUrl(
+    discussionId: string,
+    fileName: string,
+    fileSize: number
+  ): Promise<{ path: string; token: string; signedUrl: string }> {
+    const res = await apiClient.post<Envelope<{ path: string; token: string; signedUrl: string }>>(
+      `/discussions/${discussionId}/attachments/upload-url`,
+      { fileName, fileSize }
+    );
+    return res.data.data;
+  },
+
+  // Phase 12.4 — upload a file to Storage via a signed URL, returning the
+  // attachment descriptor to attach to a message.
+  async uploadAttachment(discussionId: string, file: File): Promise<DiscussionAttachment> {
+    const { path, token } = await this.getUploadUrl(discussionId, file.name, file.size);
+    const { error } = await supabase.storage
+      .from(ATTACHMENT_BUCKET)
+      .uploadToSignedUrl(path, token, file);
+    if (error) throw error;
+    return {
+      type: file.type.startsWith("image/") ? "IMAGE" : "FILE",
+      filePath: path,
+      fileName: file.name,
+      fileSize: file.size,
+    };
+  },
+
+  // Phase 12.3 — toggle an emoji reaction on a message.
+  async toggleReaction(messageId: string, emoji: string): Promise<{ reacted: boolean }> {
+    const res = await apiClient.post<Envelope<{ reacted: boolean }>>(
+      `/discussions/messages/${messageId}/reactions`,
+      { emoji }
     );
     return res.data.data;
   },

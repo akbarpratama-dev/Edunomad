@@ -170,8 +170,10 @@ PROYEK / STATUS). Numbers in stats use `tabular-nums`.
 **Mostly flat — depth comes from the navy/paper/white tonal stack, not shadows.** Borders
 (`1px border`) separate surfaces; rounded corners do the lifting. Shadows are reserved and soft:
 hover lift on interactive cards only — `0 14px 30px rgba(32,31,49,0.08)` (navy-tinted, low alpha).
-No ambient drop-shadows on static cards, no glassmorphism, no nested cards. Radii scale: inputs
-`10px`, cards `20px`, hero `24px`, pills/buttons/badges `full`.
+No ambient drop-shadows on static cards, no glassmorphism, no nested cards. **Radii scale (one
+soft-rect family):** inputs/select `10px`, buttons `16px` (sm `12px`, xs `10px`), cards `20px`, hero
+`24px`. Only true tags stay pill (`full`): badges, filter chips, reaction chips. Buttons are NOT pills
+(refined 2026-07-01, D-UI-12/13) — match the card family so every surface reads as one theme.
 
 **Motion.** Scoped to `[data-app]`. One reveal: `app-reveal` (fade-up 10px, 0.5s,
 `cubic-bezier(0.22,1,0.36,1)`), staggered across list items via `animation-delay`. Transitions are
@@ -182,9 +184,10 @@ instantly (content is visible by default — reveals enhance, never gate visibil
 
 ## Components
 
-- **Button — primary:** chartreuse fill, dark text, `rounded-full`, `12px 24px`, hover `#cdec5a`,
-  `active:translate-y-px`, visible focus ring. The one loud element per surface.
-- **Button — outline/secondary:** white fill, `border`, dark text, `rounded-full`; hover `muted-surface`.
+- **Button — primary:** chartreuse fill, dark text, `rounded-[16px]` (sm `12px`, xs `10px`), `12px 24px`,
+  hover `#cdec5a`, `active:translate-y-px`, visible focus ring. The one loud element per surface.
+  NOT a pill — same soft-rect family as cards/inputs. Use the shared `<Button>`; don't hand-roll radii.
+- **Button — outline/secondary:** white fill, `border`, dark text, `rounded-[16px]`; hover `muted-surface`.
 - **Link / tertiary:** `link-green` text, underline on hover (not chartreuse).
 - **Card:** white, `1px border`, `rounded-[20px]`, `p-5`–`p-6`. Hover lift only if it's a link/action.
 - **Input:** `surface-inset` fill, `1.5px border`, `rounded-[10px]`, `h-11`; focus ring `ring`.

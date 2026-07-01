@@ -1,27 +1,45 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   MessagesSquare,
   Plus,
   CheckCircle2,
   Circle,
-  Users,
-  CalendarClock,
   GraduationCap,
-  ArrowRight,
+  Pin,
+  PinOff,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { discussionApi, type Discussion } from "@/services/discussionApi";
+import { UserAvatar } from "@/components/common/UserAvatar";
+import {
+  discussionApi,
+  DISCUSSION_CATEGORY_META,
+  type Discussion,
+  type DiscussionCategory,
+} from "@/services/discussionApi";
 import {
   projectApi,
-  PROJECT_STATUS_META,
   type ProjectDetail,
   type ProjectMember,
 } from "@/services/projectApi";
@@ -34,6 +52,15 @@ const ROLE_BADGE: Record<string, { label: string; className: string }> = {
   ADMIN: { label: "Admin", className: "bg-zinc-200 text-zinc-700" },
 };
 
+const CATEGORY_ORDER: DiscussionCategory[] = [
+  "ANNOUNCEMENT",
+  "QUESTION",
+  "IDEA",
+  "BLOCKER",
+  "MENTOR_REVIEW",
+  "UPDATE",
+];
+
 const AVATAR_TONES = [
   "bg-[#201f31] text-white",
   "bg-sky-500 text-white",
@@ -45,9 +72,6 @@ function toneFor(id: string) {
   let h = 0;
   for (const c of id) h = (h * 31 + c.charCodeAt(0)) % AVATAR_TONES.length;
   return AVATAR_TONES[h];
-}
-function initials(name: string) {
-  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 }
 function timeAgo(iso?: string) {
   if (!iso) return "";
@@ -67,7 +91,10 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
   const [discussions, setDiscussions] = useState<Discussion[] | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
+  const [filter, setFilter] = useState<DiscussionCategory | "ALL">("ALL");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [pinningId, setPinningId] = useState<string | null>(null);
+  const [shown, setShown] = useState(6); // "Muat lebih banyak" page size
 
   const canCreate =
     (appUser?.role === "SENIOR" && project.senior?.id === appUser.id) ||
@@ -92,27 +119,64 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
     load();
   }, [load]);
 
-  const create = async () => {
-    setCreating(true);
+  const create = async (title: string, category: DiscussionCategory) => {
+    const activeIds = members.filter((m) => m.status === "ACTIVE").map((m) => m.user.id);
+    const created = await discussionApi.createGroupDiscussion(project.id, {
+      title,
+      category,
+      members: activeIds,
+    });
+    toast.success("Diskusi dibuat");
+    setFilter("ALL");
+    await load();
+    setActiveId(created.id); // open the new topic (after load, overrides cur ?? …)
+  };
+
+  const togglePin = async (d: Discussion) => {
+    setPinningId(d.id);
     try {
-      const activeIds = members.filter((m) => m.status === "ACTIVE").map((m) => m.user.id);
-      const created = await discussionApi.createGroupDiscussion(project.id, activeIds);
-      toast.success("Diskusi dibuat");
-      setActiveId(created.id);
+      await discussionApi.pinDiscussion(d.id, !d.isPinned);
       await load();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Gagal membuat diskusi");
+      toast.error(err instanceof ApiError ? err.message : "Gagal menyematkan diskusi");
     } finally {
-      setCreating(false);
+      setPinningId(null);
     }
   };
 
   const activeMembers = members.filter((m) => m.status === "ACTIVE");
-  // Team = senior + active members, de-duplicated by user id.
   const team = [
     ...(project.senior ? [{ id: project.senior.id, name: project.senior.name, role: "SENIOR" }] : []),
     ...activeMembers.map((m) => ({ id: m.user.id, name: m.user.name, role: "BEGINNER" })),
   ].filter((t, i, arr) => arr.findIndex((x) => x.id === t.id) === i);
+
+  // Categories actually present (for the filter row).
+  const presentCategories = useMemo(() => {
+    const set = new Set<DiscussionCategory>();
+    (discussions ?? []).forEach((d) => d.category && set.add(d.category));
+    return CATEGORY_ORDER.filter((c) => set.has(c));
+  }, [discussions]);
+
+  const visible = useMemo(
+    () => (discussions ?? []).filter((d) => filter === "ALL" || d.category === filter),
+    [discussions, filter]
+  );
+
+  // Keep an in-view discussion selected when the filter changes.
+  useEffect(() => {
+    if (visible.length && !visible.some((d) => d.id === activeId)) {
+      setActiveId(visible[0].id);
+    }
+  }, [visible, activeId]);
+
+  // Reset the visible window when the category filter changes.
+  useEffect(() => setShown(6), [filter]);
+
+  // Phase 12.5: record a unique view of the opened topic, then refresh counts.
+  useEffect(() => {
+    if (!activeId) return;
+    discussionApi.recordView(activeId).then(() => load());
+  }, [activeId, load]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -126,274 +190,334 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
           </p>
         </div>
         {canCreate && (
-          <Button onClick={create} disabled={creating}>
+          <Button onClick={() => setCreateOpen(true)}>
             <Plus className="size-4" /> Buat Diskusi Baru
           </Button>
         )}
       </div>
 
-      {/* Project summary card */}
-      <ProjectSummaryCard project={project} team={team} />
-
       {discussions === null ? (
         <p className="text-sm text-muted-foreground">Memuat diskusi…</p>
       ) : discussions.length === 0 ? (
-        <EmptyDiscussions canCreate={canCreate} creating={creating} onCreate={create} />
+        <EmptyDiscussions canCreate={canCreate} onCreate={() => setCreateOpen(true)} />
       ) : (
-        <div className="grid gap-5 lg:grid-cols-[290px_minmax(0,1fr)] xl:grid-cols-[290px_minmax(0,1fr)_280px]">
-          {/* Discussion list */}
-          <div className="flex flex-col gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Daftar Diskusi
-            </p>
-            {discussions.map((d, i) => (
-              <DiscussionListCard
-                key={d.id}
-                index={i}
-                discussion={d}
-                active={d.id === activeId}
-                onSelect={() => setActiveId(d.id)}
-              />
-            ))}
-            {canCreate && (
-              <button
-                onClick={create}
-                disabled={creating}
-                className="flex items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-[#a3ce00] hover:text-foreground disabled:opacity-60"
-              >
-                <Plus className="size-4" /> Diskusi Baru
-              </button>
-            )}
-          </div>
-
-          {/* Active thread */}
-          {activeId && (
-            <DiscussionFeed
-              key={activeId}
-              channelId={activeId}
-              count={discussions.find((d) => d.id === activeId)?._count?.messages}
-            />
+        <>
+          {/* Category filter chips (real) */}
+          {presentCategories.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <FilterChip label="Semua" active={filter === "ALL"} onClick={() => setFilter("ALL")} />
+              {presentCategories.map((c) => (
+                <FilterChip
+                  key={c}
+                  label={DISCUSSION_CATEGORY_META[c].label}
+                  active={filter === c}
+                  onClick={() => setFilter(c)}
+                />
+              ))}
+            </div>
           )}
 
-          {/* Right rail (xl only — key info already in summary card) */}
-          <aside className="hidden flex-col gap-4 xl:flex">
-            <RailCard icon={<CheckCircle2 className="size-4" />} title="Milestone Berikutnya">
-              {project.milestones.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Belum ada milestone.</p>
+          <div className="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_280px]">
+            {/* Discussion list */}
+            <div className="flex flex-col gap-4">
+              {visible.length === 0 ? (
+                <p className="rounded-[20px] border border-dashed border-border py-8 text-center text-xs text-muted-foreground">
+                  Tidak ada diskusi pada kategori ini.
+                </p>
               ) : (
-                <ul className="flex flex-col gap-3">
-                  {project.milestones.slice(0, 5).map((m) => {
-                    const done = m.status === "COMPLETED";
-                    return (
-                      <li key={m.id} className="flex items-start gap-2.5">
-                        {done ? (
-                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#5da316]" />
-                        ) : (
-                          <Circle className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p
-                            className={cn(
-                              "text-sm",
-                              done ? "text-muted-foreground line-through" : "font-medium text-foreground"
-                            )}
-                          >
-                            {m.title}
-                          </p>
-                          <p className="text-[11px] text-muted-foreground">
-                            {new Date(m.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
-                          </p>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
+                visible.slice(0, shown).map((d) => (
+                  <DiscussionListCard
+                    key={d.id}
+                    discussion={d}
+                    active={d.id === activeId}
+                    canPin={canCreate}
+                    pinning={pinningId === d.id}
+                    onSelect={() => setActiveId(d.id)}
+                    onTogglePin={() => togglePin(d)}
+                  />
+                ))
               )}
-            </RailCard>
-
-            <RailCard icon={<GraduationCap className="size-4" />} title="Anggota Tim">
-              {team.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Belum ada anggota.</p>
-              ) : (
-                <ul className="flex flex-col gap-3">
-                  {team.map((t) => {
-                    const badge = ROLE_BADGE[t.role];
-                    return (
-                      <li key={t.id} className="flex items-center gap-2.5">
-                        <span
-                          className={cn(
-                            "grid size-8 shrink-0 place-items-center rounded-full text-[12px] font-bold",
-                            toneFor(t.id)
-                          )}
-                        >
-                          {initials(t.name)}
-                        </span>
-                        <span className="flex-1 truncate text-sm font-medium">{t.name}</span>
-                        {badge && (
-                          <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", badge.className)}>
-                            {badge.label}
-                          </span>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+              {visible.length > shown && (
+                <button
+                  onClick={() => setShown((s) => s + 6)}
+                  className="flex items-center justify-center gap-1.5 rounded-[20px] border border-dashed border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-[#a3ce00] hover:text-foreground"
+                >
+                  Muat lebih banyak
+                </button>
               )}
-            </RailCard>
-          </aside>
-        </div>
-      )}
-    </div>
-  );
-}
+            </div>
 
-// ── Project summary card (real data) ─────────────────────────────────────────
-function ProjectSummaryCard({
-  project,
-  team,
-}: {
-  project: ProjectDetail;
-  team: { id: string; name: string; role: string }[];
-}) {
-  const statusMeta = PROJECT_STATUS_META[project.status];
-  return (
-    <section className="flex flex-col gap-4 rounded-[24px] border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-start gap-4">
-        <span
-          className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#eef7d6] text-[#5f8c00]"
-          aria-hidden="true"
-        >
-          <MessagesSquare className="size-6" />
-        </span>
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-bold tracking-tight text-foreground">{project.title}</h3>
-            <Badge variant={statusMeta.variant} className={statusMeta.className}>
-              {statusMeta.label}
-            </Badge>
-          </div>
-          <p className="mt-0.5 text-sm text-muted-foreground">Bersama {project.umkm.name}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <GraduationCap className="size-3.5" /> Mentor: {project.senior?.name ?? "Belum ada"}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <CalendarClock className="size-3.5" />
-              {new Date(project.deadline).toLocaleDateString("id-ID", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4 sm:flex-col sm:items-end">
-        <AvatarStack team={team} />
-        <Button
-          variant="outline"
-          size="sm"
-          render={<Link href={`/projects/${project.id}`} />}
-          className="shrink-0"
-        >
-          Lihat Detail Proyek <ArrowRight className="size-4" />
-        </Button>
-      </div>
-    </section>
-  );
-}
-
-function AvatarStack({ team }: { team: { id: string; name: string }[] }) {
-  const shown = team.slice(0, 5);
-  const extra = team.length - shown.length;
-  return (
-    <div className="flex items-center">
-      <div className="flex -space-x-2">
-        {shown.map((t) => (
-          <span
-            key={t.id}
-            title={t.name}
-            className={cn(
-              "grid size-8 place-items-center rounded-full text-[11px] font-bold ring-2 ring-card",
-              toneFor(t.id)
+            {/* Active thread */}
+            {activeId && (
+              <DiscussionFeed
+                key={activeId}
+                channelId={activeId}
+                count={discussions.find((d) => d.id === activeId)?._count?.messages}
+                views={discussions.find((d) => d.id === activeId)?._count?.views}
+                title={discussions.find((d) => d.id === activeId)?.title ?? undefined}
+                category={discussions.find((d) => d.id === activeId)?.category ?? undefined}
+              />
             )}
-          >
-            {initials(t.name)}
-          </span>
-        ))}
-        {extra > 0 && (
-          <span className="grid size-8 place-items-center rounded-full bg-muted text-[11px] font-bold text-muted-foreground ring-2 ring-card">
-            +{extra}
-          </span>
-        )}
-      </div>
-      <span className="ml-2.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
-        <Users className="size-3.5" /> {team.length}
-      </span>
+
+            {/* Right rail (xl only) */}
+            <aside className="hidden flex-col gap-4 xl:flex">
+              <RailCard icon={<CheckCircle2 className="size-4" />} title="Milestone Berikutnya">
+                {project.milestones.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Belum ada milestone.</p>
+                ) : (
+                  <ul className="flex flex-col gap-3">
+                    {project.milestones.slice(0, 5).map((m) => {
+                      const done = m.status === "COMPLETED";
+                      return (
+                        <li key={m.id} className="flex items-start gap-2.5">
+                          {done ? (
+                            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#5da316]" />
+                          ) : (
+                            <Circle className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className={cn(
+                                "text-sm",
+                                done ? "text-muted-foreground line-through" : "font-medium text-foreground"
+                              )}
+                            >
+                              {m.title}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {new Date(m.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+                            </p>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </RailCard>
+
+              <RailCard icon={<GraduationCap className="size-4" />} title="Anggota Tim">
+                {team.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Belum ada anggota.</p>
+                ) : (
+                  <ul className="flex flex-col gap-3">
+                    {team.map((t) => {
+                      const badge = ROLE_BADGE[t.role];
+                      return (
+                        <li key={t.id} className="flex items-center gap-2.5">
+                          <UserAvatar
+                            name={t.name}
+                            className={cn("size-8 shrink-0 text-[12px] font-bold", toneFor(t.id))}
+                          />
+                          <span className="flex-1 truncate text-sm font-medium">{t.name}</span>
+                          {badge && (
+                            <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", badge.className)}>
+                              {badge.label}
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </RailCard>
+            </aside>
+          </div>
+        </>
+      )}
+
+      <CreateDiscussionDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={create} />
     </div>
   );
 }
 
-// ── Discussion list card (real: message count + last activity + members) ──────
-function DiscussionListCard({
-  discussion,
-  index,
-  active,
-  onSelect,
+// ── Create discussion dialog ─────────────────────────────────────────────────
+function CreateDiscussionDialog({
+  open,
+  onOpenChange,
+  onCreate,
 }: {
-  discussion: Discussion;
-  index: number;
-  active: boolean;
-  onSelect: () => void;
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  onCreate: (title: string, category: DiscussionCategory) => Promise<void>;
 }) {
-  const memberCount = discussion.members?.length ?? 0;
-  const msgCount = discussion._count?.messages ?? 0;
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState<DiscussionCategory | "">("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (title.trim().length < 3) return toast.error("Judul minimal 3 karakter");
+    if (!category) return toast.error("Pilih kategori diskusi");
+    setBusy(true);
+    try {
+      await onCreate(title.trim(), category);
+      setTitle("");
+      setCategory("");
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal membuat diskusi");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !busy && onOpenChange(o)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Buat Diskusi Baru</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="disc-title">Judul Diskusi</Label>
+            <Input
+              id="disc-title"
+              placeholder="cth. Review Landing Page Minggu Ini"
+              value={title}
+              maxLength={255}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="disc-cat">Kategori</Label>
+            <Select value={category} onValueChange={(v) => setCategory((v ?? "") as DiscussionCategory)}>
+              <SelectTrigger id="disc-cat">
+                <SelectValue placeholder="Pilih kategori" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORY_ORDER.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {DISCUSSION_CATEGORY_META[c].label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
+            Batal
+          </Button>
+          <Button onClick={submit} disabled={busy}>
+            {busy ? "Membuat…" : "Buat Diskusi"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button
-      onClick={onSelect}
+      onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left transition-[border-color,background-color,box-shadow] duration-200",
+        "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
         active
-          ? "border-[#a3ce00] bg-[#f6fae9] shadow-[0_8px_24px_rgba(32,31,49,0.06)]"
-          : "border-border bg-card hover:border-foreground/15 hover:bg-muted/40"
+          ? "border-[#201f31] bg-[#201f31] text-white"
+          : "border-border bg-card text-muted-foreground hover:border-[#a3ce00] hover:text-foreground"
       )}
     >
-      <span
-        className={cn(
-          "grid size-10 shrink-0 place-items-center rounded-xl",
-          active ? "bg-[#d8f277] text-[#0b0b0b]" : "bg-muted text-muted-foreground"
-        )}
-        aria-hidden="true"
-      >
-        <MessagesSquare className="size-5" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-foreground">
-          Diskusi Tim{discussion._count ? ` ${index + 1}` : ""}
-        </p>
-        <p className="truncate text-xs text-muted-foreground">
-          {memberCount} anggota · {timeAgo(discussion.updatedAt) || "Aktif"}
-        </p>
-      </div>
-      <span className="grid min-w-7 shrink-0 place-items-center rounded-full bg-muted px-1.5 text-xs font-semibold tabular-nums text-muted-foreground">
-        {msgCount}
-      </span>
+      {label}
     </button>
   );
 }
 
-// ── Empty state ──────────────────────────────────────────────────────────────
-function EmptyDiscussions({
-  canCreate,
-  creating,
-  onCreate,
+// ── Discussion list card (real title + category + pin) ───────────────────────
+function DiscussionListCard({
+  discussion,
+  active,
+  canPin,
+  pinning,
+  onSelect,
+  onTogglePin,
 }: {
-  canCreate: boolean;
-  creating: boolean;
-  onCreate: () => void;
+  discussion: Discussion;
+  active: boolean;
+  canPin: boolean;
+  pinning: boolean;
+  onSelect: () => void;
+  onTogglePin: () => void;
 }) {
+  const msgCount = discussion._count?.messages ?? 0;
+  const cat = discussion.category ? DISCUSSION_CATEGORY_META[discussion.category] : null;
+  // Pinned topics get a navy card; active adds a chartreuse ring on top.
+  const dark = discussion.isPinned;
+  return (
+    <div
+      className={cn(
+        "group/disc relative rounded-[20px] border p-4 transition-[border-color,background-color,box-shadow] duration-200",
+        dark
+          ? cn("border-[#201f31] bg-[#201f31] text-white", active && "ring-2 ring-[#a3ce00]")
+          : active
+            ? "border-[#a3ce00] bg-[#f6fae9] shadow-[0_8px_24px_rgba(32,31,49,0.06)]"
+            : "border-border bg-card hover:border-foreground/15 hover:bg-muted/40"
+      )}
+    >
+      <button onClick={onSelect} aria-pressed={active} className="flex w-full items-start gap-3 text-left">
+        <span
+          className={cn(
+            "grid size-10 shrink-0 place-items-center rounded-xl",
+            dark
+              ? "bg-white/10 text-white"
+              : active
+                ? "bg-[#d8f277] text-[#0b0b0b]"
+                : "bg-muted text-muted-foreground"
+          )}
+          aria-hidden="true"
+        >
+          <MessagesSquare className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className={cn("flex items-center gap-1.5 truncate text-sm font-semibold", dark ? "text-white" : "text-foreground")}>
+            {discussion.isPinned && (
+              <Pin className={cn("size-3 shrink-0", dark ? "text-[#a3ce00]" : "text-[#5f8c00]")} />
+            )}
+            {discussion.title ?? "Diskusi Tim"}
+          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            {cat && (
+              <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", cat.className)}>
+                {cat.label}
+              </span>
+            )}
+            <span className={cn("text-[11px]", dark ? "text-white/60" : "text-muted-foreground")}>
+              {timeAgo(discussion.updatedAt) || "Aktif"}
+            </span>
+            {/* Message count — bottom-right of the card. */}
+            <span
+              className={cn(
+                "ml-auto inline-flex items-center gap-1 text-[11px] tabular-nums",
+                dark ? "text-white/70" : "text-muted-foreground"
+              )}
+            >
+              <MessagesSquare className="size-3" /> {msgCount}
+            </span>
+          </div>
+        </div>
+      </button>
+      {canPin && (
+        <button
+          onClick={onTogglePin}
+          disabled={pinning}
+          title={discussion.isPinned ? "Lepas sematan" : "Sematkan"}
+          aria-label={discussion.isPinned ? "Lepas sematan" : "Sematkan"}
+          className={cn(
+            "absolute right-2 top-2 hidden size-7 place-items-center rounded-lg transition-colors group-hover/disc:grid disabled:opacity-50",
+            dark
+              ? "text-white/70 hover:bg-white/10 hover:text-white"
+              : "text-muted-foreground hover:bg-card hover:text-foreground"
+          )}
+        >
+          {discussion.isPinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── Empty state ──────────────────────────────────────────────────────────────
+function EmptyDiscussions({ canCreate, onCreate }: { canCreate: boolean; onCreate: () => void }) {
   return (
     <div className="app-reveal flex flex-col items-center gap-3 rounded-[24px] border border-dashed border-border py-16 text-center">
       <span className="grid size-14 place-items-center rounded-2xl bg-[#eef7d6] text-[#5f8c00]" aria-hidden="true">
@@ -406,7 +530,7 @@ function EmptyDiscussions({
         </p>
       </div>
       {canCreate ? (
-        <Button onClick={onCreate} disabled={creating} className="mt-1">
+        <Button onClick={onCreate} className="mt-1">
           <Plus className="size-4" /> Buat Diskusi Baru
         </Button>
       ) : (

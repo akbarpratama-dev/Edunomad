@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { ArrowLeft, CalendarDays, Building2, GraduationCap, CalendarClock } from "lucide-react";
+import { useParams, usePathname } from "next/navigation";
+import { CalendarDays, Building2, GraduationCap, CalendarClock, Users, ArrowRight } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -52,6 +54,14 @@ function WorkspaceInner() {
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabKey>("overview");
 
+  // Deep-link a tab via ?tab=discussion (e.g. "Diskusi" shortcut from Proyek
+  // Mentoring / Proyek Saya). Read client-side to skip a Suspense boundary,
+  // matching the register page's ?role= pattern.
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("tab");
+    if (t && TABS.some((tab) => tab.key === t)) setTab(t as TabKey);
+  }, []);
+
   useEffect(() => {
     let active = true;
     projectApi
@@ -73,13 +83,7 @@ function WorkspaceInner() {
   return (
     <div className="flex flex-col gap-5">
       <div className="app-reveal">
-        <Link
-          href={`/projects/${id}`}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" /> Kembali ke detail proyek
-        </Link>
-        <div className="mt-2 flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">
             {project.title}
           </h1>
@@ -118,8 +122,49 @@ function MetaRow({ icon: Icon, label, value }: { icon: typeof Building2; label: 
 }
 
 function OverviewTab({ project }: { project: ProjectDetail }) {
+  const pathname = usePathname();
+  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
+  const [members, setMembers] = useState<ProjectMember[] | null>(null);
+  useEffect(() => {
+    let active = true;
+    projectApi.members(project.id).then((m) => active && setMembers(m)).catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [project.id]);
+  const team = (members ?? []).filter((m) => m.status === "ACTIVE");
+
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="flex flex-col gap-4">
+      {/* Anggota tim + jalan ke detail proyek (judul/status sudah di header halaman). */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-4">
+        <div className="flex items-center gap-3">
+          {team.length > 0 && (
+            <div className="flex -space-x-2">
+              {team.slice(0, 5).map((m) => (
+                <UserAvatar
+                  key={m.user.id}
+                  name={m.user.name}
+                  className="size-8 text-[11px] font-bold ring-2 ring-card bg-[#d8f277] text-[#0b0b0b]"
+                />
+              ))}
+              {team.length > 5 && (
+                <span className="grid size-8 place-items-center rounded-full bg-muted text-[11px] font-bold text-muted-foreground ring-2 ring-card">
+                  +{team.length - 5}
+                </span>
+              )}
+            </div>
+          )}
+          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Users className="size-4" /> {team.length} anggota
+          </span>
+        </div>
+        <Button variant="outline" size="sm" render={<Link href={`${base}/${project.id}`} />}>
+          Lihat Detail Proyek <ArrowRight className="size-4" />
+        </Button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
       <Card className="app-reveal md:col-span-2">
         <CardContent className="space-y-4">
           <div>
@@ -143,6 +188,7 @@ function OverviewTab({ project }: { project: ProjectDetail }) {
           />
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
@@ -238,9 +284,14 @@ function MembersTab({ project }: { project: ProjectDetail }) {
 }
 
 export default function WorkspacePage() {
+  const params = useParams();
+  const id = params.id as string;
+  // Back goes to the section you came from (/my-projects/:id or /projects/:id).
+  const pathname = usePathname();
+  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
   return (
     <AuthGuard>
-      <AppShell>
+      <AppShell backHref={`${base}/${id}`}>
         <WorkspaceInner />
       </AppShell>
     </AuthGuard>

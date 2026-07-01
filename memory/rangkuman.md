@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-06-28 (Redesign Diskusi + Phase 12 backend forum upgrade 12.1)
+
+Prompt:
+(1) "redesign page diskusi proyek jadi seperti [reference forum]" + detail panjang (Linear/Slack/Notion). (2) "ok, buat phase upgrade backend ini agar works". (3) Pilih scope via AskUserQuestion → "Full forum (incl. attachments)".
+
+Hasil:
+(1) Diskusi tab di-redesign premium master-detail (data nyata) → merged main b821b5c; fitur tanpa backend dihilangkan jujur. (2)+(3) Cek locked docs: diskusi sengaja minimal + "no attachments MVP" eksplisit → STOP, jelaskan, user otorisasi override. Bangun **Phase 12** (renumber dari 10) bertahap di feature/phase-10-discussion-forum. **12.1 (title+category+pin) SELESAI & verified E2E**: migration live (discussions +3 kolom) + prisma sync, backend layered (create wajib title+category, pin endpoint senior/UMKM), frontend (dialog create, filter chips kategori real, badge+judul, pin). DB persist confirmed. Docs 03/04/06/07 + task-breakdown di-amandemen (D-P12-1). Sisa 12.2 threaded replies, 12.3 reactions, 12.4 attachments (Supabase Storage), 12.5 views. Branch belum merge.
+
+---
+
+Date:
 2026-06-28 (Unify-UI sweep — batches 2–6, SELESAI)
 
 Prompt:
@@ -485,3 +496,5 @@ TERSISA: PHASE 4.3 (Project Members & Lifecycle — start/complete project, memb
 [2026-06-25] PHASE 6.3 frontend (Deliverables & Contributions). Bikin deliverableApi+contributionApi, DeliverablesTab (beginner create/submit evidence LINK/lihat feedback/resubmit; senior review inline Setujui/Minta Revisi+feedback), ContributionTab (beginner report summary+skill chips one-per-project; senior approve), tab Deliverables+Kontribusi di workspace. Review inline (bukan page terpisah, D-P6-3). File-upload ditunda (LINK dulu). Browser full loop verified. Phase 6 SELESAI. NEXT = Phase 7 Reviews & Ratings (merge feature/phase-6-deliverables→main dulu).
 
 [2026-06-25] Merge Phase 6→main (1fc2b7e). PHASE 7.1 backend Reviews & Ratings (WF12): review module layered (3 type SENIOR/UMKM→BEGINNER + UMKM→SENIOR, rating 1-5, anti-dup, editable sebelum COMPLETED). GET project/user reviews ditambah (D-P7-1). E2E 11/11. NEXT = 7.2 frontend (Review Center + My Reviews).
+
+[2026-06-30] User: "cek semua role flow, pastikan tidak ada eror & sesuai flow, trs buat autoredirectnya, karna jadi eror saat akses page lain pasti dilempar kesana terus." AskUserQuestion → target redirect = /auth/login; user minta baca semua doc md dulu. Baca docs/06 RBAC (role+status+permission matrix) + audit seluruh guard auth. ROOT CAUSE = transient race (Context7 supabase-js: signInWithPassword resolve & dispatch SIGNED_IN terpisah; pola resmi navigate DI DALAM onAuthStateChange, bukan setelah promise). Login page push /dashboard sebelum event SIGNED_IN sampai → AuthGuard isLoading=false+isAuthenticated=false → replace /auth/login (race #1). Race #2: authenticated-tanpa-appUser (fetchMe in-flight) → /auth/register/role. FIX 3 file (tsc 0): AuthGuard.tsx (getSession re-cek sebelum redirect login), AuthProvider.tsx (setLoading true selama fetch app-user saat fresh session; refresh tetap silent), useRequireSession.ts (getSession re-cek). RBAC allowedRoles per page + nav role-filter sudah benar/sesuai docs/06. TEMUAN belum difix (dilaporkan): nav link 404 → /artifacts /notifications /help /privacy /terms /auth/forgot-password. Belum E2E browser (butuh backend+creds). Decision D-AUTH-1. UNCOMMITTED.

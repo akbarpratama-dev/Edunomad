@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
@@ -248,7 +248,7 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
               onDone={reload}
             />
           )}
-          <Button render={<Link href={`/projects/${project.id}/manage`} />}>
+          <Button render={<Link href={`/my-projects/${project.id}/manage`} />}>
             Kelola Lamaran Senior
           </Button>
           <Button variant="outline" render={<Link href="/my-projects" />}>
@@ -286,7 +286,7 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
               onDone={reload}
             />
           )}
-          <Button render={<Link href={`/projects/${project.id}/applicants`} />}>
+          <Button render={<Link href={`/my-projects/${project.id}/applicants`} />}>
             Kelola Lamaran Beginner
           </Button>
         </CardContent>
@@ -342,6 +342,10 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
 function Content() {
   const params = useParams<{ id: string }>();
   const id = params.id;
+  // Same page serves /projects/:id (from browse) and /my-projects/:id (from the
+  // user's own projects). Keep navigation inside whichever section you came from.
+  const pathname = usePathname();
+  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -360,7 +364,7 @@ function Content() {
   useEffect(load, [id]);
 
   return (
-    <AppShell>
+    <AppShell backHref={base}>
       <div className="mx-auto w-full max-w-5xl">
         {loading ? (
           <ListSkeleton rows={5} />
@@ -371,12 +375,15 @@ function Content() {
             <div className="min-w-0">
               <ProjectDetailView project={project} />
             </div>
-            <aside className="flex flex-col gap-4 lg:sticky lg:top-2 lg:self-start">
+            {/* Content already starts below the header (AppShell pt-16), so the
+                sticky aside uses top-0: aligned with the left column at rest, and
+                pinned to the cleared content top while scrolling. */}
+            <aside className="flex flex-col gap-4 lg:sticky lg:top-0 lg:self-start">
               <ActionPanel project={project} reload={load} />
               {(project.status === "ACTIVE" || project.status === "AWAITING_COMPLETION") && (
                 <Button
                   className="app-reveal w-full"
-                  render={<Link href={`/projects/${project.id}/workspace`} />}
+                  render={<Link href={`/my-projects/${project.id}/workspace`} />}
                 >
                   Buka Workspace
                 </Button>

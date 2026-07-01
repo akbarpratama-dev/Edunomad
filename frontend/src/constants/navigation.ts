@@ -55,6 +55,9 @@ const ROLE_ITEMS: Record<Role, NavItem[]> = {
   ],
   SENIOR: [
     BROWSE_PROJECTS,
+    // The senior's assigned projects — their route into each project's workspace
+    // (and the Diskusi tab), mirroring the Beginner/UMKM "Proyek Saya" entry.
+    { label: "Proyek Mentoring", href: "/my-projects", icon: FolderKanban },
     { label: "Lamaran Mentor", href: "/applications/mentor", icon: FileSignature },
   ],
   BEGINNER: [

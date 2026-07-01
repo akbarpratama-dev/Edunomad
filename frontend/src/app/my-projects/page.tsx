@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { FolderKanban, Plus } from "lucide-react";
+import { FolderKanban, Plus, MessageSquare } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -136,26 +136,36 @@ function Content() {
                   </div>
                   <StatusBadge status={item.status} />
                 </div>
-                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
-                  {item.status === "DRAFT" && (
-                    <>
+                {(item.status === "DRAFT" ||
+                  item.status === "ACTIVE" ||
+                  item.status === "AWAITING_COMPLETION") && (
+                  <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
+                    {item.status === "DRAFT" && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={busy}
+                          onClick={() => setDeleting(item)}
+                        >
+                          Hapus
+                        </Button>
+                        <Button size="sm" disabled={busy} onClick={() => submit(item)}>
+                          Kirim untuk Ditinjau
+                        </Button>
+                      </>
+                    )}
+                    {(item.status === "ACTIVE" || item.status === "AWAITING_COMPLETION") && (
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={busy}
-                        onClick={() => setDeleting(item)}
+                        render={<Link href={`/my-projects/${item.id}/workspace?tab=discussion`} />}
                       >
-                        Hapus
+                        <MessageSquare className="size-4" /> Diskusi
                       </Button>
-                      <Button size="sm" disabled={busy} onClick={() => submit(item)}>
-                        Kirim untuk Ditinjau
-                      </Button>
-                    </>
-                  )}
-                  <Button variant="outline" size="sm" render={<Link href={`/projects/${item.id}`} />}>
-                    Lihat Detail
-                  </Button>
-                </div>
+                    )}
+                  </div>
+                )}
               </article>
             ))}
           </div>
@@ -172,6 +182,95 @@ function Content() {
         destructive
         onConfirm={confirmDelete}
       />
+    </AppShell>
+  );
+}
+
+// Senior "Proyek Mentoring" — the projects this senior leads, each a route into
+// its workspace (and the Diskusi tab). Discussion stays per-project per docs/08;
+// this only gives the senior a sidebar path to it, like Beginner/UMKM have.
+function SeniorView() {
+  const [tab, setTab] = useState<ProjectStatus | "ALL">("ALL");
+  const [items, setItems] = useState<ProjectListItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    projectApi
+      .mentoredProjects()
+      .then((p) => active && setItems(p))
+      .catch(() => active && toast.error("Gagal memuat proyek"))
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const visible = tab === "ALL" ? items : items.filter((p) => p.status === tab);
+
+  return (
+    <AppShell>
+      <div className="flex flex-col gap-5">
+        <PageHeader
+          title="Proyek Mentoring"
+          subtitle="Proyek yang kamu bimbing — buka workspace untuk diskusi, deliverable, dan review tim."
+        />
+
+        <PillTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Filter status proyek" />
+
+        {loading ? (
+          <ListSkeleton rows={4} />
+        ) : visible.length === 0 ? (
+          <EmptyState
+            icon={FolderKanban}
+            heading="Belum Ada Proyek Mentoring"
+            message="Lamar sebagai mentor pada proyek yang membutuhkan untuk mulai membimbing tim."
+          />
+        ) : (
+          <div className="flex flex-col gap-3">
+            {visible.map((item, i) => (
+              <article
+                key={item.id}
+                style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+                className="app-reveal flex flex-col gap-3 rounded-[20px] border border-border bg-card p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span
+                      className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]"
+                      aria-hidden="true"
+                    >
+                      <FolderKanban className="size-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-semibold tracking-tight text-foreground">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">{item.category.name}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        Deadline {new Date(item.deadline).toLocaleDateString("id-ID")}
+                      </p>
+                    </div>
+                  </div>
+                  <StatusBadge status={item.status} />
+                </div>
+                {(item.status === "ACTIVE" || item.status === "AWAITING_COMPLETION") && (
+                  <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      render={<Link href={`/my-projects/${item.id}/workspace?tab=discussion`} />}
+                    >
+                      <MessageSquare className="size-4" /> Diskusi
+                    </Button>
+                    <Button size="sm" render={<Link href={`/my-projects/${item.id}/workspace`} />}>
+                      Buka Workspace
+                    </Button>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
     </AppShell>
   );
 }
@@ -195,12 +294,13 @@ function BeginnerView() {
 function RoleRouter() {
   const role = useAuthStore((s) => s.appUser?.role);
   if (role === "BEGINNER") return <BeginnerView />;
+  if (role === "SENIOR") return <SeniorView />;
   return <Content />;
 }
 
 export default function MyProjectsPage() {
   return (
-    <AuthGuard allowedRoles={["UMKM", "BEGINNER"]}>
+    <AuthGuard allowedRoles={["UMKM", "BEGINNER", "SENIOR"]}>
       <RoleRouter />
     </AuthGuard>
   );

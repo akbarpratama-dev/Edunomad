@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { PROJECT_STATUS_META, type ProjectListItem } from "@/services/projectApi";
 
 // ── primitives ───────────────────────────────────────────────────────────────
@@ -33,16 +34,10 @@ const AVATAR_TONES = [
 
 export function Avatar({ name, i = 0, ring = "ring-card" }: { name: string; i?: number; ring?: string }) {
   return (
-    <span
-      className={cn(
-        "inline-flex size-7 items-center justify-center rounded-full text-[10px] font-bold ring-2",
-        AVATAR_TONES[i % AVATAR_TONES.length],
-        ring
-      )}
-      title={name}
-    >
-      {initials(name)}
-    </span>
+    <UserAvatar
+      name={name}
+      className={cn("size-7 text-[10px] font-bold ring-2", AVATAR_TONES[i % AVATAR_TONES.length], ring)}
+    />
   );
 }
 

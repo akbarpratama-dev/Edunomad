@@ -1,9 +1,12 @@
 "use client";
 
-import { Menu, Bell, LogOut, User as UserIcon, ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { Menu, Bell, LogOut, User as UserIcon, ChevronDown, ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -27,7 +30,7 @@ const ROLE_LABEL: Record<Role, string> = {
 
 // Slim top bar — no breadcrumbs (each page owns its own title). Just the mobile
 // nav trigger on the left and the notification + profile controls on the right.
-export function Header() {
+export function Header({ backHref, scrolled }: { backHref?: string; scrolled?: boolean }) {
   const mobileNavOpen = useUIStore((s) => s.modals["mobile-nav"] ?? false);
   const openModal = useUIStore((s) => s.openModal);
   const closeModal = useUIStore((s) => s.closeModal);
@@ -36,16 +39,33 @@ export function Header() {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   return (
-    <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-end px-4 lg:px-8">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="pointer-events-auto absolute left-3 top-1/2 -translate-y-1/2 md:hidden"
-        onClick={() => openModal("mobile-nav")}
-        aria-label="Open menu"
-      >
-        <Menu className="size-5" />
-      </Button>
+    <header
+      className={cn(
+        "pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between px-4 lg:px-8 transition-colors duration-200",
+        // Fill the bar (matching page bg, frosted) once content scrolls under it,
+        // so the notif/profile/back controls stay readable instead of overlapping
+        // the scrolled content. Back pages keep it filled (band is reserved); other
+        // pages stay transparent at the top so the title can share the row.
+        (backHref || scrolled) && "border-b border-border bg-background/85 backdrop-blur-md"
+      )}
+    >
+      {/* Left controls: mobile nav + optional back, same ghost-icon style as the right cluster */}
+      <div className="pointer-events-auto flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => openModal("mobile-nav")}
+          aria-label="Open menu"
+        >
+          <Menu className="size-5" />
+        </Button>
+        {backHref && (
+          <Button variant="ghost" size="icon" aria-label="Kembali" render={<Link href={backHref} />}>
+            <ArrowLeft className="size-5" />
+          </Button>
+        )}
+      </div>
 
       <div className="pointer-events-auto flex items-center gap-2">
         <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
@@ -60,11 +80,18 @@ export function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger>
             <span className="flex cursor-pointer items-center gap-2 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-muted">
-              <Avatar className="size-8">
-                <AvatarFallback className="bg-[#d8f277] text-[12px] font-bold text-[#0b0b0b]">
-                  {appUser?.name?.charAt(0).toUpperCase() ?? <UserIcon className="size-4" />}
-                </AvatarFallback>
-              </Avatar>
+              {appUser ? (
+                <UserAvatar
+                  name={appUser.name}
+                  className="size-8 bg-[#d8f277] text-[12px] font-bold text-[#0b0b0b]"
+                />
+              ) : (
+                <Avatar className="size-8">
+                  <AvatarFallback className="bg-[#d8f277] text-[#0b0b0b]">
+                    <UserIcon className="size-4" />
+                  </AvatarFallback>
+                </Avatar>
+              )}
               {appUser && (
                 <span className="hidden text-left leading-tight sm:block">
                   <span className="block text-sm font-semibold text-foreground">{appUser.name}</span>

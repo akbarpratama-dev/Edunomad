@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
+import { supabase } from "@/lib/supabase/client";
 import type { Role } from "@/types/user";
 
 // Protects pages: requires a session + a completed app account. Optionally
@@ -24,8 +25,19 @@ export function AuthGuard({
   useEffect(() => {
     if (isLoading) return;
     if (!isAuthenticated) {
-      router.replace("/auth/login");
-      return;
+      // Don't bounce to login on the store's `isAuthenticated` flag alone: right
+      // after sign-in (and on token refresh / multi-tab) the SIGNED_IN event can
+      // land AFTER the navigation that mounted this guard, so the flag is briefly
+      // false while a real session already exists in the auth client. Confirm
+      // there is genuinely no session before redirecting; if one exists, the
+      // store catches up via onAuthStateChange and this guard re-renders.
+      let cancelled = false;
+      supabase.auth.getSession().then(({ data }) => {
+        if (!cancelled && !data.session) router.replace("/auth/login");
+      });
+      return () => {
+        cancelled = true;
+      };
     }
     // Signed in but registration not completed (no public.users row yet).
     if (!appUser) {

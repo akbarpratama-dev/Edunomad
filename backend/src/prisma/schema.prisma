@@ -298,6 +298,12 @@ model Discussion {
   id        String   @id @default(uuid()) @db.Uuid
   projectId String?  @map("project_id") @db.Uuid
   type      String   @db.VarChar(20)
+  // Phase 12 (Discussion Forum Upgrade): forum metadata for GROUP discussions;
+  // null for DIRECT chats. category allowed values validated at the Zod layer
+  // (ANNOUNCEMENT|QUESTION|IDEA|BLOCKER|MENTOR_REVIEW|UPDATE).
+  title     String?  @db.VarChar(255)
+  category  String?  @db.VarChar(30)
+  isPinned  Boolean  @default(false) @map("is_pinned")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
 
@@ -305,8 +311,22 @@ model Discussion {
 
   members  DiscussionMember[]
   messages DiscussionMessage[]
+  views    DiscussionView[]
 
   @@map("discussions")
+}
+
+// Phase 12.5: one row per (discussion, user) — unique-viewer view tracking.
+model DiscussionView {
+  id           String   @id @default(uuid()) @db.Uuid
+  discussionId String   @map("discussion_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+
+  @@unique([discussionId, userId])
+  @@map("discussion_views")
 }
 
 model DiscussionMember {
@@ -329,13 +349,55 @@ model DiscussionMessage {
   discussionId String   @map("discussion_id") @db.Uuid
   senderId     String   @map("sender_id") @db.Uuid
   message      String
+  parentId     String?  @map("parent_id") @db.Uuid // Phase 12.2: one-level reply (null = top-level)
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
 
   discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
   sender     User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  parent      DiscussionMessage?  @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     DiscussionMessage[] @relation("MessageReplies")
+  reactions   MessageReaction[]
+  attachments DiscussionAttachment[]
 
+  @@index([parentId])
   @@map("discussion_messages")
+}
+
+// Phase 12.4: file/image/link attachment on a discussion message. Files live in
+// Supabase Storage (private bucket); only path/url + metadata stored here.
+model DiscussionAttachment {
+  id        String   @id @default(uuid()) @db.Uuid
+  messageId String   @map("message_id") @db.Uuid
+  type      String   @db.VarChar(10) // FILE | IMAGE | LINK
+  url       String?  // LINK url; FILE/IMAGE signed at read time
+  filePath  String?  @map("file_path") // storage object path for FILE/IMAGE
+  fileName  String?  @map("file_name") @db.VarChar(255)
+  fileSize  Int?     @map("file_size")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  message DiscussionMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("discussion_attachments")
+}
+
+// Phase 12.3: emoji reaction on a discussion message. discussion_id denormalised
+// for realtime/RLS gating. userId/discussionId kept as scalars (no back-relation
+// needed) to avoid widening User/Discussion models.
+model MessageReaction {
+  id           String   @id @default(uuid()) @db.Uuid
+  messageId    String   @map("message_id") @db.Uuid
+  discussionId String   @map("discussion_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  emoji        String   @db.VarChar(16)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  message DiscussionMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@map("message_reactions")
 }
 
 // status: DRAFT | SUBMITTED | REVISION_REQUESTED | APPROVED

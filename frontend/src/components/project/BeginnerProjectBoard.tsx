@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { cn } from "@/lib/utils";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { useAuthStore } from "@/stores/authStore";
 import { projectApi, type ProjectDetail, type ProjectMember } from "@/services/projectApi";
 import { deliverableApi, type Deliverable } from "@/services/deliverableApi";
@@ -29,14 +30,6 @@ import { contributionApi, type Contribution } from "@/services/contributionApi";
 import { reviewApi, type ProjectReview } from "@/services/reviewApi";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
-function initials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-}
 const MILESTONE_DONE = /done|complete|selesai|approved/i;
 const AVATAR_TONES = [
   "bg-[#d8f277] text-[#0b0b0b]",
@@ -47,16 +40,14 @@ const AVATAR_TONES = [
 ];
 function Avatar({ name, i = 0, className }: { name: string; i?: number; className?: string }) {
   return (
-    <span
+    <UserAvatar
+      name={name}
       className={cn(
-        "inline-flex items-center justify-center rounded-full text-[11px] font-bold ring-2 ring-card",
+        "text-[11px] font-bold ring-2 ring-card",
         AVATAR_TONES[i % AVATAR_TONES.length],
         className ?? "size-8"
       )}
-      title={name}
-    >
-      {initials(name)}
-    </span>
+    />
   );
 }
 
@@ -190,7 +181,7 @@ export function BeginnerProjectBoard() {
 
   const { project, roleName, members, deliverables } = data;
   const activeMembers = members.filter((m) => m.status === "ACTIVE");
-  const workspace = `/projects/${project.id}/workspace`;
+  const workspace = `/my-projects/${project.id}/workspace`;
   const teamAvatars = [
     ...(project.senior ? [project.senior.name] : []),
     ...activeMembers.map((m) => m.user.name),

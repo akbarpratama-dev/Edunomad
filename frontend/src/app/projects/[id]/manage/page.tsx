@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { Inbox, BadgeCheck } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
@@ -14,7 +14,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { EmptyState } from "@/components/common/EmptyState";
-import { initials } from "@/components/dashboard/dashboardKit";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { ApiError } from "@/lib/apiClient";
 import { projectApi, type ProjectDetail } from "@/services/projectApi";
 import {
@@ -35,6 +35,8 @@ function StatusBadge({ status }: { status: ApplicationStatus }) {
 
 function Content() {
   const { id } = useParams<{ id: string }>();
+  const pathname = usePathname();
+  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [items, setItems] = useState<SeniorApplicant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +77,7 @@ function Content() {
   };
 
   return (
-    <AppShell>
+    <AppShell backHref={`${base}/${id}`}>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
         <PageHeader
           title="Lamaran Senior"
@@ -100,7 +102,7 @@ function Content() {
               <p className="text-sm text-muted-foreground">
                 {project.senior.name} adalah mentor proyek ini. Lamaran lain otomatis ditolak.
               </p>
-              <Button variant="outline" className="w-fit" render={<Link href={`/projects/${id}`} />}>
+              <Button variant="outline" className="w-fit" render={<Link href={`${base}/${id}`} />}>
                 Lihat Proyek
               </Button>
             </CardContent>
@@ -121,12 +123,10 @@ function Content() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-start gap-3">
-                    <span
-                      className="grid size-11 shrink-0 place-items-center rounded-full bg-[#d8f277] text-sm font-bold text-[#0b0b0b]"
-                      aria-hidden="true"
-                    >
-                      {initials(app.senior.name)}
-                    </span>
+                    <UserAvatar
+                      name={app.senior.name}
+                      className="size-11 shrink-0 bg-[#d8f277] text-sm font-bold text-[#0b0b0b]"
+                    />
                     <div className="min-w-0">
                       <p className="font-semibold tracking-tight text-foreground">{app.senior.name}</p>
                       {app.senior.profile?.headline && (

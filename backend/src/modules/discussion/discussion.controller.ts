@@ -19,9 +19,24 @@ export const discussionController = {
       const discussion = await discussionService.createGroupDiscussion(
         req.user!.id,
         req.params.id,
+        { title: req.body.title, category: req.body.category },
         req.body.members
       );
       res.status(201).json(successResponse(discussion, "Discussion created"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // POST /discussions/:id/pin
+  async pin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const discussion = await discussionService.pinDiscussion(
+        req.user!.id,
+        req.params.id,
+        req.body.pinned
+      );
+      res.json(successResponse(discussion, "Discussion updated"));
     } catch (err) {
       next(err);
     }
@@ -50,9 +65,49 @@ export const discussionController = {
       const msg = await discussionService.sendMessage(
         req.user!.id,
         req.params.id,
-        req.body.message
+        req.body.message,
+        req.body.parentId,
+        req.body.attachments
       );
       res.status(201).json(successResponse(msg, "Message sent"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // POST /discussions/:id/view
+  async recordView(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await discussionService.recordView(req.user!.id, req.params.id);
+      res.json(successResponse(result, "View recorded"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // POST /discussions/:id/attachments/upload-url
+  async createUploadUrl(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await discussionService.getUploadUrl(
+        req.user!.id,
+        req.params.id,
+        req.body.fileName
+      );
+      res.json(successResponse(result, "Upload URL created"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // POST /discussions/messages/:messageId/reactions
+  async toggleReaction(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await discussionService.toggleReaction(
+        req.user!.id,
+        req.params.messageId,
+        req.body.emoji
+      );
+      res.json(successResponse(result, "Reaction toggled"));
     } catch (err) {
       next(err);
     }
