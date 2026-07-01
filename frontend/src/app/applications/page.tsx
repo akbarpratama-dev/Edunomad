@@ -119,13 +119,31 @@ function Content() {
                   <StatusBadge status={a.status} />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    render={<Link href={`/projects/${a.project.id}`} />}
-                  >
-                    Lihat Proyek
-                  </Button>
+                  {a.status === "ACCEPTED" &&
+                  (a.project.status === "ACTIVE" || a.project.status === "AWAITING_COMPLETION") ? (
+                    <Button
+                      size="sm"
+                      render={<Link href={`/my-projects/${a.project.id}/workspace`} />}
+                    >
+                      Buka Workspace
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      render={
+                        <Link
+                          href={
+                            a.status === "ACCEPTED"
+                              ? `/my-projects/${a.project.id}`
+                              : `/projects/${a.project.id}`
+                          }
+                        />
+                      }
+                    >
+                      Lihat Proyek
+                    </Button>
+                  )}
                   {a.status === "PENDING" && (
                     <Button
                       variant="outline"
