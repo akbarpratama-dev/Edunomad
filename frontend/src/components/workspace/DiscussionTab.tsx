@@ -94,6 +94,7 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
   const [filter, setFilter] = useState<DiscussionCategory | "ALL">("ALL");
   const [createOpen, setCreateOpen] = useState(false);
   const [pinningId, setPinningId] = useState<string | null>(null);
+  const [shown, setShown] = useState(6); // "Muat lebih banyak" page size
 
   const canCreate =
     (appUser?.role === "SENIOR" && project.senior?.id === appUser.id) ||
@@ -168,6 +169,9 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
     }
   }, [visible, activeId]);
 
+  // Reset the visible window when the category filter changes.
+  useEffect(() => setShown(6), [filter]);
+
   // Phase 12.5: record a unique view of the opened topic, then refresh counts.
   useEffect(() => {
     if (!activeId) return;
@@ -221,7 +225,7 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
                   Tidak ada diskusi pada kategori ini.
                 </p>
               ) : (
-                visible.map((d) => (
+                visible.slice(0, shown).map((d) => (
                   <DiscussionListCard
                     key={d.id}
                     discussion={d}
@@ -233,12 +237,12 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
                   />
                 ))
               )}
-              {canCreate && (
+              {visible.length > shown && (
                 <button
-                  onClick={() => setCreateOpen(true)}
+                  onClick={() => setShown((s) => s + 6)}
                   className="flex items-center justify-center gap-1.5 rounded-[20px] border border-dashed border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-[#a3ce00] hover:text-foreground"
                 >
-                  <Plus className="size-4" /> Diskusi Baru
+                  Muat lebih banyak
                 </button>
               )}
             </div>
@@ -437,28 +441,38 @@ function DiscussionListCard({
 }) {
   const msgCount = discussion._count?.messages ?? 0;
   const cat = discussion.category ? DISCUSSION_CATEGORY_META[discussion.category] : null;
+  // Pinned topics get a navy card; active adds a chartreuse ring on top.
+  const dark = discussion.isPinned;
   return (
     <div
       className={cn(
         "group/disc relative rounded-[20px] border p-4 transition-[border-color,background-color,box-shadow] duration-200",
-        active
-          ? "border-[#a3ce00] bg-[#f6fae9] shadow-[0_8px_24px_rgba(32,31,49,0.06)]"
-          : "border-border bg-card hover:border-foreground/15 hover:bg-muted/40"
+        dark
+          ? cn("border-[#201f31] bg-[#201f31] text-white", active && "ring-2 ring-[#a3ce00]")
+          : active
+            ? "border-[#a3ce00] bg-[#f6fae9] shadow-[0_8px_24px_rgba(32,31,49,0.06)]"
+            : "border-border bg-card hover:border-foreground/15 hover:bg-muted/40"
       )}
     >
       <button onClick={onSelect} aria-pressed={active} className="flex w-full items-start gap-3 text-left">
         <span
           className={cn(
             "grid size-10 shrink-0 place-items-center rounded-xl",
-            active ? "bg-[#d8f277] text-[#0b0b0b]" : "bg-muted text-muted-foreground"
+            dark
+              ? "bg-white/10 text-white"
+              : active
+                ? "bg-[#d8f277] text-[#0b0b0b]"
+                : "bg-muted text-muted-foreground"
           )}
           aria-hidden="true"
         >
           <MessagesSquare className="size-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-1.5 truncate text-sm font-semibold text-foreground">
-            {discussion.isPinned && <Pin className="size-3 shrink-0 text-[#5f8c00]" />}
+          <p className={cn("flex items-center gap-1.5 truncate text-sm font-semibold", dark ? "text-white" : "text-foreground")}>
+            {discussion.isPinned && (
+              <Pin className={cn("size-3 shrink-0", dark ? "text-[#a3ce00]" : "text-[#5f8c00]")} />
+            )}
             {discussion.title ?? "Diskusi Tim"}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -467,14 +481,20 @@ function DiscussionListCard({
                 {cat.label}
               </span>
             )}
-            <span className="text-[11px] text-muted-foreground">
+            <span className={cn("text-[11px]", dark ? "text-white/60" : "text-muted-foreground")}>
               {timeAgo(discussion.updatedAt) || "Aktif"}
+            </span>
+            {/* Message count — bottom-right of the card. */}
+            <span
+              className={cn(
+                "ml-auto inline-flex items-center gap-1 text-[11px] tabular-nums",
+                dark ? "text-white/70" : "text-muted-foreground"
+              )}
+            >
+              <MessagesSquare className="size-3" /> {msgCount}
             </span>
           </div>
         </div>
-        <span className="grid min-w-7 shrink-0 place-items-center rounded-full bg-muted px-1.5 text-xs font-semibold tabular-nums text-muted-foreground">
-          {msgCount}
-        </span>
       </button>
       {canPin && (
         <button
@@ -482,7 +502,12 @@ function DiscussionListCard({
           disabled={pinning}
           title={discussion.isPinned ? "Lepas sematan" : "Sematkan"}
           aria-label={discussion.isPinned ? "Lepas sematan" : "Sematkan"}
-          className="absolute right-2 top-2 hidden size-7 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-card hover:text-foreground group-hover/disc:grid disabled:opacity-50"
+          className={cn(
+            "absolute right-2 top-2 hidden size-7 place-items-center rounded-lg transition-colors group-hover/disc:grid disabled:opacity-50",
+            dark
+              ? "text-white/70 hover:bg-white/10 hover:text-white"
+              : "text-muted-foreground hover:bg-card hover:text-foreground"
+          )}
         >
           {discussion.isPinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
         </button>

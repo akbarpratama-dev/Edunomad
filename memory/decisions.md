@@ -904,3 +904,6 @@ Gejala user: button di /my-projects "belum berubah" stlh D-UI-12. Sebab: size sm
 DESIGN.md diperbarui: radii scale (buttons 16/12/10, bukan full; hanya badge/chip yg pill) + spec Button (rounded-[16px], "pakai <Button> shared, jangan hand-roll radii").
 Card my-projects: tombol "Lihat Detail" DIHAPUS (user: page detail tak penting) dari SeniorView + UMKM Content; action-row di-guard supaya tak render kosong utk status non-aksi (COMPLETED dll). DRAFT tetap Hapus/Kirim, ACTIVE tetap Diskusi/Buka Workspace.
 File: components/ui/button.tsx, app/my-projects/page.tsx, DESIGN.md. tsc 0; browser-verified.
+
+### D-P12-8 (2026-07-01, branch feature/phase-10-discussion-forum): polish Diskusi list (req user)
+DiscussionTab: (1) hapus tombol dashed "Diskusi Baru" di list (redundan, sudah ada "Buat Diskusi Baru" kanan-atas) → ganti "Muat lebih banyak" (client-side, state `shown` default 6, slice visible, +6 per klik, reset saat filter ganti). (2) badge jumlah pesan dipindah dari kanan-atas row ke BAWAH-KANAN kartu (ml-auto di meta row, ikon MessagesSquare size-3 + angka). (3) DiscussionListCard pinned (`isPinned`) → kartu NAVY (#201f31) teks putih, ikon/avatar bg-white/10, pin chartreuse, active tambah ring-2 ring-[#a3ce00]. File: components/workspace/DiscussionTab.tsx. tsc 0; browser-verified (pinned "Diskusi Tim" bg rgb(32,31,49), count bawah-kanan, no Diskusi Baru).
