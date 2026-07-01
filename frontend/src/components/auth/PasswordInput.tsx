@@ -18,7 +18,8 @@ export const PasswordInput = forwardRef<HTMLInputElement, React.ComponentProps<"
           aria-label={visible ? "Hide password" : "Show password"}
           tabIndex={-1}
         >
-          {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          {/* Icon shows the STATE: open eye = visible, crossed eye = hidden. */}
+          {visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
         </button>
       </div>
     );
