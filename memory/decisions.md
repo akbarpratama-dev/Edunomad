@@ -1,6 +1,24 @@
 # Decisions
 
 Date:
+2026-07-02 (Phase 8 — Artifact System)
+
+Decision (D-P8-1) — Artifact PDF storage & delivery:
+PDF disimpan di bucket Supabase Storage PRIVAT `artifacts`, path `${code}/v${version}.pdf` (satu objek per versi → history WF14 tak pernah ketimpa). Hanya path yang dipersist (FILE STORAGE rule). Endpoint download (`GET /artifacts/:id/download`, authenticated) STREAM byte via service role (bukan signed/public URL) supaya sertifikat tak bocor lewat URL publik. verify publik TIDAK mengembalikan path/pdf — hanya field aman.
+Reason: docs "store URL/path only" + sertifikat = dokumen sensitif per-orang; stream lewat Express konsisten dgn pola akses-terkontrol.
+Impact: bucket baru (bukan tabel, bukan migration). Tak ada storage RLS (akses via service role Express).
+
+Decision (D-P8-2) — verification_url = base, code di-append server-side:
+Frontend kirim `verification_url` = base halaman verify (`${origin}/verify`); code baru diketahui SETELAH generate, jadi service yang bikin URL final `base + '/' + code` (disimpan + di QR/PDF). Regenerate pakai code lama.
+Reason: API spec minta verification_url di body tapi code sequential dibuat server; append di server satu-satunya cara konsisten.
+Impact: QR & verifikasi publik selalu nunjuk ke kode yang benar tanpa round-trip.
+
+Decision (D-P8-3) — Completion gate WF15 diselesaikan (tutup carry-over D-P4.3-3):
+projectLifecycle.requestCompletion sekarang blokir ACTIVE→AWAITING_COMPLETION sampai: semua deliverable APPROVED; tiap beginner AKTIF punya kontribusi APPROVED + review SENIOR_TO_BEGINNER + review UMKM_TO_BEGINNER + artifact; dan ada review UMKM_TO_SENIOR. Blocker dikembalikan sbg pesan 422 rinci (Indonesian). Generate artifact sendiri (WF13) mensyaratkan kontribusi APPROVED + review mentor per beginner.
+Reason: WF15 "Completion Requirements" eksplisit; artifacts baru ada di Phase 8 → gate lengkap baru bisa dibangun sekarang.
+Impact: alur wajib: approve deliverable → approve kontribusi → review → generate artifact → baru bisa ajukan penyelesaian. UI Sertifikat tab + review + deliverable tab semua mendukung ini.
+
+Date:
 2026-07-01 (Auth transient-error handling + rate limit tuning)
 
 Decision (D-AUTH-2):

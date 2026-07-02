@@ -2,7 +2,16 @@ import { prisma } from "../config/database";
 import type { Prisma } from "../generated/prisma/client";
 
 const detailInclude = {
-  project: { select: { id: true, title: true, seniorId: true, umkmId: true, status: true } },
+  project: {
+    select: {
+      id: true,
+      title: true,
+      seniorId: true,
+      umkmId: true,
+      status: true,
+      umkm: { select: { id: true, name: true } },
+    },
+  },
   beginner: { select: { id: true, name: true, email: true } },
   senior: { select: { id: true, name: true, email: true } },
   versions: { orderBy: { version: "asc" } },
@@ -33,6 +42,15 @@ export const artifactRepository = {
   // Admin monitoring — all artifacts.
   listAll() {
     return prisma.artifact.findMany({ include: detailInclude, orderBy: { issuedAt: "desc" } });
+  },
+
+  // All certificates for a project (senior "Sertifikat" tab / beginner board).
+  listByProject(projectId: string) {
+    return prisma.artifact.findMany({
+      where: { projectId },
+      include: detailInclude,
+      orderBy: { issuedAt: "desc" },
+    });
   },
 
   // Next sequential code for the year (EDN-2026-000001).

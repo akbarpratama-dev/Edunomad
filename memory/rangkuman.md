@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-07-02 (Phase 8 — Artifact System / Sertifikat)
+
+Prompt:
+"lanjut phase 8" (+ sebelumnya: commit fix & cek phase kurang → jawab Phase 8/9/10 sisa/11).
+
+Hasil:
+Baca semua docs artifact (WF13/14/18 + WF15 gate, RBAC artifact rules, API artifacts, schema Artifact/ArtifactVersion immutable → NO migration). Branch feature/phase-8-artifacts-v2 dari fix/auth-register-bounce-routing + cherry-pick WIP 1e6a4a3 + npm install + bucket privat `artifacts` (MCP). Backend penuh (storage.service stream, validator, service generate/regenerate/detail/listMine/listForProject/listAll/download/verify, controller, routes project+artifact+verify+admin, wired) + completion gate WF15 (tutup carry-over D-P4.3-3). Frontend: /artifacts (Sertifikat Saya), /verify + /verify/[code] PUBLIC, workspace tab "Sertifikat", /admin/artifacts, nav admin. E2E backend script /tmp/p8-e2e*.sh (generate 201 + 422 negatives, verify public, download PDF 4090B, regenerate v3 history, gate 422 rinci, admin list) + Playwright semua role hijau. Context7 dipakai (express-rate-limit di sesi fix). backend build 0, frontend tsc 0. D-P8-1..3. Dev server FE sempat crash global (restart, bukan bug kode). NEXT = merge → main + Phase 9.
+
+---
+
+Date:
 2026-07-01 (fix routing flow my-projects + auth register-bounce bug, cek userflow Mahasiswa)
 
 Prompt:

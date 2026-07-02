@@ -28,6 +28,8 @@ import { createGroupDiscussionSchema } from "../validators/discussion.validator"
 import { createDeliverableSchema } from "../validators/deliverable.validator";
 import { submitContributionSchema } from "../validators/contribution.validator";
 import { reviewBeginnerSchema, reviewSeniorSchema } from "../validators/review.validator";
+import { artifactController } from "../modules/artifact/artifact.controller";
+import { generateArtifactsSchema } from "../validators/artifact.validator";
 
 const router = Router();
 const umkm = [roleMiddleware(["UMKM"])];
@@ -232,6 +234,24 @@ router.post(
   ...umkm,
   validateRequest({ params: projectIdParamSchema }),
   projectLifecycleController.confirmCompletion
+);
+
+// Certificates for a project (senior "Sertifikat" tab / beginner view).
+router.get(
+  "/:id/artifacts",
+  authMiddleware,
+  validateRequest({ params: projectIdParamSchema }),
+  artifactController.listForProject
+);
+
+// Artifact generation (Workflow 13) — SENIOR lead, enforced in the service.
+router.post(
+  "/:id/generate-artifacts",
+  authMiddleware,
+  roleMiddleware(["SENIOR"]),
+  requireVerified,
+  validateRequest({ params: projectIdParamSchema, body: generateArtifactsSchema }),
+  artifactController.generate
 );
 
 export default router;
