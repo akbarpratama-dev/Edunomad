@@ -47,6 +47,7 @@ const ROLE_ITEMS: Record<Role, NavItem[]> = {
     BROWSE_PROJECTS,
     { label: "Tinjau Proyek", href: "/admin/projects/review", icon: ClipboardCheck },
     { label: "Verifikasi Pengguna", href: "/admin/users/verification", icon: ShieldCheck },
+    { label: "Sertifikat", href: "/admin/artifacts", icon: Award },
     { label: "Audit Log", href: "/admin/audit-logs", icon: ScrollText },
   ],
   UMKM: [

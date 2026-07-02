@@ -4,6 +4,7 @@ import { roleMiddleware } from "../middleware/roleMiddleware";
 import { validateRequest } from "../middleware/validateRequest";
 import { adminController } from "../modules/admin/admin.controller";
 import { auditLogController } from "../modules/admin/auditLog.controller";
+import { artifactController } from "../modules/artifact/artifact.controller";
 import { projectMemberController } from "../modules/projectMember/projectMember.controller";
 import { memberIdParamSchema } from "../validators/projectMember.validator";
 import { verificationController } from "../modules/verification/verification.controller";
@@ -28,6 +29,9 @@ router.use(authMiddleware, roleMiddleware(["ADMIN"]));
 
 // Dashboard
 router.get("/dashboard", adminController.dashboard);
+
+// Artifact monitoring (all certificates)
+router.get("/artifacts", artifactController.listAll);
 
 // Verifications
 router.get(

@@ -6,9 +6,25 @@ import { BusinessRuleError } from "../utils/errors";
 // clients upload via a signed upload URL and read via short-lived signed URLs
 // (both minted here with the service role). Only path/metadata is persisted.
 const BUCKET = "discussion-attachments";
+const PROJECT_IMAGE_BUCKET = "project-images";
 const DOWNLOAD_TTL = 60 * 60; // 1 hour
 
 export const storageService = {
+  // Signed upload URL for a project cover image (public bucket). Returns the
+  // eventual public URL to persist as Project.imageUrl.
+  async createProjectImageUploadUrl(fileName: string) {
+    const safe = fileName.replace(/[^\w.\-]+/g, "_").slice(-100);
+    const path = `${randomUUID()}-${safe}`;
+    const { data, error } = await supabaseAdmin.storage
+      .from(PROJECT_IMAGE_BUCKET)
+      .createSignedUploadUrl(path);
+    if (error || !data) {
+      throw new BusinessRuleError(error?.message ?? "Gagal membuat URL unggah");
+    }
+    const { data: pub } = supabaseAdmin.storage.from(PROJECT_IMAGE_BUCKET).getPublicUrl(path);
+    return { path: data.path, token: data.token, signedUrl: data.signedUrl, publicUrl: pub.publicUrl };
+  },
+
   // Mint a one-off signed upload URL + token for a new object under a discussion.
   async createUploadUrl(discussionId: string, fileName: string) {
     const safe = fileName.replace(/[^\w.\-]+/g, "_").slice(-100);

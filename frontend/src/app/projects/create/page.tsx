@@ -43,6 +43,7 @@ const basicSchema = z
     category_id: z.string().uuid("Pilih kategori"),
     description: z.string().min(1, "Deskripsi wajib diisi"),
     expected_deliverables: z.string().min(1, "Hasil yang diharapkan wajib diisi"),
+    image_url: z.string().url().optional().or(z.literal("")),
     start_date: z.string().min(1, "Tanggal mulai wajib diisi"),
     deadline: z.string().min(1, "Deadline wajib diisi"),
   })
@@ -101,6 +102,7 @@ function CreateProjectContent() {
   const [roles, setRoles] = useState<ProjectRole[]>([]);
   const [savingBasic, setSavingBasic] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const {
     register,
@@ -111,6 +113,27 @@ function CreateProjectContent() {
     formState: { errors },
   } = useForm<BasicForm>({ resolver: zodResolver(basicSchema) });
   const categoryId = watch("category_id");
+  const imageUrl = watch("image_url");
+
+  const onPickImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Ukuran gambar maksimal 3 MB");
+      return;
+    }
+    setUploadingImage(true);
+    try {
+      const url = await projectApi.uploadImage(file);
+      setValue("image_url", url, { shouldValidate: true });
+      toast.success("Gambar diunggah");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal mengunggah gambar");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   useEffect(() => {
     projectApi
@@ -125,11 +148,13 @@ function CreateProjectContent() {
   // Step 1: create the DRAFT on first save, update on subsequent saves.
   const saveBasic = async (values: BasicForm) => {
     setSavingBasic(true);
+    // Empty image field must be omitted (backend expects a URL or null, not "").
+    const payload = { ...values, image_url: values.image_url || null };
     try {
       if (projectId) {
-        await projectApi.update(projectId, values);
+        await projectApi.update(projectId, payload);
       } else {
-        const created = await projectApi.create(values);
+        const created = await projectApi.create(payload);
         setProjectId(created.id);
       }
       setStep(2);
@@ -170,6 +195,25 @@ function CreateProjectContent() {
                   <Label htmlFor="title">Judul Proyek</Label>
                   <Input id="title" placeholder="cth. Website Toko Online" {...register("title")} />
                   {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <Label>Gambar Sampul (opsional)</Label>
+                  <div className="flex items-center gap-3">
+                    {imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={imageUrl} alt="Sampul proyek" className="h-16 w-24 rounded-lg border border-border object-cover" />
+                    ) : (
+                      <div className="grid h-16 w-24 place-items-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
+                        Belum ada
+                      </div>
+                    )}
+                    <label className="inline-flex cursor-pointer items-center rounded-full border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted">
+                      {uploadingImage ? "Mengunggah…" : imageUrl ? "Ganti Gambar" : "Unggah Gambar"}
+                      <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={onPickImage} disabled={uploadingImage} />
+                    </label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">PNG/JPG/WebP, maks 3 MB. Tampil sebagai sampul di kartu artifact.</p>
                 </div>
 
                 <div className="flex flex-col gap-1.5">

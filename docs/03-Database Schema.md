@@ -284,6 +284,7 @@ deleted_at TIMESTAMP NULL
 | `title` | VARCHAR(255) | Project title |
 | `description` | TEXT | Project description |
 | `expected_deliverables` | TEXT | List of expected deliverables |
+| `image_url` | VARCHAR(1000) NULL | Cover image (public `project-images` bucket); URL only. Added 2026-07-02 (migration `20260702134407_project_image_url`) |
 | `start_date` | DATE | Project start date |
 | `deadline` | DATE | Project deadline |
 | `completed_at` | TIMESTAMP NULL | Completion timestamp |

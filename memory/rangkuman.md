@@ -5,6 +5,64 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-07-02 (Phase 8b — redesign page Artifact + Portfolio publik + image proyek)
+
+Prompt:
+"perbaiki & revisi page artifact (flow + isi), ubah docs karna belum final, buat tampilan awal mirip mockup [list] + flow detail [mockup detail]".
+
+Hasil:
+Via AskUserQuestion (3 tabrakan scope) putusan user: status DERIVED (no migration), Portfolio publik IN-SCOPE (dulu OUT), field image proyek (+migration+upload). Backend: migration image_url + bucket project-images, endpoint pipeline/pipeline-detail (derived VERIFIED/READY/IN_PROGRESS + komposit detail), portfolio publik, image upload URL. Frontend: redesign /artifacts (stat/tab/kartu cover/sidebar progres+info/share), /artifacts/[projectId] (4 tab detail), /portfolio/[id] publik, upload gambar di wizard. Docs 03/04/06/08 + task-breakdown + CLAUDE.md (OUT OF SCOPE) diamandemen. E2E backend+Playwright semua hijau (stat 1/1/2/0, detail 4 tab, portfolio publik). build 0, tsc 0, console 0. D-P8-4, D-P8-5. NEXT commit+push.
+
+---
+
+Date:
+2026-07-02 (Phase 8 — Artifact System / Sertifikat)
+
+Prompt:
+"lanjut phase 8" (+ sebelumnya: commit fix & cek phase kurang → jawab Phase 8/9/10 sisa/11).
+
+Hasil:
+Baca semua docs artifact (WF13/14/18 + WF15 gate, RBAC artifact rules, API artifacts, schema Artifact/ArtifactVersion immutable → NO migration). Branch feature/phase-8-artifacts-v2 dari fix/auth-register-bounce-routing + cherry-pick WIP 1e6a4a3 + npm install + bucket privat `artifacts` (MCP). Backend penuh (storage.service stream, validator, service generate/regenerate/detail/listMine/listForProject/listAll/download/verify, controller, routes project+artifact+verify+admin, wired) + completion gate WF15 (tutup carry-over D-P4.3-3). Frontend: /artifacts (Sertifikat Saya), /verify + /verify/[code] PUBLIC, workspace tab "Sertifikat", /admin/artifacts, nav admin. E2E backend script /tmp/p8-e2e*.sh (generate 201 + 422 negatives, verify public, download PDF 4090B, regenerate v3 history, gate 422 rinci, admin list) + Playwright semua role hijau. Context7 dipakai (express-rate-limit di sesi fix). backend build 0, frontend tsc 0. D-P8-1..3. Dev server FE sempat crash global (restart, bukan bug kode). NEXT = merge → main + Phase 9.
+
+---
+
+Date:
+2026-07-01 (fix routing flow my-projects + auth register-bounce bug, cek userflow Mahasiswa)
+
+Prompt:
+"perbaiki route /my-projects/:id jadi detail-only, flow my-projects > workspace > detail, back sebaliknya. saat ini ada error auto routing ke register trus. cek userflow Mahasiswa" (+ turn sebelumnya: list cards → 'Lihat Detail' bukan langsung workspace; beginner back workspace → /my-projects).
+
+Hasil:
+DUA BUG.
+(1) **AUTH REGISTER-BOUNCE (utama)** — login beginner selalu dilempar ke /auth/register/role. ROOT CAUSE via Playwright: `/auth/me` balas **429** (rate limit backend 100/15min ketembus — board Mahasiswa saja tembak ~6 request). `fetchMe()` LAMA `catch{ return null }` → menelan SEMUA error jadi null → AuthGuard baca authenticated-tanpa-appUser → bounce register. FIX: (a) `fetchMe` hanya return null saat **404** (benar-benar belum registrasi), selain itu rethrow; (b) `AuthProvider.loadAppUser` — signOut+clear HANYA saat **401**; error transient (429/5xx/network) di-RETRY backoff (400→5000ms) tanpa hancurkan sesi / tanpa setLoading(false), jadi guard tunggu ("Memuat…") bukan bounce; (c) backend rate limit 100→**1000**/15min + `skip:()=>env.nodeEnv==='development'` (Context7 express-rate-limit: skip = cara resmi disable, bukan limit:0). ✅ VERIFIED Playwright: login beginner → /dashboard (tak bounce); /auth/me hammer 8x → 401 (bukan 429).
+(2) **ROUTING reverse-back Mahasiswa** — `projects/[id]/page.tsx` backHref kini role-aware: BEGINNER+base /my-projects → back ke `/my-projects/:id/workspace` (reverse); UMKM/SENIOR → back ke list. Workspace back beginner → /my-projects (turn sblm). Chain terverifikasi: board→workspace→detail, back: detail→workspace→/my-projects. UMKM/SENIOR: list→detail→workspace, back reverse.
+File: frontend authApi.ts, AuthProvider.tsx, projects/[id]/page.tsx, projects/[id]/workspace/page.tsx, my-projects/page.tsx; backend setupMiddleware.ts. tsc 0 (backend+frontend), console 0. BELUM commit.
+
+---
+
+Date:
+2026-07-01 (fix beginner /my-projects flow)
+
+Prompt:
+"perbaiki redirect flow my project begginer jadi kyk senior, saya cek masih banyak yg berubah ke /project biasa"
+
+Hasil:
+Audit semua entry point beginner. Satu-satunya yang broken: `applications/page.tsx` — tombol "Lihat Proyek" selalu ke `/projects/:id` tanpa memperhatikan apakah user sudah jadi member. Fix: ACCEPTED + ACTIVE/AWAITING → "Buka Workspace" → `/my-projects/:id/workspace`; ACCEPTED + status lain → "Lihat Proyek" → `/my-projects/:id`; PENDING/REJECTED/WITHDRAWN tetap `/projects/:id` (discovery). tsc 0, committed main (6adfeda).
+
+---
+
+Date:
+2026-07-01 (Merge Phase 12 → main)
+
+Prompt:
+"Lanjutkan EduNomad: PHASE 12 lanjut 12.2+" (init prompt stale — 12.2–12.5 sudah selesai sesi lalu).
+
+Hasil:
+Konfirmasi via memory: Phase 12 (12.1–12.5) SUDAH committed di feature/phase-10-discussion-forum, init prompt basi. Pilih next via AskUserQuestion → "Merge ke main". Stash reformat `page.tsx` (leftover, non-fungsional). Merge --no-ff feature/phase-10-discussion-forum → main (578be6a, 0 konflik, 62 file) + push origin/main. NEXT = Phase 8 Artifact System (WIP feature/phase-8-artifacts).
+
+---
+
+Date:
 2026-06-28 (Redesign Diskusi + Phase 12 backend forum upgrade 12.1)
 
 Prompt:

@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, ApiError } from "@/lib/apiClient";
 import type { AppUser } from "@/types/user";
 
 // Backend envelope: { success, message, data }.
@@ -29,14 +29,18 @@ export interface RegisterPayload {
   portfolio_links: { title: string; url: string; type: string }[];
 }
 
-// GET /auth/me — returns the app user, or null if the account doesn't exist yet
-// (signed up but registration not completed → backend 401).
+// GET /auth/me — returns the app user, or null ONLY when the account doesn't
+// exist yet (signed up but registration not completed → backend 404 "User not
+// found"). Any other failure (401 invalid token, 429 rate limit, 5xx, network)
+// is propagated: a transient error must never be mistaken for "unregistered",
+// which would bounce a real, registered user into the registration wizard.
 export async function fetchMe(): Promise<AppUser | null> {
   try {
     const res = await apiClient.get<Envelope<AppUser>>("/auth/me");
     return res.data.data;
-  } catch {
-    return null;
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    throw err;
   }
 }
 

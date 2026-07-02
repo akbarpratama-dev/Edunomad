@@ -1124,6 +1124,69 @@ GET /verify/:artifactCode
 
 ---
 
+#### My Artifacts
+
+```
+GET /artifacts
+```
+
+**Access:** Authenticated  
+**Description:** The caller's own issued certificates.
+
+---
+
+#### Artifact Pipeline (Beginner) — added 2026-07-02
+
+```
+GET /me/artifact-pipeline
+GET /me/artifact-pipeline/:projectId
+```
+
+**Access:** Authenticated (BEGINNER)  
+**Description:** Powers the "Artifact Saya" page. Returns a DERIVED per-project
+pipeline (no stored artifact status — computed from contribution / review /
+artifact data, D-P8-4). List form returns one item per project the caller is a
+member of, each with `status` (`VERIFIED` = artifact issued, `READY` =
+prerequisites met but not issued, `IN_PROGRESS`), `stages[]`, `technologies`,
+`team`, and `artifact` (or null). The `:projectId` form adds `project` (dates,
+image), `achievements`, `deliverables`, `seniorReview`, `umkmReview`,
+`timeline`, and `team` roles for the detail page.
+
+---
+
+#### Project Artifacts
+
+```
+GET /projects/:id/artifacts
+```
+
+**Access:** Authenticated  
+**Description:** Certificates issued for a project (senior "Sertifikat" tab).
+
+---
+
+#### Project Cover Image Upload — added 2026-07-02
+
+```
+POST /projects/image-upload-url
+```
+
+**Access:** SENIOR? No — UMKM (verified)  
+**Body:** `{ "file_name": "cover.png" }`  
+**Description:** Returns `{ path, token, publicUrl }` for a signed upload to the
+public `project-images` bucket. The client uploads the file then persists
+`publicUrl` as `Project.image_url` on create/update.
+
+---
+
+### Portfolio Endpoints — PLANNED (deferred to a later phase, D-P8-5)
+
+> `GET /portfolio/:userId` (public portfolio) is NOT built yet. The artifact
+> pages only carry placeholder buttons that link to the future `/portfolio/:id`
+> route. Build the endpoint + page in the dedicated portfolio phase.
+
+---
+
 ### Reviews Endpoints
 
 #### Review Beginner (by Senior)

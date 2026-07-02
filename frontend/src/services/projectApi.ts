@@ -121,6 +121,7 @@ export interface ProjectBasicInput {
   title: string;
   description: string;
   expected_deliverables: string;
+  image_url?: string | null;
   start_date: string;
   deadline: string;
 }
@@ -174,6 +175,20 @@ export const projectApi = {
 
   async remove(id: string): Promise<void> {
     await apiClient.delete(`/projects/${id}`);
+  },
+
+  // Upload a project cover image → returns its public URL (store as image_url).
+  async uploadImage(file: File): Promise<string> {
+    const res = await apiClient.post<
+      Envelope<{ path: string; token: string; publicUrl: string }>
+    >("/projects/image-upload-url", { file_name: file.name });
+    const { path, token, publicUrl } = res.data.data;
+    const { supabase } = await import("@/lib/supabase/client");
+    const { error } = await supabase.storage
+      .from("project-images")
+      .uploadToSignedUrl(path, token, file);
+    if (error) throw new Error(error.message);
+    return publicUrl;
   },
 
   async submit(id: string): Promise<ProjectDetail> {

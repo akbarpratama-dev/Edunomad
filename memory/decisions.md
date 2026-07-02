@@ -1,6 +1,55 @@
 # Decisions
 
 Date:
+2026-07-02 (Phase 8 — Artifact page redesign + Public Portfolio + project image)
+
+Decision (D-P8-4) — Derived artifact status (no schema change):
+Mockup "Artifact Saya" punya status Terverifikasi/Dalam Proses/Siap Diterbitkan/Ditolak + stat + progress tracker. Via AskUserQuestion user pilih **Derived (no migration)** — artifact TETAP immutable (tanpa kolom status). Status DIHITUNG per proyek dari data existing: VERIFIED=artifact terbit; READY=kontribusi APPROVED + review senior & UMKM ada tapi belum generate; IN_PROGRESS=selain itu; "Ditolak" tak ada di model → tab selalu kosong. Endpoint `GET /me/artifact-pipeline` (list) + `/:projectId` (detail komposit: project+dates+image, achievements[dari summary di-split], deliverables[filter submittedBy], seniorReview/umkmReview, timeline berperingkat+tanggal+aktor, team+role). Detail page tab: Detail/Proses Verifikasi/Feedback Mentor/Riwayat Aktivitas.
+Reason: hormati aturan locked "artifact immutable history"; visual kaya bisa dicapai tanpa invent workflow verifikasi/kolom baru. User setuju.
+Impact: NO migration utk status. Docs 06 diamandemen (status derived). Riwayat Aktivitas & Kontribusi% diadaptasi (tak ada activity log per-artifact / kolom persen → derive dari timeline & status).
+
+Decision (D-P8-5) — Public Portfolio DITUNDA (button-only) + project image:
+Sempat dibangun penuh (page `/portfolio/:id` + `GET /portfolio/:userId` + portfolio.service/controller/routes), TAPI user mengklarifikasi: portfolio itu untuk phase NANTI — **jangan bangun fiturnya dulu, cukup tombolnya saja** yang nge-route ke `/portfolio/:id`. Jadi: page + backend portfolio DIHAPUS lagi; "Public Portfolio Pages" tetap di OUT OF SCOPE (CLAUDE.md di-revert + note "placeholder button, dibangun di phase-nya"). Tombol "Lihat di Portofolio" (detail) & "Bagikan Profil Portofolio" (list) = `<Link href="/portfolio/:id">` placeholder (404 sampai phase-nya, konsisten pola nav unbuilt). Docs 04/06/08 + task-breakdown ditandai PLANNED/deferred.
+Project image TETAP dibangun (dipilih user, dipakai kartu artifact): `projects.image_url` (migration `20260702134407_project_image_url` LIVE + _prisma_migrations sync) + bucket PUBLIK `project-images` + `POST /projects/image-upload-url` (UMKM signed upload → publicUrl) + upload di wizard create Step 1. Kartu artifact pakai image, fallback gradient+inisial deterministik.
+Reason: user hanya mau placeholder tombol untuk portfolio (belum sampai phase-nya); MVP-protection — jangan bangun fitur di luar phase.
+Impact: no portfolio feature sekarang; scope OUT OF SCOPE dipertahankan. Image field + bucket TETAP ada (dipakai kartu). Endpoint pipeline/detail + redesign page TETAP (D-P8-4).
+
+Date:
+2026-07-02 (Phase 8 — Artifact System)
+
+Decision (D-P8-1) — Artifact PDF storage & delivery:
+PDF disimpan di bucket Supabase Storage PRIVAT `artifacts`, path `${code}/v${version}.pdf` (satu objek per versi → history WF14 tak pernah ketimpa). Hanya path yang dipersist (FILE STORAGE rule). Endpoint download (`GET /artifacts/:id/download`, authenticated) STREAM byte via service role (bukan signed/public URL) supaya sertifikat tak bocor lewat URL publik. verify publik TIDAK mengembalikan path/pdf — hanya field aman.
+Reason: docs "store URL/path only" + sertifikat = dokumen sensitif per-orang; stream lewat Express konsisten dgn pola akses-terkontrol.
+Impact: bucket baru (bukan tabel, bukan migration). Tak ada storage RLS (akses via service role Express).
+
+Decision (D-P8-2) — verification_url = base, code di-append server-side:
+Frontend kirim `verification_url` = base halaman verify (`${origin}/verify`); code baru diketahui SETELAH generate, jadi service yang bikin URL final `base + '/' + code` (disimpan + di QR/PDF). Regenerate pakai code lama.
+Reason: API spec minta verification_url di body tapi code sequential dibuat server; append di server satu-satunya cara konsisten.
+Impact: QR & verifikasi publik selalu nunjuk ke kode yang benar tanpa round-trip.
+
+Decision (D-P8-3) — Completion gate WF15 diselesaikan (tutup carry-over D-P4.3-3):
+projectLifecycle.requestCompletion sekarang blokir ACTIVE→AWAITING_COMPLETION sampai: semua deliverable APPROVED; tiap beginner AKTIF punya kontribusi APPROVED + review SENIOR_TO_BEGINNER + review UMKM_TO_BEGINNER + artifact; dan ada review UMKM_TO_SENIOR. Blocker dikembalikan sbg pesan 422 rinci (Indonesian). Generate artifact sendiri (WF13) mensyaratkan kontribusi APPROVED + review mentor per beginner.
+Reason: WF15 "Completion Requirements" eksplisit; artifacts baru ada di Phase 8 → gate lengkap baru bisa dibangun sekarang.
+Impact: alur wajib: approve deliverable → approve kontribusi → review → generate artifact → baru bisa ajukan penyelesaian. UI Sertifikat tab + review + deliverable tab semua mendukung ini.
+
+Date:
+2026-07-01 (Auth transient-error handling + rate limit tuning)
+
+Decision (D-AUTH-2):
+`fetchMe()` semula `catch { return null }` — menyamakan SEMUA kegagalan `/auth/me` dengan "belum registrasi", sehingga error transient (429 rate-limit, 5xx, network) mem-bounce user terdaftar ke /auth/register/role. Sekarang: `fetchMe` return null HANYA pada 404 (backend `NotFoundError "User not found"` = benar-benar belum ada public.users row), selain itu rethrow. `AuthProvider.loadAppUser` jadi state-machine definitif: appUser loaded → set; 404 → setAppUser(null) → guard→register; 401 → signOut+clear → guard→login; transient → RETRY backoff (400/800/1600/3200/5000ms) tanpa merusak sesi & tanpa mengakhiri loading (guard tetap "Memuat…", tak bounce). Backend rate limit 100→1000/15min + `skip:()=>env.nodeEnv==='development'` (Context7: `skip` = cara resmi disable, `limit:0` malah nge-block dari request pertama sejak v7).
+Reason:
+Bug lapangan: login Mahasiswa selalu ke register. Root cause bukan race SIGNED_IN (itu sudah difix D-AUTH-1) tapi /auth/me 429 karena limit 100/15min ketembus wajar (board beginner ~6 req + navigasi). Prinsip: hanya sinyal DEFINITIF (404/401) yang boleh mengubah tujuan navigasi; error sementara harus di-retry, bukan diperlakukan sebagai fakta akun.
+Impact:
+Melengkapi D-AUTH-1. User terdaftar tak akan lagi dilempar register/login karena blip jaringan atau rate-limit. Dev lokal (hot reload + navigasi berulang) tak pernah kena 429. Prod tetap dibatasi 1000/15min. Tak ada perubahan arsitektur/business-rule.
+
+Decision (D-ROUTE-1):
+Flow per-role dibuat konsisten & reversible. BEGINNER (Mahasiswa): /my-projects = BOARD (bento, 1 proyek aktif) → workspace → detail; Back reverse (detail→workspace→board). UMKM/SENIOR: /my-projects = LIST → detail → workspace; Back reverse (workspace→detail→list). Implementasi: `projects/[id]/page.tsx` + `workspace/page.tsx` hitung backHref dari `usePathname` base + `appUser.role` (BEGINNER+/my-projects dapat jalur board-first). List cards (UMKM/SENIOR) tombol "Lihat Detail" (bukan langsung workspace).
+Reason:
+User minta detail = detail-only dan back mengikuti jalur masuk (mudah diprediksi). Halaman detail & workspace dipakai bersama /projects (discovery) dan /my-projects (milik sendiri) → backHref harus base+role-aware, bukan hardcode.
+Impact:
+Navigasi Back tak lagi "nyangkut" di detail saat harusnya balik ke board. Discovery (/projects/:id) tak berubah.
+
+Date:
 2026-06-28 (Phase 12 — Discussion Forum Upgrade, user-approved scope override)
 
 Decision (D-P12-1):

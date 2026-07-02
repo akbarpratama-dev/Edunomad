@@ -9,6 +9,7 @@ export const createProjectSchema = z
     title: z.string().min(3).max(255),
     description: z.string().min(1),
     expected_deliverables: z.string().min(1),
+    image_url: z.string().url().max(1000).optional().nullable(),
     start_date: z.coerce.date(),
     deadline: z.coerce.date(),
   })
@@ -18,6 +19,10 @@ export const createProjectSchema = z
   });
 
 export const updateProjectSchema = createProjectSchema;
+
+export const projectImageUploadSchema = z.object({
+  file_name: z.string().min(1).max(200),
+});
 
 export const listProjectsQuerySchema = z.object({
   q: z.string().optional(),

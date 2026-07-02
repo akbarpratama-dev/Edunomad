@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { projectService } from "../../services/project.service";
+import { storageService } from "../../services/storage.service";
 import { successResponse, paginatedResponse } from "../../utils/response";
 import { listProjectsQuerySchema, myProjectsQuerySchema } from "../../validators/project.validator";
 
@@ -77,6 +78,16 @@ export const projectController = {
     try {
       const data = await projectService.getMentoredProjects(req.user!.id);
       res.json(successResponse(data, "Mentored projects retrieved"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // POST /projects/image-upload-url — signed URL for a project cover image.
+  async imageUploadUrl(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await storageService.createProjectImageUploadUrl(req.body.file_name);
+      res.json(successResponse(data, "Upload URL created"));
     } catch (err) {
       next(err);
     }

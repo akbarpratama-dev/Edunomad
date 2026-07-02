@@ -346,6 +346,12 @@ function Content() {
   // user's own projects). Keep navigation inside whichever section you came from.
   const pathname = usePathname();
   const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
+  const role = useAuthStore((s) => s.appUser?.role);
+  // Beginner flow is board → workspace → detail, so Back from detail returns to
+  // the workspace (reverse of how they arrived). UMKM/SENIOR flow is list →
+  // detail → workspace, so their Back returns to the list.
+  const backHref =
+    role === "BEGINNER" && base === "/my-projects" ? `${base}/${id}/workspace` : base;
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -364,7 +370,7 @@ function Content() {
   useEffect(load, [id]);
 
   return (
-    <AppShell backHref={base}>
+    <AppShell backHref={backHref}>
       <div className="mx-auto w-full max-w-5xl">
         {loading ? (
           <ListSkeleton rows={5} />
@@ -383,7 +389,7 @@ function Content() {
               {(project.status === "ACTIVE" || project.status === "AWAITING_COMPLETION") && (
                 <Button
                   className="app-reveal w-full"
-                  render={<Link href={`/my-projects/${project.id}/workspace`} />}
+                  render={<Link href={`${base}/${project.id}/workspace`} />}
                 >
                   Buka Workspace
                 </Button>
