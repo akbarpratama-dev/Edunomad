@@ -1,5 +1,14 @@
 # Development Log
 
+2026-07-01 (FIX auth register-bounce + routing reverse-back Mahasiswa) — UNCOMMITTED
+Task: user lapor login Mahasiswa "auto routing ke register trus" + minta flow /my-projects→workspace→detail dgn back reverse.
+- DIAGNOSA (Playwright, p4-beginner): login → dilempar /auth/register/role. Cek langsung `/auth/me` = **429** (rate limit backend 100/15min ketembus; board beginner nembak ~6 req paralel + navigasi). `fetchMe()` LAMA `catch{return null}` telan 429 jadi null → AuthGuard lihat authenticated-tanpa-appUser → bounce register. (Ini BEDA dari D-AUTH-1 yg soal race SIGNED_IN.)
+- FIX FRONTEND: `services/authApi.ts` fetchMe return null HANYA saat ApiError.status===404, selain itu rethrow. `components/auth/AuthProvider.tsx` loadAppUser jadi loop: sukses→setAppUser; 401→signOut+clear; transient (429/5xx/net)→retry backoff [400,800,1600,3200,5000]ms tanpa setLoading(false) (guard tetap "Memuat…", tak bounce). import ApiError.
+- FIX BACKEND: `middleware/setupMiddleware.ts` rate limit 100→1000/15min + `skip:()=>env.nodeEnv==='development'` (Context7 express-rate-limit: skip = disable resmi; limit:0 malah block sejak v7). Backend nodemon auto-reload.
+- FIX ROUTING: `app/projects/[id]/page.tsx` backHref role-aware — BEGINNER+base /my-projects → back ke `${base}/${id}/workspace` (reverse board-first flow); else base. `app/projects/[id]/workspace/page.tsx` backHref beginner+/my-projects → /my-projects (turn sebelumnya). `app/my-projects/page.tsx` list cards (UMKM/SENIOR) tombol "Lihat Detail" ganti shortcut Diskusi/workspace.
+- VERIFIED (Playwright): login p4-beginner → /dashboard (TAK bounce). /auth/me hammer 8x → semua 401 (bukan 429, dev skip aktif). Chain: /my-projects(board)→[Lihat Diskusi]→workspace(back=/my-projects, "Lihat Detail Proyek"=/my-projects/:id)→detail(back[aria=Kembali]=/my-projects/:id/workspace). Reverse-back OK. tsc 0 backend+frontend, console 0. Decisions D-AUTH-2, D-ROUTE-1.
+- NEXT: commit (branch dari main; ini fix di atas main 6adfeda). Lalu Phase 8 Artifact tetap pending.
+
 2026-07-01 (PHASE 12.5 — Views; PHASE 12 SELESAI)
 Task: unique view count per topik diskusi (sub-phase terakhir Phase 12).
 - MIGRATION `20260701030000_phase12_5_views` (Supabase MCP → LIVE DB; _prisma_migrations 4f223735…): tabel discussion_views (id, discussion_id FK CASCADE, user_id FK CASCADE, created_at) + unique(discussion_id,user_id). Tanpa RLS/publication (count dibaca via Express). prisma generate.

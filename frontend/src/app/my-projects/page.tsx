@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { FolderKanban, Plus, MessageSquare } from "lucide-react";
+import { FolderKanban, Plus } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -136,36 +136,30 @@ function Content() {
                   </div>
                   <StatusBadge status={item.status} />
                 </div>
-                {(item.status === "DRAFT" ||
-                  item.status === "ACTIVE" ||
-                  item.status === "AWAITING_COMPLETION") && (
-                  <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
-                    {item.status === "DRAFT" && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={busy}
-                          onClick={() => setDeleting(item)}
-                        >
-                          Hapus
-                        </Button>
-                        <Button size="sm" disabled={busy} onClick={() => submit(item)}>
-                          Kirim untuk Ditinjau
-                        </Button>
-                      </>
-                    )}
-                    {(item.status === "ACTIVE" || item.status === "AWAITING_COMPLETION") && (
+                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
+                  {item.status === "DRAFT" && (
+                    <>
                       <Button
                         variant="outline"
                         size="sm"
-                        render={<Link href={`/my-projects/${item.id}/workspace?tab=discussion`} />}
+                        disabled={busy}
+                        onClick={() => setDeleting(item)}
                       >
-                        <MessageSquare className="size-4" /> Diskusi
+                        Hapus
                       </Button>
-                    )}
-                  </div>
-                )}
+                      <Button size="sm" disabled={busy} onClick={() => submit(item)}>
+                        Kirim untuk Ditinjau
+                      </Button>
+                    </>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    render={<Link href={`/my-projects/${item.id}`} />}
+                  >
+                    Lihat Detail
+                  </Button>
+                </div>
               </article>
             ))}
           </div>
@@ -252,20 +246,20 @@ function SeniorView() {
                   </div>
                   <StatusBadge status={item.status} />
                 </div>
-                {(item.status === "ACTIVE" || item.status === "AWAITING_COMPLETION") && (
-                  <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      render={<Link href={`/my-projects/${item.id}/workspace?tab=discussion`} />}
-                    >
-                      <MessageSquare className="size-4" /> Diskusi
-                    </Button>
+                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    render={<Link href={`/my-projects/${item.id}`} />}
+                  >
+                    Lihat Detail
+                  </Button>
+                  {(item.status === "ACTIVE" || item.status === "AWAITING_COMPLETION") && (
                     <Button size="sm" render={<Link href={`/my-projects/${item.id}/workspace`} />}>
                       Buka Workspace
                     </Button>
-                  </div>
-                )}
+                  )}
+                </div>
               </article>
             ))}
           </div>

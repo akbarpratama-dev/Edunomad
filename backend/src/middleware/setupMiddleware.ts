@@ -14,7 +14,14 @@ export const setupMiddleware = (app: Express) => {
   app.use(
     rateLimit({
       windowMs: 15 * 60 * 1000,
-      limit: 100,
+      // A single SPA page loads several resources in parallel (a project board
+      // fires ~6 requests), so 100/15min was easily exhausted by ordinary
+      // browsing — and once /auth/me got a 429 the client treated it as an
+      // auth failure. 1000/15min leaves ample headroom for real usage while
+      // still capping abuse. Skipped entirely in development so local testing
+      // (hot reload + repeated navigation) never trips it.
+      limit: 1000,
+      skip: () => env.nodeEnv === "development",
       standardHeaders: true,
       legacyHeaders: false,
       message: {

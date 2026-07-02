@@ -1,7 +1,15 @@
 ============================================================
-⚡ ACTIVE HANDOFF (2026-06-28 #10) — PHASE 12 Discussion Forum Upgrade IN PROGRESS (12.1 done)
+⚡ ACTIVE HANDOFF (2026-07-01 #11) — PHASE 12 MERGED → main. NEXT = PHASE 8 Artifact
 ============================================================
-main = b821b5c (Phase 0–7 + unify-UI + Diskusi tab premium redesign). Branch aktif `feature/phase-10-discussion-forum` (belum merge). D-P12-1: user otorisasi FULL forum upgrade (override locked "no attachments MVP").
+main = 578be6a (Phase 0–7 + unify-UI + Diskusi redesign + **PHASE 12 forum upgrade 12.1–12.5** + UX batch). PUSHED origin/main. feature/phase-10-discussion-forum sudah merged --no-ff (0 konflik). Stash tersisa: "landing page.tsx prettier reformat (leftover)" — non-fungsional, `git stash drop` kalau mau buang.
+
+➡️ NEXT = **PHASE 8 — Artifact System** (label UI "Sertifikat", D-UI-7). WIP di branch feature/phase-8-artifacts 1e6a4a3 (cabang dari main LAMA — pertimbangkan rebase ke 578be6a dulu). SISA: (1) backend artifact.service+controller+routes (POST /projects/:id/generate-artifacts, POST /artifacts/:id/regenerate, GET /artifacts/:id, GET /artifacts/:id/download, GET /verify/:code) + wire routes/index.ts; (2) completion gate D-P4.3-3 di projectLifecycle.service.requestCompletion (deliverables+contributions APPROVED + reviews + artifacts generated sebelum ACTIVE→AWAITING_COMPLETION, WF15); (3) frontend 4 page pakai pola premium (PageHeader/PillTabs/Card/EmptyState/app-reveal). Baca task-breakdown §8 + schema Artifact/ArtifactVersion (immutable → kemungkinan NO migration) + WF 13/14/18. Test: p4-beginner/senior/umkm + p43-admin pw TestPass123!; project ACTIVE a1a1a1a1-…0005.
+
+--- arsip handoff #10 (Phase 12, SELESAI & merged) ---
+============================================================
+⚡ ACTIVE HANDOFF (2026-06-28 #10) — PHASE 12 Discussion Forum Upgrade (12.1–12.5 SELESAI, merged 2026-07-01)
+============================================================
+main saat kerja = b821b5c. Branch `feature/phase-10-discussion-forum` (merged → main 578be6a 2026-07-01). D-P12-1: user otorisasi FULL forum upgrade (override locked "no attachments MVP").
 
 ✅ 12.1 (title+category+pin) SELESAI & verified E2E. Migration `phase12_discussion_forum_metadata` di LIVE DB (discussions += title/category/is_pinned) + prisma history sync. Backend: constants/discussionCategory; create wajib title+category (senior lead/UMKM owner); list pinned-first; POST /discussions/:id/pin. Frontend Diskusi tab: dialog create, filter chips kategori real, badge+judul, toggle pin. Docs 03/04/06/07 + task-breakdown amended. backend build 0, tsc 0, console 0, DB persist confirmed.
 

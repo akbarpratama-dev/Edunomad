@@ -1,6 +1,23 @@
 # Decisions
 
 Date:
+2026-07-01 (Auth transient-error handling + rate limit tuning)
+
+Decision (D-AUTH-2):
+`fetchMe()` semula `catch { return null }` — menyamakan SEMUA kegagalan `/auth/me` dengan "belum registrasi", sehingga error transient (429 rate-limit, 5xx, network) mem-bounce user terdaftar ke /auth/register/role. Sekarang: `fetchMe` return null HANYA pada 404 (backend `NotFoundError "User not found"` = benar-benar belum ada public.users row), selain itu rethrow. `AuthProvider.loadAppUser` jadi state-machine definitif: appUser loaded → set; 404 → setAppUser(null) → guard→register; 401 → signOut+clear → guard→login; transient → RETRY backoff (400/800/1600/3200/5000ms) tanpa merusak sesi & tanpa mengakhiri loading (guard tetap "Memuat…", tak bounce). Backend rate limit 100→1000/15min + `skip:()=>env.nodeEnv==='development'` (Context7: `skip` = cara resmi disable, `limit:0` malah nge-block dari request pertama sejak v7).
+Reason:
+Bug lapangan: login Mahasiswa selalu ke register. Root cause bukan race SIGNED_IN (itu sudah difix D-AUTH-1) tapi /auth/me 429 karena limit 100/15min ketembus wajar (board beginner ~6 req + navigasi). Prinsip: hanya sinyal DEFINITIF (404/401) yang boleh mengubah tujuan navigasi; error sementara harus di-retry, bukan diperlakukan sebagai fakta akun.
+Impact:
+Melengkapi D-AUTH-1. User terdaftar tak akan lagi dilempar register/login karena blip jaringan atau rate-limit. Dev lokal (hot reload + navigasi berulang) tak pernah kena 429. Prod tetap dibatasi 1000/15min. Tak ada perubahan arsitektur/business-rule.
+
+Decision (D-ROUTE-1):
+Flow per-role dibuat konsisten & reversible. BEGINNER (Mahasiswa): /my-projects = BOARD (bento, 1 proyek aktif) → workspace → detail; Back reverse (detail→workspace→board). UMKM/SENIOR: /my-projects = LIST → detail → workspace; Back reverse (workspace→detail→list). Implementasi: `projects/[id]/page.tsx` + `workspace/page.tsx` hitung backHref dari `usePathname` base + `appUser.role` (BEGINNER+/my-projects dapat jalur board-first). List cards (UMKM/SENIOR) tombol "Lihat Detail" (bukan langsung workspace).
+Reason:
+User minta detail = detail-only dan back mengikuti jalur masuk (mudah diprediksi). Halaman detail & workspace dipakai bersama /projects (discovery) dan /my-projects (milik sendiri) → backHref harus base+role-aware, bukan hardcode.
+Impact:
+Navigasi Back tak lagi "nyangkut" di detail saat harusnya balik ke board. Discovery (/projects/:id) tak berubah.
+
+Date:
 2026-06-28 (Phase 12 — Discussion Forum Upgrade, user-approved scope override)
 
 Decision (D-P12-1):

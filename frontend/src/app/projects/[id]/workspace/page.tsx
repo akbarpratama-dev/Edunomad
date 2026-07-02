@@ -286,12 +286,16 @@ function MembersTab({ project }: { project: ProjectDetail }) {
 export default function WorkspacePage() {
   const params = useParams();
   const id = params.id as string;
-  // Back goes to the section you came from (/my-projects/:id or /projects/:id).
   const pathname = usePathname();
   const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
+  const role = useAuthStore((s) => s.appUser?.role);
+  // Beginner's /my-projects is the board (no per-project detail page in their flow).
+  // Back from workspace goes straight to the list, not to the detail.
+  const backHref =
+    role === "BEGINNER" && base === "/my-projects" ? "/my-projects" : `${base}/${id}`;
   return (
     <AuthGuard>
-      <AppShell backHref={`${base}/${id}`}>
+      <AppShell backHref={backHref}>
         <WorkspaceInner />
       </AppShell>
     </AuthGuard>

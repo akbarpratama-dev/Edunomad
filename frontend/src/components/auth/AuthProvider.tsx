@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { useAuthStore } from "@/stores/authStore";
 import { fetchMe } from "@/services/authApi";
+import { ApiError } from "@/lib/apiClient";
 
 // Bootstraps auth state on load and keeps it in sync with Supabase Auth.
 // After a session exists, loads the app user (role/status) from GET /auth/me.
@@ -16,14 +17,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let active = true;
 
-    // Load the app user; a stale/expired session token makes /auth/me 401 — sign
-    // out so it doesn't error-loop and the guard redirects cleanly to login.
+    // Resolve the app user (role/status) for the current session. Only a
+    // DEFINITIVE outcome ends this:
+    //   • app user loaded            → setAppUser(user)
+    //   • real 404 (not registered)  → setAppUser(null) → guard → /auth/register
+    //   • 401 (token invalid/expired)→ signOut + clear → guard → /auth/login
+    // Transient failures (429 rate-limit, 5xx, network) DO NOT end it: we keep
+    // the session + loading state and retry with backoff, so a temporary blip
+    // never bounces a signed-in, registered user to login or registration.
+    const BACKOFF_MS = [400, 800, 1600, 3200, 5000];
     const loadAppUser = async () => {
-      try {
-        setAppUser(await fetchMe());
-      } catch {
-        await supabase.auth.signOut();
-        clear();
+      for (let attempt = 0; active; attempt++) {
+        try {
+          setAppUser(await fetchMe()); // AppUser, or null only on a real 404
+          return;
+        } catch (err) {
+          if (err instanceof ApiError && err.status === 401) {
+            await supabase.auth.signOut();
+            clear();
+            return;
+          }
+          await new Promise((r) =>
+            setTimeout(r, BACKOFF_MS[Math.min(attempt, BACKOFF_MS.length - 1)])
+          );
+        }
       }
     };
 
