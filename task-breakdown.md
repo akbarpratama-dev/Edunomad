@@ -1005,10 +1005,11 @@
 > `/artifacts/:projectId` (tab Detail/Proses Verifikasi/Feedback Mentor/Riwayat).
 > Status artifact DIDERIVASI (bukan kolom baru — artifact tetap immutable):
 > VERIFIED/READY/IN_PROGRESS. Endpoint baru: `GET /me/artifact-pipeline[/:projectId]`,
-> `GET /projects/:id/artifacts`. **BARU IN-SCOPE:** halaman Portofolio Publik
-> `/portfolio/:id` + `GET /portfolio/:userId` (dulu OUT OF SCOPE, dipindah oleh
-> user). **BARU:** `projects.image_url` + bucket publik `project-images` + upload
-> di wizard create + `POST /projects/image-upload-url`.
+> `GET /projects/:id/artifacts`. **Portofolio Publik `/portfolio/:id` DITUNDA ke phase
+> tersendiri** (tetap OUT OF SCOPE sekarang, D-P8-5) — artifact page cuma punya tombol
+> placeholder yang nge-link ke route itu; halaman + backend BELUM dibuat. **BARU:**
+> `projects.image_url` + bucket publik `project-images` + upload di wizard create +
+> `POST /projects/image-upload-url`.
 
 ## 8.1 — Backend: Artifact Module
 

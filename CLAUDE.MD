@@ -394,6 +394,7 @@ Never implement:
 - Wallet
 - Gamification
 - Achievement System
+- Public Portfolio Pages
 - WhatsApp Integration
 - Video Calls
 - Voice Calls
@@ -402,7 +403,7 @@ Never implement:
 
 Unless explicitly approved.
 
-NOTE (2026-07-02): "Public Portfolio Pages" moved IN SCOPE by explicit user approval — a read-only public portfolio (`/portfolio/:id`, backend `GET /portfolio/:userId`) surfaces a beginner's profile + verified artifacts. See decisions D-P8-5. This is a scoped, read-only page, not a social network.
+NOTE (2026-07-02): Public Portfolio Pages stay OUT OF SCOPE for now — deferred to their own later phase. The artifact pages only expose placeholder BUTTONS ("Lihat di Portofolio" / "Bagikan Profil Portofolio") that link to the future `/portfolio/:id` route; the page and its backend are NOT built yet. See decision D-P8-5.
 
 ⸻
 

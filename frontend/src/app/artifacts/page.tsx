@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
 import { Box, ShieldCheck, Clock, Sparkles, Share2, GraduationCap, Users } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
@@ -194,17 +193,6 @@ function Content() {
     return items.filter((i) => i.status === tab);
   }, [items, tab]);
 
-  const share = async () => {
-    if (!userId) return;
-    const url = `${window.location.origin}/portfolio/${userId}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success("Tautan portofolio disalin");
-    } catch {
-      toast.error("Gagal menyalin tautan");
-    }
-  };
-
   if (error) return <ErrorState message={error} />;
   if (items === null) return <ListSkeleton rows={4} />;
 
@@ -215,7 +203,10 @@ function Content() {
         subtitle="Semua artifact terverifikasi dari proyek yang telah Anda kontribusikan. Dapat digunakan sebagai bukti pengalaman dan portofolio Anda."
         action={
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={share}>
+            <Button
+              variant="outline"
+              render={<Link href={userId ? `/portfolio/${userId}` : "/portfolio"} />}
+            >
               <Share2 className="size-4" /> Bagikan Profil Portofolio
             </Button>
             <Button onClick={() => setInfoOpen(true)}>

@@ -8,10 +8,11 @@ Mockup "Artifact Saya" punya status Terverifikasi/Dalam Proses/Siap Diterbitkan/
 Reason: hormati aturan locked "artifact immutable history"; visual kaya bisa dicapai tanpa invent workflow verifikasi/kolom baru. User setuju.
 Impact: NO migration utk status. Docs 06 diamandemen (status derived). Riwayat Aktivitas & Kontribusi% diadaptasi (tak ada activity log per-artifact / kolom persen → derive dari timeline & status).
 
-Decision (D-P8-5) — Public Portfolio dipindah IN SCOPE + project image:
-"Public Portfolio Pages" ADA di OUT OF SCOPE (CLAUDE.md). Via AskUserQuestion user pilih **Buat portfolio publik** → dipindah in-scope. `GET /portfolio/:userId` PUBLIC (profil+skills+experiences+links+artifact terbit; tanpa email/path). Page `/portfolio/:id` (standalone, no auth/shell). Tombol "Bagikan Profil Portofolio" = copy tautan itu. Juga user pilih **Tambah field image** → `projects.image_url` (migration `20260702134407_project_image_url`, LIVE + _prisma_migrations sync) + bucket PUBLIK `project-images` + `POST /projects/image-upload-url` (UMKM, signed upload → simpan publicUrl) + upload di wizard create Step 1. Kartu artifact pakai image, fallback gradient+inisial deterministik.
-Reason: perluasan scope DISETUJUI eksplisit user. CLAUDE.md OUT OF SCOPE diedit (hapus "Public Portfolio Pages" + note). Docs 03/04/06/08 + task-breakdown diamandemen.
-Impact: fitur read-only baru; bukan social network. CLAUDE.md berubah (scope). Migration + bucket baru.
+Decision (D-P8-5) — Public Portfolio DITUNDA (button-only) + project image:
+Sempat dibangun penuh (page `/portfolio/:id` + `GET /portfolio/:userId` + portfolio.service/controller/routes), TAPI user mengklarifikasi: portfolio itu untuk phase NANTI — **jangan bangun fiturnya dulu, cukup tombolnya saja** yang nge-route ke `/portfolio/:id`. Jadi: page + backend portfolio DIHAPUS lagi; "Public Portfolio Pages" tetap di OUT OF SCOPE (CLAUDE.md di-revert + note "placeholder button, dibangun di phase-nya"). Tombol "Lihat di Portofolio" (detail) & "Bagikan Profil Portofolio" (list) = `<Link href="/portfolio/:id">` placeholder (404 sampai phase-nya, konsisten pola nav unbuilt). Docs 04/06/08 + task-breakdown ditandai PLANNED/deferred.
+Project image TETAP dibangun (dipilih user, dipakai kartu artifact): `projects.image_url` (migration `20260702134407_project_image_url` LIVE + _prisma_migrations sync) + bucket PUBLIK `project-images` + `POST /projects/image-upload-url` (UMKM signed upload → publicUrl) + upload di wizard create Step 1. Kartu artifact pakai image, fallback gradient+inisial deterministik.
+Reason: user hanya mau placeholder tombol untuk portfolio (belum sampai phase-nya); MVP-protection — jangan bangun fitur di luar phase.
+Impact: no portfolio feature sekarang; scope OUT OF SCOPE dipertahankan. Image field + bucket TETAP ada (dipakai kartu). Endpoint pipeline/detail + redesign page TETAP (D-P8-4).
 
 Date:
 2026-07-02 (Phase 8 — Artifact System)

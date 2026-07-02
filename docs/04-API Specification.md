@@ -1179,19 +1179,11 @@ public `project-images` bucket. The client uploads the file then persists
 
 ---
 
-### Portfolio Endpoints — added 2026-07-02
+### Portfolio Endpoints — PLANNED (deferred to a later phase, D-P8-5)
 
-#### Public Portfolio
-
-```
-GET /portfolio/:userId
-```
-
-**Access:** Public (no auth)  
-**Description:** Read-only public portfolio (D-P8-5): user profile (name,
-headline, bio, photo, role), skills, experiences, portfolio links, and issued
-(verified) artifacts (code + project + UMKM + mentor + date). Exposes no email
-or storage paths.
+> `GET /portfolio/:userId` (public portfolio) is NOT built yet. The artifact
+> pages only carry placeholder buttons that link to the future `/portfolio/:id`
+> route. Build the endpoint + page in the dedicated portfolio phase.
 
 ---
 

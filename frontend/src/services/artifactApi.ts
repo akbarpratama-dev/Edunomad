@@ -124,34 +124,6 @@ export interface PipelineDetail {
   artifact: { id: string; artifactCode: string; currentVersion: number; issuedAt: string } | null;
 }
 
-export interface PublicPortfolio {
-  user: {
-    id: string;
-    name: string;
-    role: string;
-    headline: string | null;
-    bio: string | null;
-    photo: string | null;
-  };
-  skills: { id: string; name: string; level: string }[];
-  experiences: {
-    id: string;
-    title: string;
-    organization: string;
-    description: string | null;
-    startDate: string;
-    endDate: string | null;
-  }[];
-  portfolioLinks: { id: string; title: string; url: string; type: string }[];
-  artifacts: {
-    artifactCode: string;
-    projectTitle: string;
-    umkmName: string | null;
-    seniorName: string;
-    issuedAt: string;
-  }[];
-}
-
 // The public verify page base the backend appends the code to.
 export function verificationBase() {
   return `${window.location.origin}/verify`;
@@ -207,12 +179,6 @@ export const artifactApi = {
   // Beginner: full detail for one project in the pipeline.
   async pipelineDetail(projectId: string): Promise<PipelineDetail> {
     const res = await apiClient.get<Envelope<PipelineDetail>>(`/me/artifact-pipeline/${projectId}`);
-    return res.data.data;
-  },
-
-  // Public: a user's portfolio (profile + verified artifacts).
-  async portfolio(userId: string): Promise<PublicPortfolio> {
-    const res = await apiClient.get<Envelope<PublicPortfolio>>(`/portfolio/${userId}`);
     return res.data.data;
   },
 

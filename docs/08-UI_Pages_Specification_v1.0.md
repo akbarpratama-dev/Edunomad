@@ -1385,8 +1385,8 @@ Column headers (sortable)
 - Detail tab: "Tentang Artifact", 4 meta cards (Peran Saya, Kontribusi, Tanggal Selesai, Durasi), "Kontribusi dan Pencapaian" (checklist), "Deliverables" (files + download), "Teknologi yang Digunakan".
 - Sidebar: **Progres Verifikasi** timeline (dates + actor) + **Lihat di Portofolio**; **Informasi Proyek** (UMKM/Mentor/Periode + Lihat Detail Proyek). Bottom: **Tim Proyek**.
 
-### Portofolio Publik — `/portfolio/:id` (Public, no auth)
-- Brand bar + navy hero (avatar, name, headline, role, bio). Sections: Artifact Terverifikasi (+ verify link), Keahlian, Pengalaman, Tautan.
+### Portofolio Publik — `/portfolio/:id` (PLANNED — deferred, D-P8-5)
+- NOT built yet. Artifact pages only carry placeholder buttons ("Lihat di Portofolio" / "Bagikan Profil Portofolio") linking to this future route.
 
 Status labels are DERIVED, not stored (D-P8-4).
 

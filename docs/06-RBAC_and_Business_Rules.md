@@ -569,10 +569,10 @@ SUBMITTED
   project from existing contribution / review / artifact data, not stored.
   "Ditolak" has no data model and is always empty.
 
-**Public Portfolio (added 2026-07-02, D-P8-5 — moved in scope by user approval):**
-- ✅ Anyone can view a beginner's public portfolio (`GET /portfolio/:userId`)
-- ✅ Read-only: profile + skills + experiences + links + issued artifacts
-- ❌ No email / private data exposed
+**Public Portfolio (PLANNED — deferred to its own phase, D-P8-5):**
+- Not built yet. Artifact pages only link placeholder buttons to the future
+  `/portfolio/:id` route. When built: read-only profile + skills + experiences +
+  links + issued artifacts; anyone can view; no email/private data exposed.
 
 ---
 
