@@ -1,7 +1,11 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-07-01 (UNCOMMITTED fix di atas main 6adfeda: **auth register-bounce** [/auth/me 429 → fetchMe telan error → bounce register; FIX fetchMe null-only-on-404 + loadAppUser retry-transient/signout-only-401 + backend rate limit 100→1000 skip-dev] + **routing reverse-back Mahasiswa** [detail backHref role-aware]. Playwright-verified. D-AUTH-2, D-ROUTE-1. Belum commit.) (main = **6adfeda**. Phase 0-7 + UNIFY-UI sweep + Diskusi redesign + **PHASE 12 forum upgrade 12.1–12.5 + UX batch MERGED → main** via --no-ff [pushed origin/main]. D-P12-1/4/5/6/7 + D-AUTH-1 + D-P12-2/3. NEXT = **PHASE 8 Artifact** [WIP feature/phase-8-artifacts]. Leftover: stash "landing page.tsx prettier reformat" non-fungsional.)
+> Last updated: 2026-07-02. main = **6adfeda** (belum ada fix/phase8 yg ke-merge). DUA branch pushed, BELUM merge:
+> (1) `fix/auth-register-bounce-routing` (9221281): auth register-bounce [/auth/me 429 → fetchMe telan error; FIX fetchMe null-only-404 + loadAppUser retry-transient/signout-only-401 + rate limit 100→1000 skip-dev] + routing reverse-back Mahasiswa. D-AUTH-2, D-ROUTE-1. PR ada.
+> (2) `feature/phase-8-artifacts-v2` (65bc371, cabang dari #1): **PHASE 8 Artifact System SELESAI & verified** — generate/regenerate(version history)/download-stream/verify-public + bucket privat `artifacts` + completion gate WF15 (tutup D-P4.3-3) + frontend /artifacts, /verify[/code], workspace tab Sertifikat, /admin/artifacts. E2E backend+Playwright hijau. D-P8-1..3.
+> ➡️ NEXT = MERGE #1 lalu #2 ke main (atau #2 sudah mengandung #1 karena bercabang darinya → merge #2 saja setelah #1). Lalu PHASE 9 Notifications. Test artifact EDN-2026-000001 (Test Beginner, 3 versi) tertinggal di DB proyek …0005.
+> (arsip note lama:) (main = **6adfeda**. Phase 0-7 + UNIFY-UI sweep + Diskusi redesign + **PHASE 12 forum upgrade 12.1–12.5 + UX batch MERGED → main** via --no-ff [pushed origin/main]. D-P12-1/4/5/6/7 + D-AUTH-1 + D-P12-2/3. NEXT = **PHASE 8 Artifact** [WIP feature/phase-8-artifacts]. Leftover: stash "landing page.tsx prettier reformat" non-fungsional.)
 
 ## ⚡ UX batch (2026-06-30→07-01, branch feature/phase-10-discussion-forum) — committed
 Bug fixes + flow upgrades on top of Phase 12 work. All tsc 0 + Playwright-verified (p4-senior).
