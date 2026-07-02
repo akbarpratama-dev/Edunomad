@@ -66,17 +66,20 @@ const ROLE_ITEMS: Record<Role, NavItem[]> = {
     { label: "Proyek Saya", href: "/my-projects", icon: FolderKanban },
     { label: "Lamaran Saya", href: "/applications", icon: FileSignature },
     { label: "Review Saya", href: "/reviews", icon: Star },
+    // "Artifact Saya" is beginner-only. Seniors generate artifacts inside each
+    // project workspace (Sertifikat tab); UMKM see them there too; admins have
+    // their own /admin/artifacts monitoring — so /artifacts isn't in their nav.
+    { label: "Sertifikat", href: "/artifacts", icon: Award },
   ],
 };
 
 const TRAILING_ITEMS: NavItem[] = [
-  { label: "Sertifikat", href: "/artifacts", icon: Award },
   { label: "Notifikasi", href: "/notifications", icon: Bell },
 ];
 
 export function getNavItems(role?: Role): NavItem[] {
-  // Sertifikat/Notifications don't apply to ADMIN (and aren't built yet), so the
-  // admin sidebar skips the trailing items.
+  // Notifications don't apply to ADMIN (not built yet), so the admin sidebar
+  // skips the trailing items.
   const trailing = role === "ADMIN" ? [] : TRAILING_ITEMS;
   return [dashboardItem(role), ...(role ? ROLE_ITEMS[role] : []), ...trailing];
 }
