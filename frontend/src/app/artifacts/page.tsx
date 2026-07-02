@@ -131,11 +131,11 @@ function NextArtifactPanel({ items }: { items: PipelineItem[] }) {
   const next = items.find((i) => i.status !== "VERIFIED");
   return (
     <div className="app-reveal rounded-[20px] border border-border bg-card p-5">
-      <h2 className="font-bold tracking-tight">Progres Menuju Artifact Berikutnya</h2>
+      <h2 className="font-bold tracking-tight">Progres Menuju Sertifikat Berikutnya</h2>
       {next ? (
         <>
           <p className="mt-1 text-sm text-muted-foreground">
-            Selesaikan langkah berikut untuk mendapatkan artifact terverifikasi selanjutnya.
+            Selesaikan langkah berikut untuk mendapatkan sertifikat terverifikasi selanjutnya.
           </p>
           <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {next.projectTitle}
@@ -151,7 +151,7 @@ function NextArtifactPanel({ items }: { items: PipelineItem[] }) {
         </>
       ) : (
         <p className="mt-2 text-sm text-muted-foreground">
-          Semua kontribusimu sudah menjadi artifact terverifikasi. Kerja bagus! 🎉
+          Semua kontribusimu sudah menjadi sertifikat terverifikasi. Kerja bagus! 🎉
         </p>
       )}
     </div>
@@ -170,7 +170,7 @@ function Content() {
     artifactApi
       .pipeline()
       .then((p) => active && setItems(p))
-      .catch((err) => active && setError(err instanceof ApiError ? err.message : "Gagal memuat artifact"));
+      .catch((err) => active && setError(err instanceof ApiError ? err.message : "Gagal memuat sertifikat"));
     return () => {
       active = false;
     };
@@ -199,8 +199,8 @@ function Content() {
   return (
     <div className="flex flex-col gap-5">
       <PageHeader
-        title="Artifact Saya"
-        subtitle="Semua artifact terverifikasi dari proyek yang telah Anda kontribusikan. Dapat digunakan sebagai bukti pengalaman dan portofolio Anda."
+        title="Sertifikat Saya"
+        subtitle="Semua sertifikat terverifikasi dari proyek yang telah Anda kontribusikan. Dapat digunakan sebagai bukti pengalaman dan portofolio Anda."
         action={
           <div className="flex flex-wrap gap-2">
             <Button
@@ -210,31 +210,31 @@ function Content() {
               <Share2 className="size-4" /> Bagikan Profil Portofolio
             </Button>
             <Button onClick={() => setInfoOpen(true)}>
-              <Sparkles className="size-4" /> Lihat Cara Mendapatkan Artifact
+              <Sparkles className="size-4" /> Lihat Cara Mendapatkan Sertifikat
             </Button>
           </div>
         }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={Box} tone="bg-[#eef7d6] text-[#5f8c00]" label="Total Artifact" value={stats.verified} sub="Sertifikat terverifikasi" />
+        <StatCard icon={Box} tone="bg-[#eef7d6] text-[#5f8c00]" label="Total Sertifikat" value={stats.verified} sub="Sertifikat terverifikasi" />
         <StatCard icon={ShieldCheck} tone="bg-violet-100 text-violet-700" label="Terverifikasi" value={stats.verified} sub="Sudah diterbitkan" />
-        <StatCard icon={Clock} tone="bg-sky-100 text-sky-700" label="Dalam Proses" value={stats.progress} sub="Menuju artifact" />
+        <StatCard icon={Clock} tone="bg-sky-100 text-sky-700" label="Dalam Proses" value={stats.progress} sub="Menuju sertifikat" />
         <StatCard icon={Sparkles} tone="bg-amber-100 text-amber-700" label="Siap Diterbitkan" value={stats.ready} sub="Menunggu mentor menerbitkan" />
       </div>
 
-      <PillTabs tabs={TABS} value={tab} onChange={(v) => setTab(v as TabKey)} ariaLabel="Filter status artifact" />
+      <PillTabs tabs={TABS} value={tab} onChange={(v) => setTab(v as TabKey)} ariaLabel="Filter status sertifikat" />
 
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         <div className="flex min-w-0 flex-col gap-3">
           {visible.length === 0 ? (
             <EmptyState
               icon={Box}
-              heading={tab === "REJECTED" ? "Tidak Ada yang Ditolak" : "Belum Ada Artifact"}
+              heading={tab === "REJECTED" ? "Tidak Ada yang Ditolak" : "Belum Ada Sertifikat"}
               message={
                 tab === "REJECTED"
-                  ? "Tidak ada artifact yang ditolak."
-                  : "Selesaikan kontribusi proyek untuk mulai mengumpulkan artifact terverifikasi."
+                  ? "Tidak ada sertifikat yang ditolak."
+                  : "Selesaikan kontribusi proyek untuk mulai mengumpulkan sertifikat terverifikasi."
               }
             />
           ) : (
@@ -249,10 +249,10 @@ function Content() {
               <span className="grid size-9 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]">
                 <Box className="size-4" />
               </span>
-              <h2 className="font-bold tracking-tight">Apa itu Artifact?</h2>
+              <h2 className="font-bold tracking-tight">Apa itu Sertifikat?</h2>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              Artifact adalah bukti kontribusi nyata yang telah diverifikasi oleh mentor dan UMKM.
+              Sertifikat adalah bukti kontribusi nyata yang telah diverifikasi oleh mentor dan UMKM.
               Dapat digunakan untuk portofolio dan peluang kariermu.
             </p>
             <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => setInfoOpen(true)}>

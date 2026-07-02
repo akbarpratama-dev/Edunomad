@@ -236,8 +236,8 @@ export const artifactService = {
           { key: "contribution", label: "Kontribusi Tercatat", done: contributionApproved },
           { key: "senior_review", label: "Review Mentor", done: hasSeniorReview },
           { key: "umkm_review", label: "Persetujuan UMKM", done: hasUmkmReview },
-          { key: "verification", label: "Verifikasi Artifact", done: issued },
-          { key: "published", label: "Artifact Terbit", done: issued },
+          { key: "verification", label: "Verifikasi Sertifikat", done: issued },
+          { key: "published", label: "Sertifikat Terbit", done: issued },
         ];
 
         return {
@@ -392,7 +392,7 @@ export const artifactService = {
         },
         {
           key: "verification",
-          label: "Verifikasi Artifact",
+          label: "Verifikasi Sertifikat",
           done: issued,
           at: artifactDetail?.issuedAt ?? null,
           by: issued ? "Tim EduNomad" : null,

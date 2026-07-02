@@ -101,17 +101,17 @@ export function ArtifactInfoDialog({
     "Catat kontribusimu di proyek dan minta mentor menyetujuinya.",
     "Mentor memberi review atas hasil kerjamu.",
     "UMKM menyetujui hasil pekerjaan proyek.",
-    "Mentor menerbitkan artifact — sertifikat bukti kontribusi terverifikasi.",
-    "Artifact tampil di portofolio publikmu & bisa diverifikasi lewat kode.",
+    "Mentor menerbitkan sertifikat — bukti kontribusi terverifikasi.",
+    "Sertifikat tampil di portofolio publikmu & bisa diverifikasi lewat kode.",
   ];
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Cara Mendapatkan Artifact</DialogTitle>
+          <DialogTitle>Cara Mendapatkan Sertifikat</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Artifact adalah bukti kontribusi nyata yang telah diverifikasi oleh mentor dan UMKM.
+          Sertifikat adalah bukti kontribusi nyata yang telah diverifikasi oleh mentor dan UMKM.
           Dapat digunakan untuk portofolio dan peluang kariermu.
         </p>
         <ol className="mt-2 flex flex-col gap-3">

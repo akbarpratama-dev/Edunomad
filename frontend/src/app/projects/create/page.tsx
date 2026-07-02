@@ -213,7 +213,7 @@ function CreateProjectContent() {
                       <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={onPickImage} disabled={uploadingImage} />
                     </label>
                   </div>
-                  <p className="text-xs text-muted-foreground">PNG/JPG/WebP, maks 3 MB. Tampil sebagai sampul di kartu artifact.</p>
+                  <p className="text-xs text-muted-foreground">PNG/JPG/WebP, maks 3 MB. Tampil sebagai sampul di kartu sertifikat.</p>
                 </div>
 
                 <div className="flex flex-col gap-1.5">

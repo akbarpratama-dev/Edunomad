@@ -83,7 +83,7 @@ export function BeginnerDashboard() {
           icon={Award}
           tone="bg-sky-100 text-sky-700"
           value="0"
-          label="Artifact"
+          label="Sertifikat"
           trend="Terbit usai proyek selesai"
           trendTone="text-muted-foreground"
         />

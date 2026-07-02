@@ -25,7 +25,7 @@ import { artifactApi, type PipelineDetail } from "@/services/artifactApi";
 
 type TabKey = "detail" | "verification" | "feedback" | "activity";
 const TABS: { key: TabKey; label: string }[] = [
-  { key: "detail", label: "Detail Artifact" },
+  { key: "detail", label: "Detail Sertifikat" },
   { key: "verification", label: "Proses Verifikasi" },
   { key: "feedback", label: "Feedback Mentor" },
   { key: "activity", label: "Riwayat Aktivitas" },
@@ -105,12 +105,12 @@ function Content() {
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         {/* Main */}
         <div className="flex min-w-0 flex-col gap-4">
-          <PillTabs tabs={TABS} value={tab} onChange={(v) => setTab(v as TabKey)} ariaLabel="Navigasi detail artifact" />
+          <PillTabs tabs={TABS} value={tab} onChange={(v) => setTab(v as TabKey)} ariaLabel="Navigasi detail sertifikat" />
 
           {tab === "detail" && (
             <div className="flex flex-col gap-4">
               <section className="rounded-[20px] border border-border bg-card p-5">
-                <h2 className="font-bold tracking-tight">Tentang Artifact</h2>
+                <h2 className="font-bold tracking-tight">Tentang Sertifikat</h2>
                 <p className="mt-1.5 text-sm text-foreground/80">
                   {d.contributionSummary ?? "Ringkasan kontribusi belum tersedia."}
                 </p>
@@ -185,7 +185,7 @@ function Content() {
           {tab === "verification" && (
             <section className="rounded-[20px] border border-border bg-card p-5">
               <h2 className="font-bold tracking-tight">Proses Verifikasi</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Tahapan verifikasi artifact oleh mentor dan UMKM.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Tahapan verifikasi sertifikat oleh mentor dan UMKM.</p>
               <div className="mt-4 flex flex-col gap-4">
                 {(() => {
                   const firstTodo = d.timeline.findIndex((s) => !s.done);
@@ -250,7 +250,7 @@ function Content() {
         <aside className="flex flex-col gap-4">
           <div className="app-reveal rounded-[20px] border border-border bg-card p-5">
             <h2 className="font-bold tracking-tight">Progres Verifikasi</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Tahapan verifikasi artifact oleh mentor dan UMKM.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Tahapan verifikasi sertifikat oleh mentor dan UMKM.</p>
             <div className="mt-4 flex flex-col gap-4">
               {(() => {
                 const firstTodo = d.timeline.findIndex((s) => !s.done);

@@ -159,7 +159,7 @@ const SAMPLE_ACTIVITY = [
     tone: "bg-sky-100 text-sky-700",
   },
   {
-    who: "Artifact",
+    who: "Sertifikat",
     text: '"Sistem Kasir UMKM" berhasil diverifikasi.',
     time: "1 hari lalu",
     icon: BadgeCheck,

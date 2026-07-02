@@ -1370,19 +1370,21 @@ Column headers (sortable)
 
 ---
 
-## Artifact Pages (added 2026-07-02 — from user mockups)
+## Halaman Sertifikat (added 2026-07-02 — from user mockups)
 
-### Artifact Saya — `/artifacts` (Beginner)
-- Header: title + subtitle, actions **Bagikan Profil Portofolio** (copy `/portfolio/:id`) + **Lihat Cara Mendapatkan Artifact** (info dialog).
-- 4 stat cards: Total Artifact · Terverifikasi · Dalam Proses · Siap Diterbitkan.
+> **Terminologi (D-UI-7):** sebutan user-facing = **"Sertifikat"** di seluruh UI & docs. Entitas teknis (tabel `artifacts`, kolom `artifact_code`, endpoint `/artifacts`, model `Artifact`) TETAP "artifact" — jangan diubah.
+
+### Sertifikat Saya — `/artifacts` (Beginner)
+- Header: title + subtitle, actions **Bagikan Profil Portofolio** (copy `/portfolio/:id`) + **Lihat Cara Mendapatkan Sertifikat** (info dialog).
+- 4 stat cards: Total Sertifikat · Terverifikasi · Dalam Proses · Siap Diterbitkan.
 - Status tabs: Semua / Terverifikasi / Dalam Proses / Siap Diterbitkan / Ditolak.
 - Project cards: cover (image or gradient+initials), status badge, title, "Proyek:", description, tech chips, team avatars; right block "Diverifikasi oleh" mentor + date, **Lihat Detail / Lihat Progress** → `/artifacts/:projectId`.
-- Right sidebar: **Progres Menuju Artifact Berikutnya** (5-stage checklist) + **Apa itu Artifact?** card.
+- Right sidebar: **Progres Menuju Sertifikat Berikutnya** (5-stage checklist) + **Apa itu Sertifikat?** card.
 
-### Artifact Detail — `/artifacts/:projectId` (Beginner)
+### Detail Sertifikat — `/artifacts/:projectId` (Beginner)
 - Header: status badge, title, "Proyek:", description, tech chips + large cover image.
-- Tabs: Detail Artifact / Proses Verifikasi / Feedback Mentor / Riwayat Aktivitas.
-- Detail tab: "Tentang Artifact", 4 meta cards (Peran Saya, Kontribusi, Tanggal Selesai, Durasi), "Kontribusi dan Pencapaian" (checklist), "Deliverables" (files + download), "Teknologi yang Digunakan".
+- Tabs: Detail Sertifikat / Proses Verifikasi / Feedback Mentor / Riwayat Aktivitas.
+- Detail tab: "Tentang Sertifikat", 4 meta cards (Peran Saya, Kontribusi, Tanggal Selesai, Durasi), "Kontribusi dan Pencapaian" (checklist), "Deliverables" (files + download), "Teknologi yang Digunakan".
 - Sidebar: **Progres Verifikasi** timeline (dates + actor) + **Lihat di Portofolio**; **Informasi Proyek** (UMKM/Mentor/Periode + Lihat Detail Proyek). Bottom: **Tim Proyek**.
 
 ### Portofolio Publik — `/portfolio/:id` (PLANNED — deferred, D-P8-5)
