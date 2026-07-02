@@ -24,6 +24,8 @@ import contributionRoutes from "./contribution.routes";
 import reviewRoutes from "./review.routes";
 import artifactRoutes from "./artifact.routes";
 import verifyRoutes from "./verify.routes";
+import portfolioRoutes from "./portfolio.routes";
+import { artifactController } from "../modules/artifact/artifact.controller";
 
 // Aggregates all feature routes under the /api/v1 base path (API spec).
 const router = Router();
@@ -45,6 +47,7 @@ router.use("/contributions", contributionRoutes);
 router.use("/reviews", reviewRoutes);
 router.use("/artifacts", artifactRoutes);
 router.use("/verify", verifyRoutes);
+router.use("/portfolio", portfolioRoutes);
 router.use("/admin", adminRoutes);
 
 // Absolute-path routes
@@ -57,6 +60,9 @@ router.get(
 );
 // The caller's own project memberships (beginner "Proyek Saya").
 router.get("/me/projects", authMiddleware, projectMemberController.myProjects);
+// Derived artifact pipeline for the beginner "Artifact Saya" page.
+router.get("/me/artifact-pipeline", authMiddleware, artifactController.pipeline);
+router.get("/me/artifact-pipeline/:projectId", authMiddleware, artifactController.pipelineDetail);
 // Projects the caller mentors (senior dashboard).
 router.get(
   "/me/mentored-projects",

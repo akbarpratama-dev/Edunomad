@@ -14,6 +14,7 @@ function toData(input: CreateProjectInput) {
     title: input.title,
     description: input.description,
     expectedDeliverables: input.expected_deliverables,
+    imageUrl: input.image_url ?? null,
     startDate: input.start_date,
     deadline: input.deadline,
   };

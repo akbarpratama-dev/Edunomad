@@ -1370,6 +1370,28 @@ Column headers (sortable)
 
 ---
 
-*Last Updated: Based on Figma Screenshots*  
+## Artifact Pages (added 2026-07-02 — from user mockups)
+
+### Artifact Saya — `/artifacts` (Beginner)
+- Header: title + subtitle, actions **Bagikan Profil Portofolio** (copy `/portfolio/:id`) + **Lihat Cara Mendapatkan Artifact** (info dialog).
+- 4 stat cards: Total Artifact · Terverifikasi · Dalam Proses · Siap Diterbitkan.
+- Status tabs: Semua / Terverifikasi / Dalam Proses / Siap Diterbitkan / Ditolak.
+- Project cards: cover (image or gradient+initials), status badge, title, "Proyek:", description, tech chips, team avatars; right block "Diverifikasi oleh" mentor + date, **Lihat Detail / Lihat Progress** → `/artifacts/:projectId`.
+- Right sidebar: **Progres Menuju Artifact Berikutnya** (5-stage checklist) + **Apa itu Artifact?** card.
+
+### Artifact Detail — `/artifacts/:projectId` (Beginner)
+- Header: status badge, title, "Proyek:", description, tech chips + large cover image.
+- Tabs: Detail Artifact / Proses Verifikasi / Feedback Mentor / Riwayat Aktivitas.
+- Detail tab: "Tentang Artifact", 4 meta cards (Peran Saya, Kontribusi, Tanggal Selesai, Durasi), "Kontribusi dan Pencapaian" (checklist), "Deliverables" (files + download), "Teknologi yang Digunakan".
+- Sidebar: **Progres Verifikasi** timeline (dates + actor) + **Lihat di Portofolio**; **Informasi Proyek** (UMKM/Mentor/Periode + Lihat Detail Proyek). Bottom: **Tim Proyek**.
+
+### Portofolio Publik — `/portfolio/:id` (Public, no auth)
+- Brand bar + navy hero (avatar, name, headline, role, bio). Sections: Artifact Terverifikasi (+ verify link), Keahlian, Pengalaman, Tautan.
+
+Status labels are DERIVED, not stored (D-P8-4).
+
+---
+
+*Last Updated: Based on Figma Screenshots + 2026-07-02 artifact mockups*  
 *Status: Design Reference + Gap Analysis*  
 *Next: Design remaining pages in Figma*

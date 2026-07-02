@@ -27,6 +27,7 @@ const myMembershipInclude = {
       status: true,
       deadline: true,
       startDate: true,
+      imageUrl: true,
       umkm: { select: { id: true, name: true } },
       senior: { select: { id: true, name: true } },
       category: { select: { id: true, name: true, slug: true } },
@@ -58,6 +59,14 @@ export const projectMemberRepository = {
   countActiveByProject(projectId: string) {
     return prisma.projectMember.count({
       where: { projectId, status: MemberStatus.ACTIVE },
+    });
+  },
+
+  // A single user's membership in a project (any live/completed status) with role.
+  findByUserAndProject(userId: string, projectId: string) {
+    return prisma.projectMember.findFirst({
+      where: { userId, projectId },
+      include: { projectRole: { select: { id: true, roleName: true } } },
     });
   },
 

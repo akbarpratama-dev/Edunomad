@@ -52,6 +52,106 @@ export type VerifyResult =
       currentVersion: number;
     };
 
+export type PipelineStatus = "VERIFIED" | "READY" | "IN_PROGRESS";
+
+export interface PipelineStage {
+  key: string;
+  label: string;
+  done: boolean;
+}
+
+export interface PipelineItem {
+  projectId: string;
+  projectTitle: string;
+  projectDescription: string;
+  projectImageUrl: string | null;
+  umkm: { id: string; name: string } | null;
+  senior: { id: string; name: string } | null;
+  roleName: string | null;
+  team: { id: string; name: string }[];
+  technologies: string[];
+  contributionApproved: boolean;
+  hasSeniorReview: boolean;
+  hasUmkmReview: boolean;
+  status: PipelineStatus;
+  stages: PipelineStage[];
+  artifact: {
+    id: string;
+    artifactCode: string;
+    currentVersion: number;
+    issuedAt: string;
+    verifiedBy: string | null;
+  } | null;
+}
+
+export interface PipelineReview {
+  reviewerName: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+}
+
+export interface PipelineDetail {
+  projectId: string;
+  status: PipelineStatus;
+  project: {
+    id: string;
+    title: string;
+    description: string;
+    imageUrl: string | null;
+    status: string;
+    startDate: string;
+    deadline: string;
+    completedAt: string | null;
+  };
+  umkm: { id: string; name: string } | null;
+  senior: { id: string; name: string } | null;
+  roleName: string | null;
+  technologies: string[];
+  contributionSummary: string | null;
+  achievements: string[];
+  contributionApproved: boolean;
+  seniorReview: PipelineReview | null;
+  umkmReview: PipelineReview | null;
+  deliverables: {
+    id: string;
+    title: string;
+    status: string;
+    evidences: { type: string; url: string | null; filePath: string | null }[];
+  }[];
+  team: { id: string; name: string; roleName: string | null }[];
+  timeline: { key: string; label: string; done: boolean; at: string | null; by: string | null }[];
+  artifact: { id: string; artifactCode: string; currentVersion: number; issuedAt: string } | null;
+}
+
+export interface PublicPortfolio {
+  user: {
+    id: string;
+    name: string;
+    role: string;
+    headline: string | null;
+    bio: string | null;
+    photo: string | null;
+  };
+  skills: { id: string; name: string; level: string }[];
+  experiences: {
+    id: string;
+    title: string;
+    organization: string;
+    description: string | null;
+    startDate: string;
+    endDate: string | null;
+  }[];
+  portfolioLinks: { id: string; title: string; url: string; type: string }[];
+  artifacts: {
+    artifactCode: string;
+    projectTitle: string;
+    umkmName: string | null;
+    seniorName: string;
+    issuedAt: string;
+  }[];
+}
+
 // The public verify page base the backend appends the code to.
 export function verificationBase() {
   return `${window.location.origin}/verify`;
@@ -95,6 +195,24 @@ export const artifactApi = {
     const res = await apiClient.post<Envelope<Artifact>>(`/artifacts/${id}/regenerate`, {
       verification_url: verificationBase(),
     });
+    return res.data.data;
+  },
+
+  // Beginner: derived per-project pipeline for "Artifact Saya".
+  async pipeline(): Promise<PipelineItem[]> {
+    const res = await apiClient.get<Envelope<PipelineItem[]>>("/me/artifact-pipeline");
+    return res.data.data;
+  },
+
+  // Beginner: full detail for one project in the pipeline.
+  async pipelineDetail(projectId: string): Promise<PipelineDetail> {
+    const res = await apiClient.get<Envelope<PipelineDetail>>(`/me/artifact-pipeline/${projectId}`);
+    return res.data.data;
+  },
+
+  // Public: a user's portfolio (profile + verified artifacts).
+  async portfolio(userId: string): Promise<PublicPortfolio> {
+    const res = await apiClient.get<Envelope<PublicPortfolio>>(`/portfolio/${userId}`);
     return res.data.data;
   },
 

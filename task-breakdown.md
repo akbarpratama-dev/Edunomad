@@ -998,6 +998,18 @@
 
 > Workflow 13, 14, 18 dari WF. Inti value proposition EduNomad.
 
+> **AMANDEMEN 2026-07-02 (D-P8-4, D-P8-5, user-approved):** Halaman "Artifact Saya"
+> (8.2.2) diperkaya sesuai mockup: 4 stat card, tab status, kartu proyek
+> (thumbnail/gradient + tech + tim + "diverifikasi oleh"), sidebar "Progres
+> Menuju Artifact Berikutnya" + "Apa itu Artifact". Detail per-proyek
+> `/artifacts/:projectId` (tab Detail/Proses Verifikasi/Feedback Mentor/Riwayat).
+> Status artifact DIDERIVASI (bukan kolom baru — artifact tetap immutable):
+> VERIFIED/READY/IN_PROGRESS. Endpoint baru: `GET /me/artifact-pipeline[/:projectId]`,
+> `GET /projects/:id/artifacts`. **BARU IN-SCOPE:** halaman Portofolio Publik
+> `/portfolio/:id` + `GET /portfolio/:userId` (dulu OUT OF SCOPE, dipindah oleh
+> user). **BARU:** `projects.image_url` + bucket publik `project-images` + upload
+> di wizard create + `POST /projects/image-upload-url`.
+
 ## 8.1 — Backend: Artifact Module
 
 - [ ] **8.1.1** Artifact Service

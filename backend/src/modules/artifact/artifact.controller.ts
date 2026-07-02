@@ -42,6 +42,29 @@ export const artifactController = {
     }
   },
 
+  // GET /me/artifact-pipeline — derived pipeline for "Artifact Saya"
+  async pipeline(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await artifactService.beginnerPipeline(req.user!.id);
+      res.json(successResponse(data, "Pipeline retrieved"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // GET /me/artifact-pipeline/:projectId — full detail for one project
+  async pipelineDetail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await artifactService.beginnerProjectDetail(
+        req.user!.id,
+        req.params.projectId
+      );
+      res.json(successResponse(data, "Detail retrieved"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
   // GET /projects/:id/artifacts — certificates for a project
   async listForProject(req: Request, res: Response, next: NextFunction) {
     try {

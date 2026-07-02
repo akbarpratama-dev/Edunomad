@@ -19,6 +19,7 @@ import {
   updateProjectSchema,
   listProjectsQuerySchema,
   projectIdParamSchema,
+  projectImageUploadSchema,
 } from "../validators/project.validator";
 import { createMilestoneSchema } from "../validators/milestone.validator";
 import { createRoleSchema } from "../validators/projectRole.validator";
@@ -46,6 +47,15 @@ router.post(
   requireVerified,
   validateRequest({ body: createProjectSchema }),
   projectController.create
+);
+// Signed upload URL for a project cover image (UMKM).
+router.post(
+  "/image-upload-url",
+  authMiddleware,
+  ...umkm,
+  requireVerified,
+  validateRequest({ body: projectImageUploadSchema }),
+  projectController.imageUploadUrl
 );
 router.put(
   "/:id",

@@ -563,6 +563,17 @@ SUBMITTED
 - ✅ Public verification URL required
 - ✅ Anyone can verify artifact code
 
+**Artifact status (added 2026-07-02, D-P8-4):**
+- Artifact records stay IMMUTABLE (no status column). The "Artifact Saya" page
+  statuses — Terverifikasi / Siap Diterbitkan / Dalam Proses — are DERIVED per
+  project from existing contribution / review / artifact data, not stored.
+  "Ditolak" has no data model and is always empty.
+
+**Public Portfolio (added 2026-07-02, D-P8-5 — moved in scope by user approval):**
+- ✅ Anyone can view a beginner's public portfolio (`GET /portfolio/:userId`)
+- ✅ Read-only: profile + skills + experiences + links + issued artifacts
+- ❌ No email / private data exposed
+
 ---
 
 ### Discussion Rules

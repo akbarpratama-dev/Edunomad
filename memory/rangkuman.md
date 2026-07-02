@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-07-02 (Phase 8b — redesign page Artifact + Portfolio publik + image proyek)
+
+Prompt:
+"perbaiki & revisi page artifact (flow + isi), ubah docs karna belum final, buat tampilan awal mirip mockup [list] + flow detail [mockup detail]".
+
+Hasil:
+Via AskUserQuestion (3 tabrakan scope) putusan user: status DERIVED (no migration), Portfolio publik IN-SCOPE (dulu OUT), field image proyek (+migration+upload). Backend: migration image_url + bucket project-images, endpoint pipeline/pipeline-detail (derived VERIFIED/READY/IN_PROGRESS + komposit detail), portfolio publik, image upload URL. Frontend: redesign /artifacts (stat/tab/kartu cover/sidebar progres+info/share), /artifacts/[projectId] (4 tab detail), /portfolio/[id] publik, upload gambar di wizard. Docs 03/04/06/08 + task-breakdown + CLAUDE.md (OUT OF SCOPE) diamandemen. E2E backend+Playwright semua hijau (stat 1/1/2/0, detail 4 tab, portfolio publik). build 0, tsc 0, console 0. D-P8-4, D-P8-5. NEXT commit+push.
+
+---
+
+Date:
 2026-07-02 (Phase 8 — Artifact System / Sertifikat)
 
 Prompt:

@@ -3,6 +3,7 @@ import { projectRepository } from "../repositories/project.repository";
 import { projectMemberRepository } from "../repositories/projectMember.repository";
 import { contributionRepository } from "../repositories/contribution.repository";
 import { reviewRepository } from "../repositories/review.repository";
+import { deliverableRepository } from "../repositories/deliverable.repository";
 import { auditLogRepository } from "../repositories/auditLog.repository";
 import { generateArtifactPdf, type ArtifactPdfData } from "./artifactPdf.service";
 import { artifactStorageService } from "./artifactStorage.service";
@@ -195,9 +196,217 @@ export const artifactService = {
     return artifactRepository.listByBeginner(beginnerId);
   },
 
+  // GET /me/artifact-pipeline — derived per-project artifact pipeline for the
+  // "Artifact Saya" page. No stored artifact status: state is computed from the
+  // existing contribution / review / artifact data (D-P8-4).
+  //   VERIFIED  = artifact issued
+  //   READY     = contribution approved + senior & UMKM reviews done, not issued
+  //   IN_PROGRESS = anything earlier
+  async beginnerPipeline(beginnerId: string) {
+    const memberships = await projectMemberRepository.listByUserWithProject(beginnerId);
+    return Promise.all(
+      memberships.map(async (m) => {
+        const projectId = m.project.id;
+        const [contributionRow, reviews, artifact] = await Promise.all([
+          contributionRepository.findByBeginnerAndProject(projectId, beginnerId),
+          reviewRepository.listByProject(projectId),
+          artifactRepository.findByProjectAndBeginner(projectId, beginnerId),
+        ]);
+        const contribution = contributionRow
+          ? await contributionRepository.findById(contributionRow.id)
+          : null;
+        const artifactDetail = artifact ? await artifactRepository.findById(artifact.id) : null;
+
+        const contributionApproved = contribution?.status === ContributionStatus.APPROVED;
+        const hasSeniorReview = reviews.some(
+          (r) => r.revieweeId === beginnerId && r.type === ReviewType.SENIOR_TO_BEGINNER
+        );
+        const hasUmkmReview = reviews.some(
+          (r) => r.revieweeId === beginnerId && r.type === ReviewType.UMKM_TO_BEGINNER
+        );
+        const issued = !!artifactDetail;
+
+        const status = issued
+          ? "VERIFIED"
+          : contributionApproved && hasSeniorReview && hasUmkmReview
+            ? "READY"
+            : "IN_PROGRESS";
+
+        const stages = [
+          { key: "contribution", label: "Kontribusi Tercatat", done: contributionApproved },
+          { key: "senior_review", label: "Review Mentor", done: hasSeniorReview },
+          { key: "umkm_review", label: "Persetujuan UMKM", done: hasUmkmReview },
+          { key: "verification", label: "Verifikasi Artifact", done: issued },
+          { key: "published", label: "Artifact Terbit", done: issued },
+        ];
+
+        return {
+          projectId,
+          projectTitle: m.project.title,
+          projectDescription: m.project.description,
+          projectImageUrl: m.project.imageUrl ?? null,
+          umkm: m.project.umkm,
+          senior: m.project.senior,
+          roleName: m.projectRole?.roleName ?? null,
+          team: m.project.projectMembers.map((pm) => pm.user),
+          technologies: contribution?.contributionSkills.map((cs) => cs.skill.name) ?? [],
+          contributionApproved,
+          hasSeniorReview,
+          hasUmkmReview,
+          status,
+          stages,
+          artifact: artifactDetail
+            ? {
+                id: artifactDetail.id,
+                artifactCode: artifactDetail.artifactCode,
+                currentVersion: artifactDetail.currentVersion,
+                issuedAt: artifactDetail.issuedAt,
+                verifiedBy: artifactDetail.senior?.name ?? null,
+              }
+            : null,
+        };
+      })
+    );
+  },
+
   // GET /projects/:id/artifacts — all certificates for a project (senior tab).
   listForProject(projectId: string) {
     return artifactRepository.listByProject(projectId);
+  },
+
+  // GET /me/artifact-pipeline/:projectId — full composed detail for the
+  // "Artifact Saya" detail page (about, achievements, deliverables, verification
+  // timeline, mentor feedback, team). Derived; scoped to the calling beginner.
+  async beginnerProjectDetail(beginnerId: string, projectId: string) {
+    type Deliverable = Awaited<ReturnType<typeof deliverableRepository.listByProject>>[number];
+    type Member = Awaited<ReturnType<typeof projectMemberRepository.listByProject>>[number];
+    const membership = await projectMemberRepository.findByUserAndProject(beginnerId, projectId);
+    if (!membership) throw new NotFoundError("Proyek tidak ditemukan untuk Anda");
+
+    const project = await projectRepository.findById(projectId);
+    if (!project) throw new NotFoundError("Proyek tidak ditemukan");
+
+    const [contributionRow, reviews, artifact, deliverables, members] = await Promise.all([
+      contributionRepository.findByBeginnerAndProject(projectId, beginnerId),
+      reviewRepository.listByProject(projectId),
+      artifactRepository.findByProjectAndBeginner(projectId, beginnerId),
+      deliverableRepository.listByProject(projectId),
+      projectMemberRepository.listByProject(projectId),
+    ]);
+    const contribution = contributionRow
+      ? await contributionRepository.findById(contributionRow.id)
+      : null;
+    const artifactDetail = artifact ? await artifactRepository.findById(artifact.id) : null;
+
+    const seniorReview =
+      reviews.find(
+        (r) => r.revieweeId === beginnerId && r.type === ReviewType.SENIOR_TO_BEGINNER
+      ) ?? null;
+    const umkmReview =
+      reviews.find(
+        (r) => r.revieweeId === beginnerId && r.type === ReviewType.UMKM_TO_BEGINNER
+      ) ?? null;
+
+    const contributionApproved = contribution?.status === ContributionStatus.APPROVED;
+    const issued = !!artifactDetail;
+    const status = issued
+      ? "VERIFIED"
+      : contributionApproved && !!seniorReview && !!umkmReview
+        ? "READY"
+        : "IN_PROGRESS";
+
+    // Achievements = the contribution summary split into lines/sentences.
+    const achievements = (contribution?.contributionSummary ?? "")
+      .split(/\r?\n|(?<=\.)\s+(?=[A-Z0-9])/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    return {
+      projectId,
+      status,
+      project: {
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        imageUrl: project.imageUrl ?? null,
+        status: project.status,
+        startDate: project.startDate,
+        deadline: project.deadline,
+        completedAt: project.completedAt,
+      },
+      umkm: project.umkm ? { id: project.umkm.id, name: project.umkm.name } : null,
+      senior: project.senior ? { id: project.senior.id, name: project.senior.name } : null,
+      roleName: membership.projectRole?.roleName ?? null,
+      technologies: contribution?.contributionSkills.map((cs) => cs.skill.name) ?? [],
+      contributionSummary: contribution?.contributionSummary ?? null,
+      achievements,
+      contributionApproved,
+      seniorReview: seniorReview
+        ? {
+            reviewerName: seniorReview.reviewer.name,
+            rating: seniorReview.rating,
+            comment: seniorReview.comment,
+            createdAt: seniorReview.createdAt,
+          }
+        : null,
+      umkmReview: umkmReview
+        ? {
+            reviewerName: umkmReview.reviewer.name,
+            rating: umkmReview.rating,
+            comment: umkmReview.comment,
+            createdAt: umkmReview.createdAt,
+          }
+        : null,
+      deliverables: (deliverables as Deliverable[])
+        .filter((d) => d.submitter.id === beginnerId)
+        .map((d) => ({
+          id: d.id,
+          title: d.title,
+          status: d.status,
+          evidences: d.evidences.map((e) => ({ type: e.type, url: e.url, filePath: e.filePath })),
+        })),
+      team: (members as Member[])
+        .filter((m) => m.status === MemberStatus.ACTIVE || m.status === MemberStatus.COMPLETED)
+        .map((m) => ({ id: m.user.id, name: m.user.name, roleName: m.projectRole?.roleName ?? null })),
+      timeline: [
+        {
+          key: "contribution",
+          label: "Kontribusi Tercatat",
+          done: contributionApproved,
+          at: contribution?.createdAt ?? null,
+          by: null,
+        },
+        {
+          key: "senior_review",
+          label: "Review Mentor",
+          done: !!seniorReview,
+          at: seniorReview?.createdAt ?? null,
+          by: seniorReview?.reviewer.name ?? project.senior?.name ?? null,
+        },
+        {
+          key: "umkm_review",
+          label: "Persetujuan UMKM",
+          done: !!umkmReview,
+          at: umkmReview?.createdAt ?? null,
+          by: umkmReview?.reviewer.name ?? project.umkm?.name ?? null,
+        },
+        {
+          key: "verification",
+          label: "Verifikasi Artifact",
+          done: issued,
+          at: artifactDetail?.issuedAt ?? null,
+          by: issued ? "Tim EduNomad" : null,
+        },
+      ],
+      artifact: artifactDetail
+        ? {
+            id: artifactDetail.id,
+            artifactCode: artifactDetail.artifactCode,
+            currentVersion: artifactDetail.currentVersion,
+            issuedAt: artifactDetail.issuedAt,
+          }
+        : null,
+    };
   },
 
   // GET /admin/artifacts — all certificates (admin monitoring).

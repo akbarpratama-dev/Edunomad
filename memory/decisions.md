@@ -1,6 +1,19 @@
 # Decisions
 
 Date:
+2026-07-02 (Phase 8 — Artifact page redesign + Public Portfolio + project image)
+
+Decision (D-P8-4) — Derived artifact status (no schema change):
+Mockup "Artifact Saya" punya status Terverifikasi/Dalam Proses/Siap Diterbitkan/Ditolak + stat + progress tracker. Via AskUserQuestion user pilih **Derived (no migration)** — artifact TETAP immutable (tanpa kolom status). Status DIHITUNG per proyek dari data existing: VERIFIED=artifact terbit; READY=kontribusi APPROVED + review senior & UMKM ada tapi belum generate; IN_PROGRESS=selain itu; "Ditolak" tak ada di model → tab selalu kosong. Endpoint `GET /me/artifact-pipeline` (list) + `/:projectId` (detail komposit: project+dates+image, achievements[dari summary di-split], deliverables[filter submittedBy], seniorReview/umkmReview, timeline berperingkat+tanggal+aktor, team+role). Detail page tab: Detail/Proses Verifikasi/Feedback Mentor/Riwayat Aktivitas.
+Reason: hormati aturan locked "artifact immutable history"; visual kaya bisa dicapai tanpa invent workflow verifikasi/kolom baru. User setuju.
+Impact: NO migration utk status. Docs 06 diamandemen (status derived). Riwayat Aktivitas & Kontribusi% diadaptasi (tak ada activity log per-artifact / kolom persen → derive dari timeline & status).
+
+Decision (D-P8-5) — Public Portfolio dipindah IN SCOPE + project image:
+"Public Portfolio Pages" ADA di OUT OF SCOPE (CLAUDE.md). Via AskUserQuestion user pilih **Buat portfolio publik** → dipindah in-scope. `GET /portfolio/:userId` PUBLIC (profil+skills+experiences+links+artifact terbit; tanpa email/path). Page `/portfolio/:id` (standalone, no auth/shell). Tombol "Bagikan Profil Portofolio" = copy tautan itu. Juga user pilih **Tambah field image** → `projects.image_url` (migration `20260702134407_project_image_url`, LIVE + _prisma_migrations sync) + bucket PUBLIK `project-images` + `POST /projects/image-upload-url` (UMKM, signed upload → simpan publicUrl) + upload di wizard create Step 1. Kartu artifact pakai image, fallback gradient+inisial deterministik.
+Reason: perluasan scope DISETUJUI eksplisit user. CLAUDE.md OUT OF SCOPE diedit (hapus "Public Portfolio Pages" + note). Docs 03/04/06/08 + task-breakdown diamandemen.
+Impact: fitur read-only baru; bukan social network. CLAUDE.md berubah (scope). Migration + bucket baru.
+
+Date:
 2026-07-02 (Phase 8 — Artifact System)
 
 Decision (D-P8-1) — Artifact PDF storage & delivery:
