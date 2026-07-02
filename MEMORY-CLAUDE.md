@@ -1,10 +1,10 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-07-02. main = **6adfeda** (belum ada fix/phase8 yg ke-merge). DUA branch pushed, BELUM merge:
-> (1) `fix/auth-register-bounce-routing` (9221281): auth register-bounce [/auth/me 429 → fetchMe telan error; FIX fetchMe null-only-404 + loadAppUser retry-transient/signout-only-401 + rate limit 100→1000 skip-dev] + routing reverse-back Mahasiswa. D-AUTH-2, D-ROUTE-1. PR ada.
-> (2) `feature/phase-8-artifacts-v2` (65bc371, cabang dari #1): **PHASE 8 Artifact System SELESAI & verified** — generate/regenerate(version history)/download-stream/verify-public + bucket privat `artifacts` + completion gate WF15 (tutup D-P4.3-3) + frontend /artifacts, /verify[/code], workspace tab Sertifikat, /admin/artifacts. E2E backend+Playwright hijau. D-P8-1..3.
-> ➡️ NEXT = MERGE #1 lalu #2 ke main (atau #2 sudah mengandung #1 karena bercabang darinya → merge #2 saja setelah #1). Lalu PHASE 9 Notifications. Test artifact EDN-2026-000001 (Test Beginner, 3 versi) tertinggal di DB proyek …0005.
+> Last updated: 2026-07-02. main = **d9a50e4** (Phase 8 + auth-fix MERGED --no-ff & pushed origin/main). Branch `feature/phase-8-artifacts-v2` (+ `fix/auth-register-bounce-routing`) sudah masuk main — boleh dihapus.
+> **PHASE 8 Artifact System SELESAI & merged:** generate/regenerate(version history)/download-stream/verify-public + bucket privat `artifacts` + completion gate WF15 (tutup D-P4.3-3). Redesign "Artifact Saya" `/artifacts` (pipeline derived: VERIFIED/READY/IN_PROGRESS + stat + tab + sidebar progres) + detail `/artifacts/[projectId]` (tab Detail/Proses Verifikasi/Feedback Mentor/Riwayat) + workspace tab Sertifikat + `/admin/artifacts`. Project image: `projects.image_url` + bucket publik `project-images` + upload wizard. Auth-fix: fetchMe null-only-404 + loadAppUser retry-transient/signout-only-401 + rate limit 100→1000 skip-dev. Routing reverse-back Mahasiswa. D-AUTH-2, D-ROUTE-1, D-P8-1..5.
+> **Portofolio publik DITUNDA** (D-P8-5): tombol "Lihat di Portofolio"/"Bagikan Profil Portofolio" cuma placeholder `<Link href="/portfolio/:id">` (404 sampai phase-nya); halaman+backend BELUM dibuat; "Public Portfolio Pages" tetap OUT OF SCOPE.
+> ➡️ NEXT = **PHASE 9 Notifications** (bell+dropdown, /notifications, Supabase Realtime, trigger). Lalu Phase 10 (profil + portofolio publik + static pages) + Phase 11 QA. Test artifact EDN-2026-000001 (Test Beginner, 3 versi) tertinggal di DB proyek …0005.
 > (arsip note lama:) (main = **6adfeda**. Phase 0-7 + UNIFY-UI sweep + Diskusi redesign + **PHASE 12 forum upgrade 12.1–12.5 + UX batch MERGED → main** via --no-ff [pushed origin/main]. D-P12-1/4/5/6/7 + D-AUTH-1 + D-P12-2/3. NEXT = **PHASE 8 Artifact** [WIP feature/phase-8-artifacts]. Leftover: stash "landing page.tsx prettier reformat" non-fungsional.)
 
 ## ⚡ UX batch (2026-06-30→07-01, branch feature/phase-10-discussion-forum) — committed
@@ -77,28 +77,29 @@ DRAFT â PENDING_REVIEW â RECRUITING (approve) / REJECTED â ACTIVE
 ## 📌 NEXT-SESSION INIT PROMPT
 
 ```
-Lanjutkan EduNomad: PHASE 8 — Artifact System (label UI "Sertifikat", D-UI-7).
-Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-07-01 #11"
-+ DESIGN.md + task-breakdown §8 + decisions D-P4.3-3 + D-UI-7.
+Lanjutkan EduNomad: PHASE 9 — Notifications & Real-time.
+Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-07-02 #12"
++ task-breakdown §9 + schema Notification (0.2.11).
 
-main = 578be6a (Phase 0–7 + unify-UI + Diskusi redesign + PHASE 12 forum upgrade 12.1–12.5 + UX batch, semua
-MERGED & pushed origin/main). Phase 12 SELESAI penuh. WIP Phase 8 di branch feature/phase-8-artifacts 1e6a4a3
-(sudah: pdfkit/qrcode deps + artifactPdf.service + artifact.repository) — cabang dari main LAMA, pertimbangkan
-rebase ke 578be6a dulu (atau cherry-pick).
+main = d9a50e4 (Phase 0–8 + PHASE 12 + auth-fix + routing, semua MERGED --no-ff & pushed origin/main).
+PHASE 8 Artifact SELESAI (generate/regenerate/verify-public/download + gate WF15 + redesign /artifacts +
+detail /artifacts/[projectId] + workspace tab Sertifikat + /admin/artifacts + project image). Portofolio
+publik DITUNDA (tombol placeholder /portfolio/:id saja). Branch phase-8/auth-fix sudah masuk main.
 
-SISA Phase 8: (1) Backend artifact.service + controller + routes — endpoints POST /projects/:id/generate-artifacts,
-POST /artifacts/:id/regenerate, GET /artifacts/:id, GET /artifacts/:id/download, GET /verify/:code; wire ke
-routes/index.ts. (2) Completion gate (carry-over D-P4.3-3) di projectLifecycle.service.requestCompletion:
-semua deliverables APPROVED + contributions APPROVED + reviews ada + artifacts generated sebelum
-ACTIVE→AWAITING_COMPLETION (Workflow 15). (3) Frontend 4 page (label "Sertifikat"; nav /artifacts sudah ada,
-page belum) pakai pola premium (PageHeader/PillTabs/Card/EmptyState/app-reveal). Baca schema
-Artifact/ArtifactVersion (immutable, sudah ada → kemungkinan NO migration) + RBAC (siapa generate) + Workflow 13/14/18.
+SISA Phase 9: (1) Backend Notification module — notification.service (create/list/mark-read/mark-all),
+controller, routes (GET /notifications, POST /notifications/:id/read, POST /notifications/read-all) + wire
+index; integrate TRIGGERS di flow existing (lamaran accept/reject, member removed, deliverable review,
+contribution approved, review diterima, project completed, artifact terbit). (2) Frontend: Header bell +
+dropdown (notificationStore + unread badge SUDAH ADA), halaman /notifications (nav item ada, page belum).
+(3) Supabase Realtime subscribe notifications INSERT (pola Phase 5 discussion — SELECT-only policy +
+publication + realtime.setAuth). RBAC: user lihat notif sendiri.
 
 Dev: backend :3001 (npm run dev full type-check), frontend :3000. tsc TS2882 CSS-ambient = transient saat
-.next/types regen → settle ~2s, re-run. Deps tak lengkap → npm cache clean --force && rm -rf node_modules
-package-lock.json && npm install. Test users p4-beginner/senior/umkm + p43-admin @test.edunomad.com pw
-TestPass123!; project ACTIVE a1a1a1a1-0000-4000-8000-000000000005. Verify per fitur + tsc 0 + console 0.
-Context7 MCP sebelum kode library/framework. .env* sandboxed. Setelah selesai: merge feature/phase-8-artifacts → main.
+.next/types regen (hapus .next/types/app/<deleted> kalau ada page dihapus) → re-run. Deps tak lengkap →
+npm cache clean --force && rm -rf node_modules package-lock.json && npm install. Test users
+p4-beginner/senior/umkm + p43-admin @test.edunomad.com pw TestPass123!; project ACTIVE
+a1a1a1a1-0000-4000-8000-000000000005. Verify per fitur + tsc 0 + console 0. Context7 MCP sebelum kode
+library/framework. .env* sandboxed. Setelah selesai: commit + merge → main.
 
 === arsip init prompt #10 (Phase 12, SELESAI & merged) ===
 Lanjutkan EduNomad: PHASE 12 — Discussion Forum Upgrade (lanjut sub-phase 12.2+).
