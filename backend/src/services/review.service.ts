@@ -4,6 +4,8 @@ import { projectMemberRepository } from "../repositories/projectMember.repositor
 import { BusinessRuleError, ForbiddenError, NotFoundError } from "../utils/errors";
 import { ReviewType } from "../constants/reviewType";
 import { ProjectStatus } from "../constants/projectStatus";
+import { notificationService } from "./notification.service";
+import { NotificationType } from "../constants/notificationType";
 
 // Reviews (Workflow 12) — mandatory before completion, editable until the project
 // is finalised. Allowed pairs (docs/06): SENIOR→BEGINNER, UMKM→BEGINNER, UMKM→SENIOR.
@@ -32,7 +34,15 @@ export const reviewService = {
     if (!isMember) throw new BusinessRuleError("The reviewee must be an active member of this project");
 
     await this.assertNotDuplicate(projectId, reviewerId, revieweeId);
-    return reviewRepository.create({ projectId, reviewerId, revieweeId, rating, comment, type });
+    const result = await reviewRepository.create({ projectId, reviewerId, revieweeId, rating, comment, type });
+    await notificationService.notify({
+      userId: revieweeId,
+      type: NotificationType.REVIEW_RECEIVED,
+      title: "Review baru",
+      message: `Kamu menerima review di proyek "${project.title}".`,
+      actionUrl: "/reviews",
+    });
+    return result;
   },
 
   // POST /projects/:id/reviews/senior — UMKM owner reviews the assigned senior.
@@ -48,7 +58,7 @@ export const reviewService = {
     if (!project.seniorId) throw new BusinessRuleError("This project has no assigned senior to review");
 
     await this.assertNotDuplicate(projectId, umkmId, project.seniorId);
-    return reviewRepository.create({
+    const result = await reviewRepository.create({
       projectId,
       reviewerId: umkmId,
       revieweeId: project.seniorId,
@@ -56,6 +66,14 @@ export const reviewService = {
       comment,
       type: ReviewType.UMKM_TO_SENIOR,
     });
+    await notificationService.notify({
+      userId: project.seniorId,
+      type: NotificationType.REVIEW_RECEIVED,
+      title: "Review baru",
+      message: `Kamu menerima review di proyek "${project.title}".`,
+      actionUrl: "/reviews",
+    });
+    return result;
   },
 
   // PUT /reviews/:id — reviewer edits, only before the project is finalised.

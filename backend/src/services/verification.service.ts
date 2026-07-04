@@ -3,6 +3,8 @@ import { userRepository } from "../repositories/user.repository";
 import { BusinessRuleError, NotFoundError } from "../utils/errors";
 import type { Prisma } from "../generated/prisma/client";
 import type { ListVerificationsQuery, SubmitVerificationInput } from "../validators/verification.validator";
+import { notificationService } from "./notification.service";
+import { NotificationType } from "../constants/notificationType";
 
 function composeNotes(input: SubmitVerificationInput): string {
   const lines: string[] = [];
@@ -57,7 +59,15 @@ export const verificationService = {
     if (request.status !== "PENDING") {
       throw new BusinessRuleError("Verification request already reviewed");
     }
-    return verificationRepository.approve(requestId, request.userId, adminId);
+    const result = await verificationRepository.approve(requestId, request.userId, adminId);
+    await notificationService.notify({
+      userId: request.userId,
+      type: NotificationType.VERIFICATION_APPROVED,
+      title: "Akun terverifikasi",
+      message: "Selamat! Akunmu telah diverifikasi admin.",
+      actionUrl: "/dashboard",
+    });
+    return result;
   },
 
   // POST /admin/verifications/:id/reject
@@ -67,6 +77,14 @@ export const verificationService = {
     if (request.status !== "PENDING") {
       throw new BusinessRuleError("Verification request already reviewed");
     }
-    return verificationRepository.reject(requestId, request.userId, adminId, reason);
+    const result = await verificationRepository.reject(requestId, request.userId, adminId, reason);
+    await notificationService.notify({
+      userId: request.userId,
+      type: NotificationType.VERIFICATION_REJECTED,
+      title: "Verifikasi ditolak",
+      message: `Verifikasi akunmu ditolak. Alasan: ${reason}`,
+      actionUrl: "/dashboard",
+    });
+    return result;
   },
 };

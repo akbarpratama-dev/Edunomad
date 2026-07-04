@@ -3,6 +3,8 @@ import { projectRepository } from "../repositories/project.repository";
 import { BusinessRuleError, ForbiddenError, NotFoundError } from "../utils/errors";
 import { ProjectStatus } from "../constants/projectStatus";
 import { ApplicationStatus } from "../constants/applicationStatus";
+import { notificationService } from "./notification.service";
+import { NotificationType } from "../constants/notificationType";
 
 const SENIOR_MAX_ACTIVE = 5;
 
@@ -85,7 +87,19 @@ export const seniorApplicationService = {
         `Senior has reached the maximum of ${SENIOR_MAX_ACTIVE} active projects`
       );
     }
-    return seniorApplicationRepository.accept(applicationId, app.projectId, app.seniorId);
+    const result = await seniorApplicationRepository.accept(
+      applicationId,
+      app.projectId,
+      app.seniorId
+    );
+    await notificationService.notify({
+      userId: app.seniorId,
+      type: NotificationType.APPLICATION_ACCEPTED,
+      title: "Lamaran mentor diterima",
+      message: `Kamu jadi mentor proyek "${app.project.title}".`,
+      actionUrl: "/my-projects",
+    });
+    return result;
   },
 
   // POST /senior-applications/:id/reject (UMKM owner).
@@ -96,6 +110,17 @@ export const seniorApplicationService = {
     if (app.status !== ApplicationStatus.PENDING) {
       throw new BusinessRuleError("Only pending applications can be rejected");
     }
-    return seniorApplicationRepository.updateStatus(applicationId, ApplicationStatus.REJECTED);
+    const result = await seniorApplicationRepository.updateStatus(
+      applicationId,
+      ApplicationStatus.REJECTED
+    );
+    await notificationService.notify({
+      userId: app.seniorId,
+      type: NotificationType.APPLICATION_REJECTED,
+      title: "Lamaran mentor ditolak",
+      message: `Lamaran mentormu untuk "${app.project.title}" belum diterima.`,
+      actionUrl: "/applications/mentor",
+    });
+    return result;
   },
 };

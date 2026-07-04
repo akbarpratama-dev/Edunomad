@@ -3,6 +3,8 @@ import { categoryRepository } from "../repositories/category.repository";
 import { BusinessRuleError, ForbiddenError, NotFoundError } from "../utils/errors";
 import { ProjectStatus, PUBLIC_PROJECT_STATUSES } from "../constants/projectStatus";
 import { AuditAction } from "../constants/auditActions";
+import { notificationService } from "./notification.service";
+import { NotificationType } from "../constants/notificationType";
 import type { Prisma } from "../generated/prisma/client";
 import type { CreateProjectInput, ListProjectsQuery, MyProjectsQuery } from "../validators/project.validator";
 
@@ -137,12 +139,20 @@ export const projectService = {
     if (project.status !== ProjectStatus.PENDING_REVIEW) {
       throw new BusinessRuleError("Only projects pending review can be approved");
     }
-    return projectRepository.setStatusWithAudit(
+    const result = await projectRepository.setStatusWithAudit(
       projectId,
       ProjectStatus.RECRUITING,
       adminId,
       AuditAction.PROJECT_APPROVED
     );
+    await notificationService.notify({
+      userId: project.umkmId,
+      type: NotificationType.PROJECT_APPROVED,
+      title: "Proyek disetujui",
+      message: `Proyek "${project.title}" disetujui & masuk tahap rekrutmen.`,
+      actionUrl: `/my-projects/${projectId}`,
+    });
+    return result;
   },
 
   async rejectProject(adminId: string, projectId: string, reason: string) {
@@ -151,12 +161,20 @@ export const projectService = {
     if (project.status !== ProjectStatus.PENDING_REVIEW) {
       throw new BusinessRuleError("Only projects pending review can be rejected");
     }
-    return projectRepository.setStatusWithAudit(
+    const result = await projectRepository.setStatusWithAudit(
       projectId,
       ProjectStatus.REJECTED,
       adminId,
       AuditAction.PROJECT_REJECTED,
       reason
     );
+    await notificationService.notify({
+      userId: project.umkmId,
+      type: NotificationType.PROJECT_REJECTED,
+      title: "Proyek ditolak",
+      message: `Proyek "${project.title}" ditolak. Alasan: ${reason}`,
+      actionUrl: `/my-projects/${projectId}`,
+    });
+    return result;
   },
 };
