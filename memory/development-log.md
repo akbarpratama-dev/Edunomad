@@ -1,5 +1,14 @@
 # Development Log
 
+2026-07-04 (PHASE 9 — Notifications & Real-time) — SELESAI & MERGED → main (01fcbe7)
+Tabel `notifications` sudah ada (0.2.11) → NO migration.
+- BACKEND (build 0): constants/notificationType (14 tipe). notification.repository (create, findManyByUser paginated+filter isRead, countUnread, markRead[ownership via where id+userId], markAllRead). notification.service (notify = best-effort/never-throw utk trigger; list; markAsRead; markAllAsRead). controller (list → {data,meta,unreadCount}). routes GET /notifications, POST /:id/read, POST /read-all wired.
+- TRIGGERS (10 service, fire-and-forget setelah aksi commit): projectApplication accept/reject→beginner; seniorApplication accept/reject→senior; deliverable submit→senior lead / approve+revision→submitter; contribution approve→beginner; review→reviewee; verification approve/reject→user; project approve/reject→umkm; lifecycle requestCompletion→umkm; artifact generate→beginner; member confirmRemoval→member.
+- REALTIME: RLS SELECT-only `notifications_select_own` (auth.uid()=user_id) + publication + replica identity full (backend/db/phase9_notifications_rls_realtime.sql). Writes via Express (Prisma bypass). CATATAN: notifications.updated_at NOT NULL tanpa default → Prisma @updatedAt isi otomatis (raw SQL insert wajib set updated_at).
+- FRONTEND (tsc 0): notificationApi. NotificationProvider (layout, dlm AuthProvider): bootstrap list + subscribe INSERT filter user_id=eq.me → addNotification+toast; clear saat logout. NotificationBell (dropdown header ganti bell statik). /notifications page (filter Semua/Belum Dibaca + mark-all + pagination). base-ui DropdownMenuTrigger TANPA asChild.
+- VERIFIED E2E: GET 200; SQL insert → badge live "1" (realtime OK); dropdown+page render; mark-all→badge 0; TRIGGER NYATA UMKM review Beginner Two→REVIEW_RECEIVED row benar. build 0, tsc 0.
+- NEXT = PHASE 10 (profil + portofolio publik + static/error pages + forgot-password + admin monitoring). Note: UMKM_TO_BEGINNER review Beginner Two kini ADA (dari test trigger).
+
 2026-07-02 (PHASE 8b — Artifact page REDESIGN + Public Portfolio + project image) — branch feature/phase-8-artifacts-v2
 User kasih 2 mockup (list "Artifact Saya" + detail). Via AskUserQuestion putusan: status DERIVED (no migration), portfolio publik IN-SCOPE, field image proyek.
 - MIGRATION `20260702134407_project_image_url` (projects += image_url VARCHAR(1000), Supabase MCP + _prisma_migrations sync + prisma generate). Bucket PUBLIK `project-images` (3MB, png/jpg/webp). Bucket privat `artifacts` sudah ada.

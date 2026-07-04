@@ -1,4 +1,19 @@
 ============================================================
+⚡ ACTIVE HANDOFF (2026-07-04 #13) — PHASE 9 MERGED → main. NEXT = PHASE 10 Profiles & Polish
+============================================================
+main = **01fcbe7** (Phase 0–9 + PHASE 12, semua MERGED --no-ff & PUSHED origin/main). Branch feature/phase-9-notifications sudah masuk main (WIP lokal, tak pernah di-remote).
+
+✅ PHASE 9 Notifications SELESAI & verified: notification module (repo/service/controller/routes GET /notifications, POST /:id/read, POST /read-all) + 10 trigger site (application/deliverable/contribution/review/verification/project/lifecycle/artifact/member, fire-and-forget) + Realtime (RLS SELECT-only own + publication `notifications`, backend/db/phase9_notifications_rls_realtime.sql) + frontend NotificationBell (dropdown header) + NotificationProvider (layout: bootstrap+subscribe+toast) + /notifications page. NO migration. E2E: realtime badge live, mark-all, trigger REVIEW_RECEIVED nyata. CATATAN: notifications.updated_at NOT NULL tanpa default → raw SQL insert wajib set updated_at (Prisma isi otomatis).
+
+➡️ NEXT = **PHASE 10 — Dashboards, Profiles & Polish** (task-breakdown §10). SISA:
+(1) Profil: /profile, /profile/edit (PUT /users/me SUDAH ADA), /users/:id (GET /users/:id + /users/:id/portfolio SUDAH ADA).
+(2) Portofolio publik /portfolio/:id (D-P8-5, tombol placeholder sudah nempel) — perlu GET /portfolio/:userId PUBLIC (belum) + halaman + hapus "Public Portfolio Pages" dari CLAUDE.md OUT OF SCOPE saat dibangun.
+(3) Static/error: /help /privacy /terms + not-found.tsx + error.tsx + /auth/forgot-password (quick-win 404).
+(4) Admin: /admin/projects/monitoring + senior replacement.
+Lalu Phase 11 QA + review RLS pra-prod (RLS off ~semua tabel kecuali discussion+notifications).
+
+--- arsip handoff #12 ---
+============================================================
 ⚡ ACTIVE HANDOFF (2026-07-02 #12) — PHASE 8 MERGED → main. NEXT = PHASE 9 Notifications
 ============================================================
 main = **d9a50e4** (Phase 0–8 + PHASE 12 + auth-fix + routing, semua MERGED --no-ff & PUSHED origin/main). Branch `feature/phase-8-artifacts-v2` + `fix/auth-register-bounce-routing` sudah masuk main → boleh `git branch -d`.
