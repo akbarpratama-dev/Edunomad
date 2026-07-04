@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Manrope, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { NotificationProvider } from "@/components/notifications/NotificationProvider";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -36,7 +37,9 @@ export default function RootLayout({
       className={`${manrope.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <NotificationProvider>{children}</NotificationProvider>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

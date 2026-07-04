@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Bell, LogOut, User as UserIcon, ChevronDown, ArrowLeft } from "lucide-react";
+import { Menu, LogOut, User as UserIcon, ChevronDown, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { UserAvatar } from "@/components/common/UserAvatar";
 import {
   DropdownMenu,
@@ -17,7 +17,6 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
-import { useNotificationStore } from "@/stores/notificationStore";
 import { signOut } from "@/services/auth";
 import type { Role } from "@/types/user";
 
@@ -36,7 +35,6 @@ export function Header({ backHref, scrolled }: { backHref?: string; scrolled?: b
   const closeModal = useUIStore((s) => s.closeModal);
   const user = useAuthStore((s) => s.user);
   const appUser = useAuthStore((s) => s.appUser);
-  const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   return (
     <header
@@ -68,14 +66,7 @@ export function Header({ backHref, scrolled }: { backHref?: string; scrolled?: b
       </div>
 
       <div className="pointer-events-auto flex items-center gap-2">
-        <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
-          <Bell className="size-5" />
-          {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-4 min-w-4 justify-center px-1 text-[10px]">
-              {unreadCount}
-            </Badge>
-          )}
-        </Button>
+        <NotificationBell />
 
         <DropdownMenu>
           <DropdownMenuTrigger>
