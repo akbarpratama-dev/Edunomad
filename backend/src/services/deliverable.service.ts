@@ -4,6 +4,8 @@ import { projectMemberRepository } from "../repositories/projectMember.repositor
 import { BusinessRuleError, ForbiddenError, NotFoundError } from "../utils/errors";
 import { DeliverableStatus } from "../constants/deliverableStatus";
 import { ProjectStatus } from "../constants/projectStatus";
+import { notificationService } from "./notification.service";
+import { NotificationType } from "../constants/notificationType";
 
 type EvidenceInput = { type: string; url?: string; file_path?: string };
 
@@ -47,19 +49,45 @@ export const deliverableService = {
     if (d.status !== DeliverableStatus.DRAFT && d.status !== DeliverableStatus.REVISION_REQUESTED) {
       throw new BusinessRuleError("Only draft or revision-requested deliverables can be submitted");
     }
-    return deliverableRepository.submitWithEvidences(deliverableId, evidences);
+    const result = await deliverableRepository.submitWithEvidences(deliverableId, evidences);
+    if (d.project.seniorId) {
+      await notificationService.notify({
+        userId: d.project.seniorId,
+        type: NotificationType.DELIVERABLE_SUBMITTED,
+        title: "Deliverable baru",
+        message: `Deliverable "${d.title}" dikirim untuk direview.`,
+        actionUrl: `/my-projects/${d.project.id}/workspace`,
+      });
+    }
+    return result;
   },
 
   // POST /deliverables/:id/approve (project senior lead; SUBMITTED → APPROVED).
   async approve(seniorId: string, deliverableId: string) {
-    await this.reviewable(seniorId, deliverableId);
-    return deliverableRepository.approve(deliverableId, seniorId);
+    const d = await this.reviewable(seniorId, deliverableId);
+    const result = await deliverableRepository.approve(deliverableId, seniorId);
+    await notificationService.notify({
+      userId: d.submittedBy,
+      type: NotificationType.DELIVERABLE_APPROVED,
+      title: "Deliverable disetujui",
+      message: `Deliverable "${d.title}" telah disetujui mentor.`,
+      actionUrl: `/my-projects/${d.project.id}/workspace`,
+    });
+    return result;
   },
 
   // POST /deliverables/:id/request-revision (senior lead; SUBMITTED → REVISION_REQUESTED).
   async requestRevision(seniorId: string, deliverableId: string, feedback: string) {
-    await this.reviewable(seniorId, deliverableId);
-    return deliverableRepository.requestRevision(deliverableId, seniorId, feedback);
+    const d = await this.reviewable(seniorId, deliverableId);
+    const result = await deliverableRepository.requestRevision(deliverableId, seniorId, feedback);
+    await notificationService.notify({
+      userId: d.submittedBy,
+      type: NotificationType.DELIVERABLE_REVISION,
+      title: "Revisi diminta",
+      message: `Mentor meminta revisi untuk "${d.title}".`,
+      actionUrl: `/my-projects/${d.project.id}/workspace`,
+    });
+    return result;
   },
 
   // --- guards ---

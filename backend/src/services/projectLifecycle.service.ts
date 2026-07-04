@@ -9,6 +9,8 @@ import { ProjectStatus } from "../constants/projectStatus";
 import { MemberStatus } from "../constants/applicationStatus";
 import { DeliverableStatus, ContributionStatus } from "../constants/deliverableStatus";
 import { ReviewType } from "../constants/reviewType";
+import { notificationService } from "./notification.service";
+import { NotificationType } from "../constants/notificationType";
 
 const SENIOR_MAX_ACTIVE = 5;
 const UMKM_MAX_ACTIVE = 5;
@@ -128,7 +130,17 @@ export const projectLifecycleService = {
       throw new BusinessRuleError(`Proyek belum siap diselesaikan: ${blockers.join("; ")}`);
     }
 
-    return projectRepository.update(projectId, { status: ProjectStatus.AWAITING_COMPLETION });
+    const result = await projectRepository.update(projectId, {
+      status: ProjectStatus.AWAITING_COMPLETION,
+    });
+    await notificationService.notify({
+      userId: project.umkmId,
+      type: NotificationType.COMPLETION_REQUESTED,
+      title: "Konfirmasi penyelesaian",
+      message: `Mentor mengajukan penyelesaian proyek "${project.title}". Mohon konfirmasi.`,
+      actionUrl: `/my-projects/${projectId}`,
+    });
+    return result;
   },
 
   // POST /projects/:id/confirm-completion (UMKM owner) — AWAITING_COMPLETION →

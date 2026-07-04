@@ -3,6 +3,8 @@ import { projectRepository } from "../repositories/project.repository";
 import { projectMemberRepository } from "../repositories/projectMember.repository";
 import { BusinessRuleError, ForbiddenError, NotFoundError } from "../utils/errors";
 import { ContributionStatus } from "../constants/deliverableStatus";
+import { notificationService } from "./notification.service";
+import { NotificationType } from "../constants/notificationType";
 import { ProjectStatus } from "../constants/projectStatus";
 
 // Contribution reports (Workflow 9): one per beginner per project. Beginners
@@ -60,6 +62,14 @@ export const contributionService = {
     if (c.status !== ContributionStatus.PENDING) {
       throw new BusinessRuleError("Only pending contributions can be approved");
     }
-    return contributionRepository.approve(contributionId, seniorId);
+    const result = await contributionRepository.approve(contributionId, seniorId);
+    await notificationService.notify({
+      userId: c.beginner.id,
+      type: NotificationType.CONTRIBUTION_APPROVED,
+      title: "Kontribusi disetujui",
+      message: `Kontribusimu di "${c.project.title}" telah disetujui.`,
+      actionUrl: `/my-projects/${c.project.id}/workspace`,
+    });
+    return result;
   },
 };

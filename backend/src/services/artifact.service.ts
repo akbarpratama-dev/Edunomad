@@ -5,6 +5,8 @@ import { contributionRepository } from "../repositories/contribution.repository"
 import { reviewRepository } from "../repositories/review.repository";
 import { deliverableRepository } from "../repositories/deliverable.repository";
 import { auditLogRepository } from "../repositories/auditLog.repository";
+import { notificationService } from "./notification.service";
+import { NotificationType } from "../constants/notificationType";
 import { generateArtifactPdf, type ArtifactPdfData } from "./artifactPdf.service";
 import { artifactStorageService } from "./artifactStorage.service";
 import { AuditAction, EntityType } from "../constants/auditActions";
@@ -118,6 +120,13 @@ export const artifactService = {
         action: AuditAction.ARTIFACT_GENERATED,
         entityType: EntityType.ARTIFACT,
         entityId: artifact.id,
+      });
+      await notificationService.notify({
+        userId: beginnerId,
+        type: NotificationType.ARTIFACT_GENERATED,
+        title: "Sertifikat terbit",
+        message: `Sertifikat kontribusimu untuk "${project.title}" telah diterbitkan.`,
+        actionUrl: "/artifacts",
       });
       created.push(artifact);
     }

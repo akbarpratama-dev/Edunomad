@@ -3,6 +3,8 @@ import { projectRepository } from "../repositories/project.repository";
 import { BusinessRuleError, ForbiddenError, NotFoundError } from "../utils/errors";
 import { MemberStatus } from "../constants/applicationStatus";
 import { ProjectStatus } from "../constants/projectStatus";
+import { notificationService } from "./notification.service";
+import { NotificationType } from "../constants/notificationType";
 
 // Project members & membership lifecycle (Workflow 16 withdrawal / 17 removal).
 export const projectMemberService = {
@@ -63,10 +65,18 @@ export const projectMemberService = {
     if (member.status !== MemberStatus.REMOVAL_REQUESTED) {
       throw new BusinessRuleError("No pending removal request for this member");
     }
-    return projectMemberRepository.confirmRemoval({
+    const result = await projectMemberRepository.confirmRemoval({
       memberId,
       adminId,
       memberUserId: member.userId,
     });
+    await notificationService.notify({
+      userId: member.userId,
+      type: NotificationType.MEMBER_REMOVED,
+      title: "Dikeluarkan dari proyek",
+      message: `Kamu dikeluarkan dari proyek "${member.project.title}".`,
+      actionUrl: "/my-projects",
+    });
+    return result;
   },
 };

@@ -10,6 +10,8 @@ import {
 } from "../utils/errors";
 import { ProjectStatus } from "../constants/projectStatus";
 import { ApplicationStatus } from "../constants/applicationStatus";
+import { notificationService } from "./notification.service";
+import { NotificationType } from "../constants/notificationType";
 
 // Beginner recruitment (Workflow 4 + RBAC Beginner Application Flow + BR-001/004/005).
 export const projectApplicationService = {
@@ -107,12 +109,20 @@ export const projectApplicationService = {
     if (filled >= role.capacity) {
       throw new BusinessRuleError("This role slot is already full");
     }
-    return projectApplicationRepository.accept({
+    const result = await projectApplicationRepository.accept({
       id: app.id,
       projectId: app.projectId,
       projectRoleId: app.projectRoleId,
       beginnerId: app.beginnerId,
     });
+    await notificationService.notify({
+      userId: app.beginnerId,
+      type: NotificationType.APPLICATION_ACCEPTED,
+      title: "Lamaran diterima",
+      message: `Kamu diterima di proyek "${app.project.title}".`,
+      actionUrl: "/my-projects",
+    });
+    return result;
   },
 
   // POST /applications/:id/reject (SENIOR lead).
@@ -125,6 +135,17 @@ export const projectApplicationService = {
     if (app.status !== ApplicationStatus.PENDING) {
       throw new BusinessRuleError("Only pending applications can be rejected");
     }
-    return projectApplicationRepository.updateStatus(applicationId, ApplicationStatus.REJECTED);
+    const result = await projectApplicationRepository.updateStatus(
+      applicationId,
+      ApplicationStatus.REJECTED
+    );
+    await notificationService.notify({
+      userId: app.beginnerId,
+      type: NotificationType.APPLICATION_REJECTED,
+      title: "Lamaran ditolak",
+      message: `Lamaranmu untuk proyek "${app.project.title}" belum diterima.`,
+      actionUrl: "/applications",
+    });
+    return result;
   },
 };
