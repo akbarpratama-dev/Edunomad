@@ -405,6 +405,8 @@ Unless explicitly approved.
 
 NOTE (2026-07-02): Public Portfolio Pages stay OUT OF SCOPE for now — deferred to their own later phase. The artifact pages only expose placeholder BUTTONS ("Lihat di Portofolio" / "Bagikan Profil Portofolio") that link to the future `/portfolio/:id` route; the page and its backend are NOT built yet. See decision D-P8-5.
 
+NOTE (2026-07-05, amends D-P8-5): The Phase 10 profile page (`/profile`, `/users/:id`) DOES include a "Sertifikat" tab showing the user's own VERIFIED certificates (reusing existing artifact data) — user-approved. This is the in-app profile tab, NOT the standalone public portfolio page `/portfolio/:id`, which remains deferred. CV PDF download stays OUT OF SCOPE (rendered as a disabled placeholder). See decision D-P10-1.
+
 ⸻
 
 WHEN UNSURE
