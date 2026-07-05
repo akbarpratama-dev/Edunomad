@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, LogOut, User as UserIcon, ChevronDown, ArrowLeft, MessageSquare } from "lucide-react";
+import { Menu, LogOut, User as UserIcon, ChevronDown, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { MessageButton } from "@/components/layout/MessageButton";
 import { UserAvatar } from "@/components/common/UserAvatar";
 import {
   DropdownMenu,
@@ -66,18 +67,8 @@ export function Header({ backHref, scrolled }: { backHref?: string; scrolled?: b
       </div>
 
       <div className="pointer-events-auto flex items-center gap-2">
-        {/* Diskusi shortcut — leads to the projects hub where each project's
-            Diskusi page lives (no global inbox). Hidden for ADMIN (no projects). */}
-        {appUser && appUser.role !== "ADMIN" && (
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Diskusi"
-            render={<Link href="/my-projects" />}
-          >
-            <MessageSquare className="size-5" />
-          </Button>
-        )}
+        {/* Diskusi shortcut → the user's current project Diskusi page. */}
+        <MessageButton />
 
         <NotificationBell />
 
