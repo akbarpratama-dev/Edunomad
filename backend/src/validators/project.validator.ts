@@ -44,6 +44,10 @@ export const rejectProjectSchema = z.object({
   reason: z.string().min(1, "Alasan wajib diisi").max(2000),
 });
 
+export const replaceSeniorSchema = z.object({
+  new_senior_id: z.string().uuid(),
+});
+
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type ListProjectsQuery = z.infer<typeof listProjectsQuerySchema>;
 export type MyProjectsQuery = z.infer<typeof myProjectsQuerySchema>;

@@ -51,6 +51,16 @@ export const userRepository = {
     return prisma.user.update({ where: { id }, data });
   },
 
+  // VERIFIED seniors — candidate pool for admin senior replacement (Workflow 16).
+  // Capacity (<5 active) is checked per-candidate in the service.
+  listVerifiedSeniors() {
+    return prisma.user.findMany({
+      where: { role: "SENIOR", status: "VERIFIED" },
+      select: { id: true, name: true, email: true, profile: { select: { headline: true } } },
+      orderBy: { name: "asc" },
+    });
+  },
+
   // --- Profile overview aggregates (Phase 10) ---
 
   // Verified certificates earned as a beginner — an Artifact row only exists once

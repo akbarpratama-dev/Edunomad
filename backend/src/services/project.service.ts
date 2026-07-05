@@ -1,14 +1,17 @@
 import { projectRepository } from "../repositories/project.repository";
 import { categoryRepository } from "../repositories/category.repository";
+import { userRepository } from "../repositories/user.repository";
+import { auditLogService } from "./auditLog.service";
 import { BusinessRuleError, ForbiddenError, NotFoundError } from "../utils/errors";
 import { ProjectStatus, PUBLIC_PROJECT_STATUSES } from "../constants/projectStatus";
-import { AuditAction } from "../constants/auditActions";
+import { AuditAction, EntityType } from "../constants/auditActions";
 import { notificationService } from "./notification.service";
 import { NotificationType } from "../constants/notificationType";
 import type { Prisma } from "../generated/prisma/client";
 import type { CreateProjectInput, ListProjectsQuery, MyProjectsQuery } from "../validators/project.validator";
 
 const UMKM_MAX_ACTIVE = 5;
+const SENIOR_MAX_ACTIVE = 5;
 
 function toData(input: CreateProjectInput) {
   return {
@@ -174,6 +177,95 @@ export const projectService = {
       title: "Proyek ditolak",
       message: `Proyek "${project.title}" ditolak. Alasan: ${reason}`,
       actionUrl: `/my-projects/${projectId}`,
+    });
+    return result;
+  },
+
+  // GET /admin/projects — monitoring list across all statuses (Workflow: Admin
+  // Monitoring). Optional status / category / q filters.
+  async adminListProjects(query: ListProjectsQuery) {
+    const where: Prisma.ProjectWhereInput = {};
+    if (query.status) where.status = query.status;
+    if (query.category) where.categoryId = query.category;
+    if (query.q) {
+      where.OR = [
+        { title: { contains: query.q, mode: "insensitive" } },
+        { description: { contains: query.q, mode: "insensitive" } },
+      ];
+    }
+    const { data, total } = await projectRepository.adminFindManyPaginated(
+      where,
+      query.page,
+      query.limit
+    );
+    return { data, total, page: query.page, limit: query.limit };
+  },
+
+  // GET /admin/projects/:id/senior-candidates — VERIFIED seniors with spare
+  // capacity (<5 active), excluding the project's current mentor.
+  async listSeniorCandidates(projectId: string) {
+    const project = await projectRepository.findRawById(projectId);
+    if (!project) throw new NotFoundError("Project not found");
+    const seniors = await userRepository.listVerifiedSeniors();
+    const eligible = await Promise.all(
+      seniors
+        .filter((s) => s.id !== project.seniorId)
+        .map(async (s) => {
+          const activeCount = await projectRepository.countAssignedActiveBySenior(s.id);
+          return { ...s, activeCount, eligible: activeCount < SENIOR_MAX_ACTIVE };
+        })
+    );
+    return eligible.filter((s) => s.eligible);
+  },
+
+  // POST /admin/projects/:id/replace-senior (Workflow 16). Assign a replacement
+  // mentor to a live project without disrupting the team.
+  async replaceSenior(adminId: string, projectId: string, newSeniorId: string) {
+    const project = await projectRepository.findRawById(projectId);
+    if (!project) throw new NotFoundError("Project not found");
+    if (![ProjectStatus.ACTIVE, ProjectStatus.AWAITING_COMPLETION].includes(project.status as never)) {
+      throw new BusinessRuleError("Only active projects can have their mentor replaced");
+    }
+    if (!project.seniorId) {
+      throw new BusinessRuleError("Project has no assigned mentor to replace");
+    }
+    if (project.seniorId === newSeniorId) {
+      throw new BusinessRuleError("The new mentor is already assigned to this project");
+    }
+    const newSenior = await userRepository.findById(newSeniorId);
+    if (!newSenior || newSenior.role !== "SENIOR") {
+      throw new BusinessRuleError("Replacement must be a senior mentor");
+    }
+    if (newSenior.status !== "VERIFIED") {
+      throw new BusinessRuleError("Replacement mentor must be verified");
+    }
+    const activeCount = await projectRepository.countAssignedActiveBySenior(newSeniorId);
+    if (activeCount >= SENIOR_MAX_ACTIVE) {
+      throw new BusinessRuleError(
+        `Replacement mentor has reached the maximum of ${SENIOR_MAX_ACTIVE} active projects`
+      );
+    }
+
+    const previousSeniorId = project.seniorId;
+    const result = await projectRepository.setSenior(projectId, newSeniorId);
+    await auditLogService.createAuditLog(adminId, AuditAction.SENIOR_REPLACED, EntityType.PROJECT, projectId, {
+      previousSeniorId,
+      newSeniorId,
+    });
+    // Notify both mentors (fire-and-forget).
+    await notificationService.notify({
+      userId: newSeniorId,
+      type: NotificationType.SENIOR_ASSIGNED,
+      title: "Kamu ditugaskan sebagai mentor",
+      message: `Kamu kini menjadi mentor proyek "${project.title}".`,
+      actionUrl: `/my-projects/${projectId}/workspace`,
+    });
+    await notificationService.notify({
+      userId: previousSeniorId,
+      type: NotificationType.SENIOR_REMOVED,
+      title: "Kamu tidak lagi menjadi mentor",
+      message: `Kamu digantikan sebagai mentor proyek "${project.title}".`,
+      actionUrl: "/my-projects",
     });
     return result;
   },

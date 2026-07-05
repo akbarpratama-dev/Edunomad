@@ -48,6 +48,28 @@ export interface AuditLogItem {
   user: { id: string; name: string; email: string; role: string } | null;
 }
 
+export interface AdminProjectItem {
+  id: string;
+  title: string;
+  status: string;
+  deadline: string;
+  createdAt: string;
+  imageUrl: string | null;
+  umkm: { id: string; name: string };
+  senior: { id: string; name: string } | null;
+  category: { id: string; name: string };
+  _count: { projectMembers: number };
+}
+
+export interface SeniorCandidate {
+  id: string;
+  name: string;
+  email: string;
+  profile: { headline: string | null } | null;
+  activeCount: number;
+  eligible: boolean;
+}
+
 export const adminApi = {
   async dashboard(): Promise<DashboardStats> {
     const res = await apiClient.get<Envelope<DashboardStats>>("/admin/dashboard");
@@ -78,5 +100,29 @@ export const adminApi = {
   }): Promise<Paginated<AuditLogItem>> {
     const res = await apiClient.get<Paginated<AuditLogItem>>("/admin/audit-logs", { params });
     return res.data;
+  },
+
+  // --- Project monitoring + mentor replacement (Workflow 16) ---
+  async listProjects(params: {
+    status?: string;
+    q?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<Paginated<AdminProjectItem>> {
+    const res = await apiClient.get<Paginated<AdminProjectItem>>("/admin/projects", { params });
+    return res.data;
+  },
+
+  async seniorCandidates(projectId: string): Promise<SeniorCandidate[]> {
+    const res = await apiClient.get<Envelope<SeniorCandidate[]>>(
+      `/admin/projects/${projectId}/senior-candidates`
+    );
+    return res.data.data;
+  },
+
+  async replaceSenior(projectId: string, newSeniorId: string): Promise<void> {
+    await apiClient.post(`/admin/projects/${projectId}/replace-senior`, {
+      new_senior_id: newSeniorId,
+    });
   },
 };

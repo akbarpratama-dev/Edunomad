@@ -21,7 +21,12 @@ import {
   updateCategorySchema,
   categoryIdParamSchema,
 } from "../validators/category.validator";
-import { projectIdParamSchema, rejectProjectSchema } from "../validators/project.validator";
+import {
+  projectIdParamSchema,
+  rejectProjectSchema,
+  replaceSeniorSchema,
+  listProjectsQuerySchema,
+} from "../validators/project.validator";
 
 // All routes mounted at /api/v1/admin — ADMIN only.
 const router = Router();
@@ -79,6 +84,23 @@ router.delete(
   "/categories/:id",
   validateRequest({ params: categoryIdParamSchema }),
   categoryController.remove
+);
+
+// Project monitoring (all statuses) + mentor replacement (Workflow 16)
+router.get(
+  "/projects",
+  validateRequest({ query: listProjectsQuerySchema }),
+  adminController.listProjects
+);
+router.get(
+  "/projects/:id/senior-candidates",
+  validateRequest({ params: projectIdParamSchema }),
+  adminController.seniorCandidates
+);
+router.post(
+  "/projects/:id/replace-senior",
+  validateRequest({ params: projectIdParamSchema, body: replaceSeniorSchema }),
+  adminController.replaceSenior
 );
 
 // Project approval

@@ -78,6 +78,27 @@ export const projectRepository = {
     return { data, total };
   },
 
+  // Admin monitoring list — any status, plus mentor + active member count.
+  async adminFindManyPaginated(where: Prisma.ProjectWhereInput, page: number, limit: number) {
+    const fullWhere: Prisma.ProjectWhereInput = { ...where, deletedAt: null };
+    const [data, total] = await Promise.all([
+      prisma.project.findMany({
+        where: fullWhere,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          umkm: { select: { id: true, name: true } },
+          senior: { select: { id: true, name: true } },
+          category: { select: { id: true, name: true } },
+          _count: { select: { projectMembers: { where: { status: "ACTIVE" } } } },
+        },
+      }),
+      prisma.project.count({ where: fullWhere }),
+    ]);
+    return { data, total };
+  },
+
   countActiveByUmkm(umkmId: string) {
     return prisma.project.count({
       where: { umkmId, status: ProjectStatus.ACTIVE, deletedAt: null },

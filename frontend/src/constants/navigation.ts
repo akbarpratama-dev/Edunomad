@@ -13,6 +13,7 @@ import {
   Star,
   ShieldCheck,
   ScrollText,
+  Activity,
 } from "lucide-react";
 import type { Role } from "@/types/user";
 
@@ -46,6 +47,7 @@ const ROLE_ITEMS: Record<Role, NavItem[]> = {
   ADMIN: [
     BROWSE_PROJECTS,
     { label: "Tinjau Proyek", href: "/admin/projects/review", icon: ClipboardCheck },
+    { label: "Pantau Proyek", href: "/admin/projects", icon: Activity },
     { label: "Verifikasi Pengguna", href: "/admin/users/verification", icon: ShieldCheck },
     { label: "Sertifikat", href: "/admin/artifacts", icon: Award },
     { label: "Audit Log", href: "/admin/audit-logs", icon: ScrollText },

@@ -88,4 +88,39 @@ export const adminController = {
       next(err);
     }
   },
+
+  // GET /admin/projects — monitoring list across all statuses.
+  async listProjects(req: Request, res: Response, next: NextFunction) {
+    try {
+      const query = listProjectsQuerySchema.parse(req.query);
+      const { data, total } = await projectService.adminListProjects(query);
+      res.json(paginate(data, query.page, query.limit, total));
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // GET /admin/projects/:id/senior-candidates
+  async seniorCandidates(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await projectService.listSeniorCandidates(req.params.id);
+      res.json(successResponse(data, "Senior candidates retrieved"));
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // POST /admin/projects/:id/replace-senior
+  async replaceSenior(req: Request, res: Response, next: NextFunction) {
+    try {
+      const p = await projectService.replaceSenior(
+        req.user!.id,
+        req.params.id,
+        req.body.new_senior_id
+      );
+      res.json(successResponse(p, "Mentor replaced"));
+    } catch (err) {
+      next(err);
+    }
+  },
 };

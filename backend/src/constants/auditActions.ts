@@ -16,6 +16,8 @@ export const AuditAction = {
   DELIVERABLE_APPROVED: "DELIVERABLE_APPROVED",
   DELIVERABLE_REVISION_REQUESTED: "DELIVERABLE_REVISION_REQUESTED",
   CONTRIBUTION_APPROVED: "CONTRIBUTION_APPROVED",
+  // Phase 10 — admin reassigns a project's mentor (Workflow 16).
+  SENIOR_REPLACED: "SENIOR_REPLACED",
 } as const;
 
 export type AuditActionType = (typeof AuditAction)[keyof typeof AuditAction];
