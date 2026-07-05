@@ -1,5 +1,14 @@
 # Development Log
 
+2026-07-05 (Diskusi dipisah jadi page + sidebar proyek) — committed main (c1c20fe)
+User minta pisah Diskusi dari workspace jadi route sendiri + sidebar khusus (mockup).
+- ROUTE: `frontend/src/app/projects/[id]/workspace/diskusi/page.tsx` (load project → render DiscussionTab) + re-export `my-projects/[id]/workspace/diskusi/page.tsx`. AppShell backHref = `${base}/${id}/workspace`.
+- WORKSPACE: hapus tab "discussion" dari TABS + render + import DiscussionTab. Tambah tombol "Buka Diskusi" (MessageSquare) di header workspace → `${wsBase}/${id}/workspace/diskusi` (wsBase dari usePathname). Deep-link ?tab effect tetap (harmless).
+- DiscussionTab RAIL diganti (dulu Milestone+Anggota list) → 3 card: (1) Informasi Proyek: ProjectThumb(image/gradient) + judul + PROJECT_STATUS_META badge + "Bersama {umkm.name}" + tumpukan avatar tim (-space-x-2, +N) + tombol "Lihat Detail Proyek" → `${base}/${id}/workspace` (base dari usePathname); (2) Aktivitas Terbaru: derived dari discussions sort updatedAt (author + judul + timeAgo); (3) Milestone Berikutnya. Hapus dead ROLE_BADGE + GraduationCap import.
+- LIST CARD tampilkan AUTHOR: backend `discussion.repository.listGroupForUser` include messages{where parentId:null, take 1, orderBy asc, select sender} → discussionApi Discussion += `messages?:[{sender}]` + createdAt. Card leading avatar = UserAvatar(author) fallback icon; meta row "{author.name} · {timeAgo}".
+- BeginnerProjectBoard "Lihat Diskusi" → `${workspace}/diskusi`.
+- VERIFIED Playwright (beginner, project 0005): diskusi page 3-kolom + Diskusi Proyek/Informasi Proyek/Aktivitas Terbaru/Milestone Berikutnya + Lihat Detail Proyek→workspace + Bersama + list author "Test Senior"; workspace TANPA tab Diskusi + tombol Buka Diskusi→diskusi. backend build 0, frontend tsc 0.
+
 2026-07-04 (PHASE 9 — Notifications & Real-time) — SELESAI & MERGED → main (01fcbe7)
 Tabel `notifications` sudah ada (0.2.11) → NO migration.
 - BACKEND (build 0): constants/notificationType (14 tipe). notification.repository (create, findManyByUser paginated+filter isRead, countUnread, markRead[ownership via where id+userId], markAllRead). notification.service (notify = best-effort/never-throw utk trigger; list; markAsRead; markAllAsRead). controller (list → {data,meta,unreadCount}). routes GET /notifications, POST /:id/read, POST /read-all wired.

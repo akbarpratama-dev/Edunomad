@@ -5,6 +5,17 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-07-05 (Pisah Diskusi jadi page + sidebar proyek)
+
+Prompt:
+"pisah workspace dgn diskusi jadi /workspace/diskusi agar bisa buat button langsung; page diskusi khusus spt mockup: list kiri tampil pembuat+kategori, thread pengumuman mentor (headline+info), sidebar Informasi Proyek (image+status+anggota tumpukan foto+button→workspace) + Aktivitas Terbaru + Milestone Berikutnya."
+
+Hasil:
+Route baru /workspace/diskusi (projects + my-projects re-export). Tab Diskusi dicabut dari workspace, ganti tombol "Buka Diskusi". DiscussionTab rail → 3 card (Informasi Proyek dgn cover+status+Bersama+avatar stack+Lihat Detail Proyek→workspace, Aktivitas Terbaru derived, Milestone Berikutnya). List card tampil author (backend include first-message sender + Discussion.messages type). BeginnerProjectBoard "Lihat Diskusi" → diskusi page. Thread pengumuman sudah ada (DiscussionFeed). build 0, tsc 0, Playwright-verified. Commit main c1c20fe (feature refinement, bukan phase).
+
+---
+
+Date:
 2026-07-02 (Phase 8b — redesign page Artifact + Portfolio publik + image proyek)
 
 Prompt:
