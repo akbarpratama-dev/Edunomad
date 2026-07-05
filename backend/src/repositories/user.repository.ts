@@ -112,6 +112,27 @@ export const userRepository = {
     return Promise.resolve(0);
   },
 
+  // Count of ongoing (ACTIVE / AWAITING_COMPLETION) projects — role-aware.
+  countCurrentProjects(userId: string, role: string) {
+    const live = { in: [ProjectStatus.ACTIVE, ProjectStatus.AWAITING_COMPLETION] };
+    if (role === "SENIOR") {
+      return prisma.project.count({ where: { seniorId: userId, status: live, deletedAt: null } });
+    }
+    if (role === "UMKM") {
+      return prisma.project.count({ where: { umkmId: userId, status: live, deletedAt: null } });
+    }
+    if (role === "BEGINNER") {
+      return prisma.projectMember.count({
+        where: {
+          userId,
+          status: { not: MemberStatus.WITHDRAWN },
+          project: { status: live, deletedAt: null },
+        },
+      });
+    }
+    return Promise.resolve(0);
+  },
+
   // Projects for the profile Proyek tab — role-aware. Beginner sees memberships
   // (with their role name); Senior sees mentored; UMKM sees owned.
   listProfileProjects(userId: string, role: string) {

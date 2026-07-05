@@ -11,11 +11,16 @@ import {
   CalendarDays,
   ShieldCheck,
   FolderCheck,
+  FolderKanban,
   Star,
   Award,
   Download,
   ExternalLink,
   BadgeCheck,
+  Clock,
+  Sparkles,
+  Briefcase,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -87,6 +92,20 @@ export function ProfileView({
   isOwn: boolean;
 }) {
   const { user, profile, skills, experiences, portfolioLinks, stats, artifacts, projects } = overview;
+
+  // UMKM is a business owner, not a contributor — skills / contribution / review
+  // stats / certificate & review tabs don't apply. Everyone else ("professional")
+  // gets the full set (D-P10-2).
+  const professional = user.role !== "UMKM";
+  const tabs = professional ? TABS : TABS.filter((t) => t.key === "about" || t.key === "projects");
+
+  // Top Skill = highest-level skill (ADVANCED > INTERMEDIATE > BEGINNER), first wins.
+  const topSkill = useMemo(() => {
+    if (skills.length === 0) return null;
+    const rank = { ADVANCED: 3, INTERMEDIATE: 2, BEGINNER: 1 } as const;
+    return [...skills].sort((a, b) => (rank[b.level] ?? 0) - (rank[a.level] ?? 0))[0];
+  }, [skills]);
+
   const [tab, setTab] = useState<TabKey>("about");
 
   const [reviews, setReviews] = useState<UserReview[] | null>(null);
@@ -146,9 +165,19 @@ export function ProfileView({
               )}
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
+                  <Briefcase className="size-4" />
+                  {ROLE_LABEL[user.role]}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
                   <CalendarDays className="size-4" />
                   Bergabung sejak {joinLabel}
                 </span>
+                {professional && topSkill && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Sparkles className="size-4" />
+                    Top skill: {topSkill.skill.name}
+                  </span>
+                )}
               </div>
               {profile?.bio && (
                 <p className="mt-3 max-w-2xl whitespace-pre-wrap text-sm leading-relaxed text-foreground/80">
@@ -189,7 +218,7 @@ export function ProfileView({
         {/* Tabs */}
         <div className="border-b border-border">
           <nav className="-mb-px flex gap-1 overflow-x-auto" aria-label="Bagian profil">
-            {TABS.map((t) => (
+            {tabs.map((t) => (
               <button
                 key={t.key}
                 type="button"
@@ -224,53 +253,92 @@ export function ProfileView({
 
       {/* ---- Right sidebar ---- */}
       <aside className="flex w-full shrink-0 flex-col gap-5 lg:w-[300px]">
-        {/* Stat cards */}
-        <div className="grid grid-cols-2 gap-3">
-          <StatBox icon={ShieldCheck} value={stats.verifiedArtifacts} label="Sertifikat Terverifikasi" tone="bg-emerald-50 text-emerald-700" />
-          <StatBox icon={FolderCheck} value={stats.completedProjects} label="Proyek Selesai" tone="bg-violet-50 text-violet-700" />
-          <StatBox
-            icon={Star}
-            value={stats.avgRating != null ? stats.avgRating.toFixed(1) : "—"}
-            label={`Rata-rata Ulasan${stats.reviewCount ? ` (${stats.reviewCount})` : ""}`}
-            tone="bg-amber-50 text-amber-700"
-            span
-          />
-        </div>
+        {/* Stat cards — contributor-oriented, hidden for UMKM */}
+        {professional && (
+          <div className="grid grid-cols-2 gap-3">
+            <StatBox icon={ShieldCheck} value={stats.verifiedArtifacts} label="Sertifikat Terverifikasi" tone="bg-emerald-50 text-emerald-700" />
+            <StatBox icon={FolderCheck} value={stats.completedProjects} label="Proyek Selesai" tone="bg-violet-50 text-violet-700" />
+            <StatBox icon={FolderKanban} value={stats.currentProjects} label="Proyek Berjalan" tone="bg-sky-50 text-sky-700" />
+            <StatBox icon={MessageSquare} value={stats.reviewCount} label="Total Ulasan" tone="bg-indigo-50 text-indigo-700" />
+            <StatBox icon={Clock} value={stats.contributionHours} label="Total Jam Kontribusi" tone="bg-orange-50 text-orange-700" />
+            <StatBox
+              icon={Star}
+              value={stats.avgRating != null ? stats.avgRating.toFixed(1) : "—"}
+              label="Rata-rata Ulasan"
+              tone="bg-amber-50 text-amber-700"
+            />
+          </div>
+        )}
 
-        {/* Skills */}
-        <SidebarCard title="Skills">
-          {skills.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Belum ada skill.</p>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {skills.map((s) => {
-                const pct = SKILL_LEVEL_PCT[s.level] ?? 40;
-                return (
-                  <li key={s.id}>
-                    <div className="mb-1 flex items-center justify-between text-sm">
-                      <span className="font-medium text-foreground">{s.skill.name}</span>
-                      <span className="text-xs text-muted-foreground">{SKILL_LEVEL_LABEL[s.level]}</span>
-                    </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-[#8bc34a]" style={{ width: `${pct}%` }} />
-                    </div>
-                  </li>
-                );
-              })}
+        {/* Skills + Top Skill — hidden for UMKM */}
+        {professional && (
+          <SidebarCard title="Skills">
+            {skills.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Belum ada skill.</p>
+            ) : (
+              <>
+                {topSkill && (
+                  <div className="mb-3 flex items-center gap-2 rounded-xl bg-[#eef7d6] px-3 py-2">
+                    <Sparkles className="size-4 text-[#5f8c00]" />
+                    <span className="text-xs text-muted-foreground">Top skill</span>
+                    <span className="ml-auto text-sm font-semibold text-foreground">{topSkill.skill.name}</span>
+                  </div>
+                )}
+                <ul className="flex flex-col gap-3">
+                  {skills.map((s) => {
+                    const pct = SKILL_LEVEL_PCT[s.level] ?? 40;
+                    return (
+                      <li key={s.id}>
+                        <div className="mb-1 flex items-center justify-between text-sm">
+                          <span className="font-medium text-foreground">{s.skill.name}</span>
+                          <span className="text-xs text-muted-foreground">{SKILL_LEVEL_LABEL[s.level]}</span>
+                        </div>
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                          <div className="h-full rounded-full bg-[#8bc34a]" style={{ width: `${pct}%` }} />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            )}
+          </SidebarCard>
+        )}
+
+        {/* Social / portfolio links — all roles */}
+        {socials.length > 0 && (
+          <SidebarCard title="Tautan Sosial">
+            <ul className="flex flex-col gap-1">
+              {socials.map((s, i) => (
+                <li key={i}>
+                  <a
+                    href={s.href}
+                    target={s.href.startsWith("mailto:") ? undefined : "_blank"}
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-foreground/80 transition-colors hover:bg-muted"
+                  >
+                    <s.icon className="size-4 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{s.label}</span>
+                    <ExternalLink className="ml-auto size-3.5 shrink-0 text-muted-foreground" />
+                  </a>
+                </li>
+              ))}
             </ul>
-          )}
-        </SidebarCard>
+          </SidebarCard>
+        )}
 
-        {/* CV — placeholder (out of scope: PDF generation deferred) */}
-        <SidebarCard title="Unduh CV">
-          <p className="mb-3 text-sm text-muted-foreground">
-            Fitur CV PDF akan tersedia pada fase berikutnya.
-          </p>
-          <Button variant="outline" size="sm" disabled className="w-full gap-1.5">
-            <Download className="size-4" />
-            Unduh CV (PDF)
-          </Button>
-        </SidebarCard>
+        {/* CV — placeholder (out of scope), contributor-oriented → non-UMKM only */}
+        {professional && (
+          <SidebarCard title="Unduh CV">
+            <p className="mb-3 text-sm text-muted-foreground">
+              Fitur CV PDF akan tersedia pada fase berikutnya.
+            </p>
+            <Button variant="outline" size="sm" disabled className="w-full gap-1.5">
+              <Download className="size-4" />
+              Unduh CV (PDF)
+            </Button>
+          </SidebarCard>
+        )}
       </aside>
     </div>
   );

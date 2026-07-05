@@ -67,8 +67,10 @@ export interface ProfileLink {
 export interface ProfileStats {
   verifiedArtifacts: number;
   completedProjects: number;
+  currentProjects: number;
   avgRating: number | null;
   reviewCount: number;
+  contributionHours: number; // placeholder 0 — no tracking field yet (D-P10-2)
 }
 
 export interface ProfileArtifact {

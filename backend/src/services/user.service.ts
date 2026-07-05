@@ -55,9 +55,10 @@ export const userService = {
     const user = await userRepository.findByIdWithRelations(targetUserId);
     if (!user) throw new NotFoundError("User not found");
 
-    const [artifacts, completedProjects, reviewAgg, projects] = await Promise.all([
+    const [artifacts, completedProjects, currentProjects, reviewAgg, projects] = await Promise.all([
       userRepository.listVerifiedArtifacts(targetUserId),
       userRepository.countCompletedProjects(targetUserId, user.role),
+      userRepository.countCurrentProjects(targetUserId, user.role),
       userRepository.reviewAggregate(targetUserId),
       userRepository.listProfileProjects(targetUserId, user.role),
     ]);
@@ -79,8 +80,12 @@ export const userService = {
       stats: {
         verifiedArtifacts: artifacts.length,
         completedProjects,
+        currentProjects,
         avgRating: reviewAgg._avg.rating,
         reviewCount: reviewAgg._count,
+        // No schema field tracks contribution hours yet — surfaced as 0 until a
+        // tracking mechanism exists (D-P10-2, placeholder).
+        contributionHours: 0,
       },
       artifacts,
       projects,
