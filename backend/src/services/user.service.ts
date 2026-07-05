@@ -46,4 +46,44 @@ export const userService = {
       portfolioLinks: user.portfolioLinks,
     };
   },
+
+  // GET /users/:id/profile-overview — composite payload for the profile page
+  // (Phase 10): core identity + profile + skills + experiences + links, plus the
+  // stat cards, the verified-certificate grid (Portofolio tab) and role-aware
+  // project list. Reviews stay on the dedicated /users/:id/reviews endpoint.
+  async getProfileOverview(targetUserId: string) {
+    const user = await userRepository.findByIdWithRelations(targetUserId);
+    if (!user) throw new NotFoundError("User not found");
+
+    const [artifacts, completedProjects, reviewAgg, projects] = await Promise.all([
+      userRepository.listVerifiedArtifacts(targetUserId),
+      userRepository.countCompletedProjects(targetUserId, user.role),
+      userRepository.reviewAggregate(targetUserId),
+      userRepository.listProfileProjects(targetUserId, user.role),
+    ]);
+
+    return {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+        emailVerifiedAt: user.emailVerifiedAt,
+        createdAt: user.createdAt,
+      },
+      profile: user.profile,
+      skills: user.userSkills,
+      experiences: user.experiences,
+      portfolioLinks: user.portfolioLinks,
+      stats: {
+        verifiedArtifacts: artifacts.length,
+        completedProjects,
+        avgRating: reviewAgg._avg.rating,
+        reviewCount: reviewAgg._count,
+      },
+      artifacts,
+      projects,
+    };
+  },
 };

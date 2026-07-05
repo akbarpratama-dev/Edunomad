@@ -38,4 +38,13 @@ export const userController = {
       next(err);
     }
   },
+
+  async getProfileOverview(req: Request, res: Response, next: NextFunction) {
+    try {
+      const overview = await userService.getProfileOverview(req.params.id);
+      res.json(successResponse(overview, "Profile overview retrieved"));
+    } catch (err) {
+      next(err);
+    }
+  },
 };

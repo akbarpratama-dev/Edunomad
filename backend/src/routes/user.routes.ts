@@ -46,6 +46,14 @@ router.get(
 );
 
 // --- Other users (authenticated only; portfolio visible to logged-in users) ---
+// Composite profile payload for the profile page (own via appUser.id, or another
+// user's public profile). Auth required.
+router.get(
+  "/:id/profile-overview",
+  authMiddleware,
+  validateRequest({ params: userIdParamSchema }),
+  userController.getProfileOverview
+);
 router.get(
   "/:id/portfolio",
   authMiddleware,

@@ -98,6 +98,10 @@ export function Header({ backHref, scrolled }: { backHref?: string; scrolled?: b
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem disabled>{user?.email ?? "Guest"}</DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/profile" />}>
+              <UserIcon className="size-4" />
+              Profil Saya
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => signOut()}>
               <LogOut className="size-4" />
               Logout
