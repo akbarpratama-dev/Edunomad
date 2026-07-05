@@ -133,6 +133,26 @@ export interface UpdateProfileInput {
   linkedin_url?: string;
 }
 
+export type LinkType = "GITHUB" | "FIGMA" | "BEHANCE" | "LINKEDIN" | "OTHER";
+export const LINK_TYPES: LinkType[] = ["GITHUB", "FIGMA", "BEHANCE", "LINKEDIN", "OTHER"];
+
+export interface AddSkillInput {
+  skill_id: string;
+  level: SkillLevel;
+}
+export interface ExperienceInput {
+  title: string;
+  organization: string;
+  description?: string;
+  start_date: string;
+  end_date?: string | null;
+}
+export interface LinkInput {
+  title: string;
+  url: string;
+  type: LinkType;
+}
+
 export const profileApi = {
   // Composite payload for the profile page (own via appUser.id, or another user).
   async getOverview(userId: string): Promise<ProfileOverview> {
@@ -145,5 +165,56 @@ export const profileApi = {
   // Partial update of the caller's own profile (name → users; rest → profile).
   async updateMe(input: UpdateProfileInput): Promise<void> {
     await apiClient.put("/users/me", input);
+  },
+
+  // --- Own skills (Workflow: profile management) ---
+  skills: {
+    async add(input: AddSkillInput): Promise<ProfileSkill> {
+      const res = await apiClient.post<Envelope<ProfileSkill>>("/users/me/skills", input);
+      return res.data.data;
+    },
+    async updateLevel(id: string, level: SkillLevel): Promise<ProfileSkill> {
+      const res = await apiClient.put<Envelope<ProfileSkill>>(`/users/me/skills/${id}`, { level });
+      return res.data.data;
+    },
+    async remove(id: string): Promise<void> {
+      await apiClient.delete(`/users/me/skills/${id}`);
+    },
+  },
+
+  // --- Own experiences ---
+  experiences: {
+    async add(input: ExperienceInput): Promise<ProfileExperience> {
+      const res = await apiClient.post<Envelope<ProfileExperience>>("/users/me/experiences", input);
+      return res.data.data;
+    },
+    async update(id: string, input: ExperienceInput): Promise<ProfileExperience> {
+      const res = await apiClient.put<Envelope<ProfileExperience>>(
+        `/users/me/experiences/${id}`,
+        input
+      );
+      return res.data.data;
+    },
+    async remove(id: string): Promise<void> {
+      await apiClient.delete(`/users/me/experiences/${id}`);
+    },
+  },
+
+  // --- Own portfolio / social links ---
+  links: {
+    async add(input: LinkInput): Promise<ProfileLink> {
+      const res = await apiClient.post<Envelope<ProfileLink>>("/users/me/portfolio-links", input);
+      return res.data.data;
+    },
+    async update(id: string, input: LinkInput): Promise<ProfileLink> {
+      const res = await apiClient.put<Envelope<ProfileLink>>(
+        `/users/me/portfolio-links/${id}`,
+        input
+      );
+      return res.data.data;
+    },
+    async remove(id: string): Promise<void> {
+      await apiClient.delete(`/users/me/portfolio-links/${id}`);
+    },
   },
 };

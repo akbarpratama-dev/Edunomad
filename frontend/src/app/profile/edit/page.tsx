@@ -17,7 +17,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { ApiError } from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { fetchMe } from "@/services/authApi";
-import { profileApi } from "@/services/profileApi";
+import { profileApi, type ProfileOverview } from "@/services/profileApi";
+import {
+  SkillsManager,
+  ExperiencesManager,
+  LinksManager,
+} from "@/components/profile/ProfileEditManagers";
 
 // Mirrors backend updateProfileSchema (URLs optional; empty string allowed).
 const schema = z.object({
@@ -35,6 +40,10 @@ function Content() {
   const appUser = useAuthStore((s) => s.appUser);
   const setAppUser = useAuthStore((s) => s.setAppUser);
   const [loading, setLoading] = useState(true);
+  const [overview, setOverview] = useState<ProfileOverview | null>(null);
+  // UMKM profiles don't surface skills/experiences (see D-P10-2), so hide those
+  // managers; links apply to everyone.
+  const professional = appUser?.role !== "UMKM";
 
   const {
     register,
@@ -49,6 +58,7 @@ function Content() {
     profileApi
       .getOverview(appUser.id)
       .then((o) => {
+        setOverview(o);
         reset({
           name: o.user.name,
           headline: o.profile?.headline ?? "",
@@ -154,6 +164,16 @@ function Content() {
           </Button>
         </div>
       </form>
+
+      {/* Sub-resource managers persist immediately (own API calls), so they live
+          outside the core-profile form. */}
+      {overview && (
+        <div className="mx-auto mt-6 flex w-full max-w-2xl flex-col gap-6">
+          {professional && <SkillsManager initial={overview.skills} />}
+          {professional && <ExperiencesManager initial={overview.experiences} />}
+          <LinksManager initial={overview.portfolioLinks} />
+        </div>
+      )}
     </AppShell>
   );
 }
