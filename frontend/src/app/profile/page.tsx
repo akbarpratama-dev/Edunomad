@@ -28,13 +28,18 @@ function Content() {
 
   return (
     <AppShell>
-      {error ? (
-        <ErrorState message="Gagal memuat profil." onAction={() => window.location.reload()} />
-      ) : !overview ? (
-        <div className="h-64 animate-pulse rounded-[24px] bg-muted" />
-      ) : (
-        <ProfileView overview={overview} isOwn />
-      )}
+      {/* Clear the ~56px absolute top bar: without a backHref AppShell reserves
+          almost no top band, so the hero's Edit button and the right stat rail
+          would slide under the notif/profile controls. */}
+      <div className="pt-10 lg:pt-11">
+        {error ? (
+          <ErrorState message="Gagal memuat profil." onAction={() => window.location.reload()} />
+        ) : !overview ? (
+          <div className="h-64 animate-pulse rounded-[24px] bg-muted" />
+        ) : (
+          <ProfileView overview={overview} isOwn />
+        )}
+      </div>
     </AppShell>
   );
 }

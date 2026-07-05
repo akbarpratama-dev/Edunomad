@@ -143,7 +143,7 @@ export function ProfileView({
       {/* ---- Main column ---- */}
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         {/* Hero */}
-        <section className="relative overflow-hidden rounded-[24px] border border-border bg-gradient-to-br from-[#f4fae4] to-card p-6 sm:p-7">
+        <section className="relative overflow-hidden rounded-[24px] border border-border bg-gradient-to-br from-[#eef7d6]/70 via-card to-card p-6 sm:p-7">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
             <UserAvatar
               name={user.name}
@@ -238,7 +238,7 @@ export function ProfileView({
 
         {/* Tab content */}
         {tab === "about" && (
-          <AboutTab overview={overview} />
+          <AboutTab overview={overview} isOwn={isOwn} />
         )}
         {tab === "projects" && (
           <ProjectsTab projects={projects} />
@@ -360,7 +360,7 @@ function StatBox({
   return (
     <div
       className={cn(
-        "flex flex-col gap-1 rounded-[18px] border border-border bg-card p-4",
+        "flex flex-col gap-1 rounded-[20px] border border-border bg-card p-4",
         span && "col-span-2"
       )}
     >
@@ -375,19 +375,35 @@ function StatBox({
 
 function SidebarCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-[18px] border border-border bg-card p-5">
+    <section className="rounded-[20px] border border-border bg-card p-5">
       <h2 className="mb-3 text-sm font-semibold tracking-tight text-foreground">{title}</h2>
       {children}
     </section>
   );
 }
 
-function AboutTab({ overview }: { overview: ProfileOverview }) {
+function AboutTab({ overview, isOwn }: { overview: ProfileOverview; isOwn: boolean }) {
   const { profile, experiences, skills } = overview;
   const hasAny = profile?.bio || experiences.length > 0 || skills.length > 0;
   if (!hasAny) {
     return (
-      <EmptyState icon={Award} heading="Profil Belum Lengkap" message="Belum ada bio, pengalaman, atau skill yang ditambahkan." />
+      <div className="flex flex-col items-center gap-4 py-12 text-center">
+        <EmptyState
+          icon={Award}
+          heading="Profil Belum Lengkap"
+          message={
+            isOwn
+              ? "Tambahkan bio, pengalaman, dan skill agar profilmu lebih menonjol."
+              : "Pengguna ini belum menambahkan bio, pengalaman, atau skill."
+          }
+        />
+        {isOwn && (
+          <Button size="sm" className="gap-1.5" render={<Link href="/profile/edit" />}>
+            <Pencil className="size-4" />
+            Lengkapi Profil
+          </Button>
+        )}
+      </div>
     );
   }
   return (
@@ -446,7 +462,7 @@ function ProjectsTab({ projects }: { projects: ProfileProject[] }) {
           <Link
             key={fp.id}
             href={`/projects/${fp.id}`}
-            className="group flex flex-col overflow-hidden rounded-[18px] border border-border bg-card transition-colors hover:border-[#8bc34a]"
+            className="group flex flex-col overflow-hidden rounded-[20px] border border-border bg-card transition-colors hover:border-[#8bc34a]"
           >
             <ProjectThumb title={fp.title} imageUrl={fp.imageUrl} className="h-28 w-full" />
             <div className="flex flex-1 flex-col gap-2 p-4">
@@ -486,7 +502,7 @@ function PortfolioTab({ artifacts }: { artifacts: ProfileOverview["artifacts"] }
       {artifacts.map((a) => (
         <article
           key={a.id}
-          className="flex flex-col overflow-hidden rounded-[18px] border border-border bg-card"
+          className="flex flex-col overflow-hidden rounded-[20px] border border-border bg-card"
         >
           <div className="relative">
             <ProjectThumb title={a.project.title} imageUrl={a.project.imageUrl} className="h-32 w-full" />
@@ -518,7 +534,7 @@ function PortfolioTab({ artifacts }: { artifacts: ProfileOverview["artifacts"] }
 
 function ReviewsTab({ reviews, loading }: { reviews: UserReview[] | null; loading: boolean }) {
   if (loading || reviews === null) {
-    return <div className="h-32 animate-pulse rounded-[18px] bg-muted" />;
+    return <div className="h-32 animate-pulse rounded-[20px] bg-muted" />;
   }
   if (reviews.length === 0) {
     return <EmptyState icon={Star} heading="Belum Ada Ulasan" message="Ulasan dari mentor atau UMKM akan muncul di sini." />;
@@ -526,7 +542,7 @@ function ReviewsTab({ reviews, loading }: { reviews: UserReview[] | null; loadin
   return (
     <div className="flex flex-col gap-3">
       {reviews.map((r) => (
-        <article key={r.id} className="flex flex-col gap-2 rounded-[18px] border border-border bg-card p-5">
+        <article key={r.id} className="flex flex-col gap-2 rounded-[20px] border border-border bg-card p-5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <UserAvatar name={r.reviewer.name} className="size-9 text-sm" />
