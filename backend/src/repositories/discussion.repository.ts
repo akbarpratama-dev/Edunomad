@@ -55,6 +55,13 @@ export const discussionRepository = {
       include: {
         members: { include: memberUserSelect },
         _count: { select: { messages: true, views: true } },
+        // Opening post's author (topic "created by") — cheap first-message lookup.
+        messages: {
+          where: { parentId: null },
+          orderBy: { createdAt: "asc" },
+          take: 1,
+          select: { sender: { select: { id: true, name: true, role: true } } },
+        },
       },
       // Pinned topics float to the top, then most-recent activity.
       orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],

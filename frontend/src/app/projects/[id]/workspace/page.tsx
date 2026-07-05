@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { CalendarDays, Building2, GraduationCap, CalendarClock, Users, ArrowRight } from "lucide-react";
+import { CalendarDays, Building2, GraduationCap, CalendarClock, Users, ArrowRight, MessageSquare } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,7 +15,6 @@ import { ErrorState } from "@/components/common/ErrorState";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PillTabs } from "@/components/common/PillTabs";
 import { ProjectMembersPanel } from "@/components/project/ProjectMembersPanel";
-import { DiscussionTab } from "@/components/workspace/DiscussionTab";
 import { DeliverablesTab } from "@/components/workspace/DeliverablesTab";
 import { ContributionTab } from "@/components/workspace/ContributionTab";
 import { ReviewTab } from "@/components/workspace/ReviewTab";
@@ -33,16 +32,15 @@ import {
 type TabKey =
   | "overview"
   | "milestones"
-  | "discussion"
   | "deliverables"
   | "contributions"
   | "reviews"
   | "artifacts"
   | "members";
+// Diskusi is now its own page (/workspace/diskusi), not a tab.
 const TABS: { key: TabKey; label: string }[] = [
   { key: "overview", label: "Ringkasan" },
   { key: "milestones", label: "Milestone" },
-  { key: "discussion", label: "Diskusi" },
   { key: "deliverables", label: "Deliverables" },
   { key: "contributions", label: "Kontribusi" },
   { key: "reviews", label: "Review" },
@@ -53,6 +51,8 @@ const TABS: { key: TabKey; label: string }[] = [
 function WorkspaceInner() {
   const params = useParams();
   const id = params.id as string;
+  const wsPathname = usePathname();
+  const wsBase = wsPathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabKey>("overview");
@@ -85,23 +85,27 @@ function WorkspaceInner() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="app-reveal">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">
-            {project.title}
-          </h1>
-          <Badge variant={statusMeta.variant} className={statusMeta.className}>
-            {statusMeta.label}
-          </Badge>
+      <div className="app-reveal flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">
+              {project.title}
+            </h1>
+            <Badge variant={statusMeta.variant} className={statusMeta.className}>
+              {statusMeta.label}
+            </Badge>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">Workspace proyek — kolaborasi tim & progres.</p>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">Workspace proyek — kolaborasi tim & progres.</p>
+        <Button variant="outline" render={<Link href={`${wsBase}/${id}/workspace/diskusi`} />}>
+          <MessageSquare className="size-4" /> Buka Diskusi
+        </Button>
       </div>
 
       <PillTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Navigasi workspace" />
 
       {tab === "overview" && <OverviewTab project={project} />}
       {tab === "milestones" && <MilestonesTab project={project} />}
-      {tab === "discussion" && <DiscussionTab project={project} />}
       {tab === "deliverables" && <DeliverablesTab project={project} />}
       {tab === "contributions" && <ContributionTab project={project} />}
       {tab === "reviews" && <ReviewTab project={project} />}

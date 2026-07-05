@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import {
   MessagesSquare,
   Plus,
   CheckCircle2,
   Circle,
-  GraduationCap,
   Pin,
   PinOff,
 } from "lucide-react";
@@ -40,17 +41,14 @@ import {
 } from "@/services/discussionApi";
 import {
   projectApi,
+  PROJECT_STATUS_META,
   type ProjectDetail,
   type ProjectMember,
 } from "@/services/projectApi";
+import { Badge } from "@/components/ui/badge";
+import { ProjectThumb } from "@/components/artifact/shared";
+import { MessageSquare, Activity } from "lucide-react";
 import { DiscussionFeed } from "./DiscussionFeed";
-
-const ROLE_BADGE: Record<string, { label: string; className: string }> = {
-  SENIOR: { label: "Mentor", className: "bg-[#eef7d6] text-[#5f8c00]" },
-  BEGINNER: { label: "Mahasiswa", className: "bg-sky-100 text-sky-700" },
-  UMKM: { label: "UMKM", className: "bg-amber-100 text-amber-700" },
-  ADMIN: { label: "Admin", className: "bg-zinc-200 text-zinc-700" },
-};
 
 const CATEGORY_ORDER: DiscussionCategory[] = [
   "ANNOUNCEMENT",
@@ -88,6 +86,8 @@ function timeAgo(iso?: string) {
 
 export function DiscussionTab({ project }: { project: ProjectDetail }) {
   const appUser = useAuthStore((s) => s.appUser);
+  const pathname = usePathname();
+  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
   const [discussions, setDiscussions] = useState<Discussion[] | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -259,14 +259,96 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
               />
             )}
 
-            {/* Right rail (xl only) */}
+            {/* Right rail (xl only) — Informasi Proyek + Aktivitas + Milestone */}
             <aside className="hidden flex-col gap-4 xl:flex">
+              {/* Informasi Proyek */}
+              <section className="rounded-[20px] border border-border bg-card p-5">
+                <h3 className="mb-3 text-sm font-bold tracking-tight">Informasi Proyek</h3>
+                <ProjectThumb
+                  title={project.title}
+                  imageUrl={(project as ProjectDetail & { imageUrl?: string | null }).imageUrl}
+                  className="h-28 w-full rounded-xl"
+                />
+                <div className="mt-3 flex items-center gap-2">
+                  <p className="font-semibold tracking-tight text-foreground">{project.title}</p>
+                  {PROJECT_STATUS_META[project.status] && (
+                    <Badge
+                      variant={PROJECT_STATUS_META[project.status].variant}
+                      className={PROJECT_STATUS_META[project.status].className}
+                    >
+                      {PROJECT_STATUS_META[project.status].label}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">Bersama {project.umkm.name}</p>
+
+                <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Anggota Tim
+                </p>
+                <div className="mt-2 flex items-center">
+                  <div className="flex -space-x-2">
+                    {team.slice(0, 6).map((t) => (
+                      <UserAvatar
+                        key={t.id}
+                        name={t.name}
+                        className={cn("size-8 text-[11px] font-bold ring-2 ring-card", toneFor(t.id))}
+                      />
+                    ))}
+                  </div>
+                  {team.length > 6 && (
+                    <span className="ml-1 text-xs font-semibold text-muted-foreground">+{team.length - 6}</span>
+                  )}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 w-full"
+                  render={<Link href={`${base}/${project.id}/workspace`} />}
+                >
+                  Lihat Detail Proyek
+                </Button>
+              </section>
+
+              {/* Aktivitas Terbaru — derived from recent topic updates */}
+              <RailCard icon={<Activity className="size-4" />} title="Aktivitas Terbaru">
+                {(() => {
+                  const recent = [...(discussions ?? [])]
+                    .sort((a, b) => +new Date(b.updatedAt ?? 0) - +new Date(a.updatedAt ?? 0))
+                    .slice(0, 5);
+                  if (recent.length === 0)
+                    return <p className="text-xs text-muted-foreground">Belum ada aktivitas.</p>;
+                  return (
+                    <ul className="flex flex-col gap-3">
+                      {recent.map((d) => {
+                        const who = d.messages?.[0]?.sender?.name;
+                        return (
+                          <li key={d.id} className="flex items-start gap-2.5">
+                            <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg bg-[#eef7d6] text-[#5f8c00]">
+                              <MessageSquare className="size-3.5" />
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-xs text-foreground/90">
+                                {who ? <span className="font-semibold">{who}</span> : "Aktivitas"} pada{" "}
+                                <span className="font-medium">&ldquo;{d.title ?? "Diskusi"}&rdquo;</span>
+                              </p>
+                              <p className="text-[11px] text-muted-foreground">{timeAgo(d.updatedAt)}</p>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  );
+                })()}
+              </RailCard>
+
+              {/* Milestone Berikutnya */}
               <RailCard icon={<CheckCircle2 className="size-4" />} title="Milestone Berikutnya">
                 {project.milestones.length === 0 ? (
                   <p className="text-xs text-muted-foreground">Belum ada milestone.</p>
                 ) : (
                   <ul className="flex flex-col gap-3">
-                    {project.milestones.slice(0, 5).map((m) => {
+                    {project.milestones.slice(0, 4).map((m) => {
                       const done = m.status === "COMPLETED";
                       return (
                         <li key={m.id} className="flex items-start gap-2.5">
@@ -276,44 +358,13 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
                             <Circle className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                           )}
                           <div className="min-w-0 flex-1">
-                            <p
-                              className={cn(
-                                "text-sm",
-                                done ? "text-muted-foreground line-through" : "font-medium text-foreground"
-                              )}
-                            >
+                            <p className={cn("text-sm", done ? "text-muted-foreground line-through" : "font-medium text-foreground")}>
                               {m.title}
                             </p>
                             <p className="text-[11px] text-muted-foreground">
                               {new Date(m.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
                             </p>
                           </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </RailCard>
-
-              <RailCard icon={<GraduationCap className="size-4" />} title="Anggota Tim">
-                {team.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">Belum ada anggota.</p>
-                ) : (
-                  <ul className="flex flex-col gap-3">
-                    {team.map((t) => {
-                      const badge = ROLE_BADGE[t.role];
-                      return (
-                        <li key={t.id} className="flex items-center gap-2.5">
-                          <UserAvatar
-                            name={t.name}
-                            className={cn("size-8 shrink-0 text-[12px] font-bold", toneFor(t.id))}
-                          />
-                          <span className="flex-1 truncate text-sm font-medium">{t.name}</span>
-                          {badge && (
-                            <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", badge.className)}>
-                              {badge.label}
-                            </span>
-                          )}
                         </li>
                       );
                     })}
@@ -441,6 +492,7 @@ function DiscussionListCard({
 }) {
   const msgCount = discussion._count?.messages ?? 0;
   const cat = discussion.category ? DISCUSSION_CATEGORY_META[discussion.category] : null;
+  const author = discussion.messages?.[0]?.sender ?? null;
   // Pinned topics get a navy card; active adds a chartreuse ring on top.
   const dark = discussion.isPinned;
   return (
@@ -455,19 +507,22 @@ function DiscussionListCard({
       )}
     >
       <button onClick={onSelect} aria-pressed={active} className="flex w-full items-start gap-3 text-left">
-        <span
-          className={cn(
-            "grid size-10 shrink-0 place-items-center rounded-xl",
-            dark
-              ? "bg-white/10 text-white"
-              : active
-                ? "bg-[#d8f277] text-[#0b0b0b]"
-                : "bg-muted text-muted-foreground"
-          )}
-          aria-hidden="true"
-        >
-          <MessagesSquare className="size-5" />
-        </span>
+        {author ? (
+          <UserAvatar
+            name={author.name}
+            className={cn("size-10 shrink-0 text-[12px] font-bold ring-2", dark ? "ring-white/10" : "ring-card", toneFor(author.id))}
+          />
+        ) : (
+          <span
+            className={cn(
+              "grid size-10 shrink-0 place-items-center rounded-xl",
+              dark ? "bg-white/10 text-white" : active ? "bg-[#d8f277] text-[#0b0b0b]" : "bg-muted text-muted-foreground"
+            )}
+            aria-hidden="true"
+          >
+            <MessagesSquare className="size-5" />
+          </span>
+        )}
         <div className="min-w-0 flex-1">
           <p className={cn("flex items-center gap-1.5 truncate text-sm font-semibold", dark ? "text-white" : "text-foreground")}>
             {discussion.isPinned && (
@@ -482,7 +537,7 @@ function DiscussionListCard({
               </span>
             )}
             <span className={cn("text-[11px]", dark ? "text-white/60" : "text-muted-foreground")}>
-              {timeAgo(discussion.updatedAt) || "Aktif"}
+              {author ? `${author.name} · ` : ""}{timeAgo(discussion.updatedAt) || "Aktif"}
             </span>
             {/* Message count — bottom-right of the card. */}
             <span

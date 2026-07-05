@@ -182,6 +182,7 @@ export function BeginnerProjectBoard() {
   const { project, roleName, members, deliverables } = data;
   const activeMembers = members.filter((m) => m.status === "ACTIVE");
   const workspace = `/my-projects/${project.id}/workspace`;
+  const diskusi = `${workspace}/diskusi`;
   const teamAvatars = [
     ...(project.senior ? [project.senior.name] : []),
     ...activeMembers.map((m) => m.user.name),
@@ -265,7 +266,7 @@ export function BeginnerProjectBoard() {
                 </div>
               </div>
               <div className="flex shrink-0 gap-2">
-                <Button render={<Link href={workspace} />}>
+                <Button render={<Link href={diskusi} />}>
                   <MessageSquare className="size-4" /> Lihat Diskusi
                 </Button>
                 <Button

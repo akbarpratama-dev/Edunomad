@@ -58,6 +58,9 @@ export interface Discussion {
   members: DiscussionMember[];
   _count?: { messages: number; views?: number };
   updatedAt?: string;
+  createdAt?: string;
+  // Opening post author (topic creator) — first top-level message sender.
+  messages?: { sender: { id: string; name: string; role: string } }[];
 }
 
 // Phase 12.3 — curated reaction set (must match backend REACTION_EMOJIS).
