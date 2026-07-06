@@ -1,6 +1,38 @@
 # Decisions
 
 Date:
+2026-07-06c (Catatan Mentor + Kontribusi junior di portofolio)
+
+Decision (D-P13-3) — Surface ulasan mentor + ringkasan kontribusi di modal & kartu portofolio:
+User: portofolio harus menampilkan penjelasan mentor (rating+komentar, apakah junior berhasil membangun proyek) + "peran dan kontribusi membangun apa", agar terlihat semua orang yang berkunjung ke profil. Ulasan mentor = review SENIOR_TO_BEGINNER (rating+comment) — sudah jadi prasyarat generate sertifikat + tercetak di PDF ("CATATAN MENTOR") + tampil di tab "Feedback Mentor" (/artifacts/:projectId) + tab "Ulasan" profil, TAPI belum di modal/kartu portofolio.
+- BACKEND: `portfolio.service.buildPortfolioArtifacts` += `seniorReview {reviewerName, rating, comment}` (dari reviewRepository.listByProject filter SENIOR_TO_BEGINNER reviewee=user). `PortfolioArtifact` (frontend) += seniorReview; contributionSummary sudah ada.
+- FRONTEND: `PortfolioPreview` += contributionSummary + seniorReview; kedua mapper (pipelineDetail/portfolioArtifact) isi keduanya. Modal render 2 blok baru: "Kontribusi Saya di Proyek Ini" (contributionSummary) + "Catatan Mentor" (UserAvatar + StarRating + komentar italic). Kartu Sertifikat di ProfileView += cuplikan "Catatan Mentor" (MessageSquare + rating bintang + comment line-clamp-2).
+Reason: portofolio = bukti + endorsement mentor; harus tampil publik di profil.
+Impact: tsc 0 backend+frontend. Browser-verified (p4-beginner /profile): kartu snippet ★4.0 "revisi" + modal blok Kontribusi ("Built landing + nav") & Catatan Mentor (Test Senior ★4 "revisi"). NO migration. Data public-safe (rating+komentar+nama mentor).
+
+Date:
+2026-07-06b (Portfolio dilipat ke dalam Profil — re-scopes D-P13-1)
+
+Decision (D-P13-2) — Portfolio = sub-section Profil, BUKAN halaman/endpoint publik terpisah:
+Sesaat setelah D-P13-1 dibangun, user: "hapus route /portfolio/:id nya, portofolio tampil di page profile aja, kyk sub profile. klo gini kyk malah bikin profile baru tapi hanya khusus buat porto." Jadi standalone public page + endpoint publik DIHAPUS; portfolio jadi bagian dari profil.
+DIHAPUS: `app/portfolio/[id]/page.tsx`, `components/portfolio/PublicPortfolioView.tsx`, backend `modules/portfolio/`, `routes/portfolio.routes.ts`, `validators/portfolio.validator.ts`, `portfolioApi.getPublic`+`PublicPortfolio` type; unmount `/portfolio` di routes/index.ts. (endpoint publik lama kini 404 — verified).
+DIPINDAH/DIPAKAI ULANG: logika komposisi artifact kaya → `backend/src/services/portfolio.service.ts` sekarang export `buildPortfolioArtifacts(userId)` (bukan getPublicPortfolio). `user.service.getProfileOverview` pakai itu utk `artifacts` (dulu `listVerifiedArtifacts` shape tipis) → tab Sertifikat di profil dapat data kaya (roleName, technologies, team, senior, umkm, dates). Tetap NO migration. `artifactRepository.listPortfolioArtifacts` tetap (dipakai builder).
+FRONTEND: `profileApi.ProfileArtifact` = alias `PortfolioArtifact` (rich); `ProfileOverview.artifacts: PortfolioArtifact[]`. ProfileView `PortfolioTab` → kartu kaya (roleName+tech chips) + tombol "Preview" → buka `PortfolioPreviewDialog` (mapper previewFromPortfolioArtifact), primary "Verifikasi Sertifikat" → /verify/:code. `PortfolioPreviewDialog` + `portfolioApi` (types+durationWeeks) + ProfileLink TETAP (dipakai). Tombol dead lama di /artifacts (Bagikan) & /artifacts/:projectId (Lihat di Portofolio) → sekarang "Lihat di Profil" → `/profile`; modal /artifacts primary → /verify/:code. Subtitle modal diperbaiki (hapus "halaman portofolio publik").
+Reason: user tak mau profil-kedua khusus porto; portofolio = tab Sertifikat di dalam profil (lebih sederhana, hormati MVP + hindari duplikasi).
+Impact: "Public Portfolio Pages" (standalone) TETAP OUT OF SCOPE (CLAUDE.md note dikoreksi). Portfolio kini in-profile. tsc 0 backend+frontend. Browser-verified (p4-beginner): /profile tab Sertifikat kartu kaya + modal buka penuh (Peran/Kontribusi/Status/Durasi/Teknologi/Tim ProfileLinks/QR→/verify); /portfolio/:id lama → not-found. Konektivitas #1 (ProfileLink) TETAP jalan.
+
+Date:
+2026-07-06 (Portfolio & Profile Connectivity — re-scopes D-P8-5)
+
+Decision (D-P13-1) — Public Portfolio Pages NOW IN SCOPE + profile connectivity + Preview modal:
+User audit: "cek apa yg kurang, apakah semua sudah saling nyambung (portfolio/sertifikat/proyek) dgn semua role?" Ditemukan 2 putus: (1) `/users/:id` (profil publik authed, sudah ada sejak Phase 10) ORPHANED — tak ada satu pun link masuk; (2) `/portfolio/:id` DEAD LINK (tombol ada, halaman+backend belum). Via AskUserQuestion user pilih **Keduanya** + **bangun halaman `/portfolio/:id` sekarang** (membalik D-P8-5 yg menunda).
+Backend: module `portfolio` baru — `GET /portfolio/:userId` PUBLIC (no auth, pola `/verify`): portfolio.service (getPublicPortfolio) + controller + routes + validator; repo `artifactRepository.listPortfolioArtifacts` (rich include). Return: user publik (id/name/role/headline/bio/photo — TANPA email/phone), stats (verifiedArtifacts, completedProjects), artifacts[] tiap-artifact detail (roleName, technologies, contributionApproved, project+dates+category, umkm, senior[verifier], team). NO migration (artifact rows = verified showcase). Verified curl: 200 publik / 404 not-found / 400 invalid-uuid.
+Frontend: (a) `common/ProfileLink.tsx` (+profileHref) — wrap nama/avatar → `/users/:id`; wired di ProjectMembersPanel, projects/[id]/applicants (+my-projects re-export), projects/[id]/manage (senior), reviews page, ProfileView reviews tab, DiscussionFeed author, artifacts/[projectId] Team. (b) `portfolio/PortfolioPreviewDialog.tsx` — modal "Preview di Portofolio" (dari gambar referensi user): project image + tech, Peran/Kontribusi/Status/Tanggal Selesai/Durasi, Teknologi, Tim Proyek (Mentor/UMKM/Tim cards, tiap-anggota ProfileLink+verified check), blok verifikasi (Diverifikasi Mentor/UMKM/Artifact Resmi + QR `qrcode.react` → /verify/:code), tombol Tutup / primary (Lihat Detail Portofolio | Verifikasi Sertifikat). Mapper previewFromPipelineDetail (own /artifacts, fetch pipelineDetail on-open) + previewFromPortfolioArtifact (public). (c) `portfolio/PublicPortfolioView.tsx` + page `app/portfolio/[id]/page.tsx` PUBLIC (no AuthGuard, top-bar wordmark+Masuk, hero+stats, grid sertifikat → modal). (d) tombol dead `/portfolio/:userId` di /artifacts (Bagikan) + /artifacts/:projectId (Lihat di Portofolio) kini live; kartu /artifacts += "Preview di Portofolio" (item.artifact only).
+Dep baru frontend: `qrcode.react@^4.2.0` (Context7-checked QRCodeSVG). tsc 0 backend+frontend. Browser-verified public page + modal (Test Beginner, EDN-2026-000001): hero/stats, modal semua field benar, team ProfileLinks → /users/:id, QR → /verify. Console 0 err.
+Reason: user eksplisit minta keduanya + halaman publik; menutup gap konektivitas lintas-role.
+Impact: CLAUDE.md OUT OF SCOPE "Public Portfolio Pages" → NOW IN SCOPE (amend D-P8-5). CV PDF TETAP out. RLS artifacts masih off — endpoint publik baca via Express (aman, hanya expose verified+identity publik). Revisit RLS pra-prod (Phase 11).
+
+Date:
 2026-07-02 (Phase 8 — Artifact page redesign + Public Portfolio + project image)
 
 Decision (D-P8-4) — Derived artifact status (no schema change):

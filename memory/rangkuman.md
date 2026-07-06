@@ -5,6 +5,18 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-07-06 (Portfolio & Profile Connectivity)
+
+Prompt: "cek apa yg kurang? apakah semua sudah saling nyambung kyk portfolio, sertifikat, project dll dengan semua role lainnya" → lalu "oke buat no 1 dengan ui dan menyajikan info deskripsi seperti ini [gambar modal Preview di Portofolio]". Via AskUserQuestion user pilih: bangun KEDUANYA (profil connectivity + modal) + bangun halaman publik /portfolio/:id sekalian.
+
+Hasil: Audit menemukan 2 putus konektivitas (/users/:id ORPHANED, /portfolio/:id DEAD LINK). Tahap 1 (D-P13-1): ProfileLink → nama/avatar klik ke /users/:id (member panel, pelamar, manage, reviews, diskusi, artifact team) + backend PUBLIC `GET /portfolio/:userId` + modal "Preview di Portofolio" (QR qrcode.react) + halaman publik /portfolio/[id].
+Tahap 2 (D-P13-2, REVISI atas prompt lanjutan user "hapus route /portfolio/:id, portofolio tampil di page profile aja kyk sub profile"): halaman + endpoint publik DIHAPUS; portofolio jadi tab "Sertifikat" DI DALAM profil — kartu kaya (role+tech) + tombol Preview buka modal yg sama; data diperkaya lewat `portfolio.service.buildPortfolioArtifacts` yg dipakai `getProfileOverview`. Tombol lama → "Lihat di Profil"/verify. ProfileLink connectivity tetap. "Public Portfolio Pages" standalone TETAP out of scope (CLAUDE.md dikoreksi).
+Tahap 3 (D-P13-3, prompt user "tambahkan blok Catatan Mentor rating+komentar ke modal + cuplikan di kartu, agar dilihat semua orang saat berkunjung ke profil, seperti peran dan kontribusi membangun apa"): modal + kartu Sertifikat kini tampilkan "Catatan Mentor" (rating+komentar review SENIOR_TO_BEGINNER) + "Kontribusi Saya di Proyek Ini" (contributionSummary). Backend buildPortfolioArtifacts += seniorReview.
+tsc 0 backend+frontend; Playwright p4-beginner verified (/profile tab Sertifikat + modal penuh + Catatan Mentor ★4 "revisi" + Kontribusi "Built landing + nav"; /portfolio/:id lama → not-found); console 0 err. NEXT: commit + merge → main; Phase 11 QA/RLS. Belum di-commit saat entry ditulis.
+
+---
+
+Date:
 2026-07-05 (Pisah Diskusi jadi page + sidebar proyek)
 
 Prompt:

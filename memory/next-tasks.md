@@ -1,4 +1,26 @@
 ============================================================
+⚡ ACTIVE HANDOFF (2026-07-06 #14) — PORTFOLIO (fold ke PROFIL) + PROFILE CONNECTIVITY SELESAI (branch feature/portfolio-profile-connectivity). NEXT = commit + merge → main, lalu PHASE 11 QA/RLS
+============================================================
+Branch `feature/portfolio-profile-connectivity` (dari main df2b5e8). D-P13-1 lalu DIREVISI D-P13-2 (user minta portofolio jadi sub-section profil, BUKAN halaman terpisah). BELUM di-commit — working tree.
+
+⚠️ REVISI FINAL (D-P13-2): TIDAK ada halaman/endpoint `/portfolio/:id` publik (dibangun lalu dihapus hari yg sama). Portofolio = tab "Sertifikat" DI DALAM profil (`/profile`, `/users/:id`), kartu kaya + modal Preview. Data via `GET /users/:id/profile-overview` (artifacts diperkaya lewat `portfolio.service.buildPortfolioArtifacts`). File final yg ADA: backend {services/portfolio.service.ts [buildPortfolioArtifacts], services/user.service.ts [pakai builder], repositories/artifact.repository.ts [+listPortfolioArtifacts]}; frontend {components/common/ProfileLink.tsx, components/portfolio/PortfolioPreviewDialog.tsx, services/portfolioApi.ts [types+durationWeeks saja], +wiring}. File yg DIHAPUS: app/portfolio/*, components/portfolio/PublicPortfolioView.tsx, backend modules/portfolio + routes/portfolio.routes + validators/portfolio.validator.
+
+✅ SELESAI & verified: Menutup gap konektivitas lintas-role (audit user). 
+- **Profile connectivity (#1):** `frontend/src/components/common/ProfileLink.tsx` (+`profileHref`) → nama/avatar klik ke `/users/:id`. Wired: ProjectMembersPanel, projects/[id]/applicants (my-projects/applicants = re-export, ikut), projects/[id]/manage (senior applicant), reviews page, ProfileView reviews tab, DiscussionFeed author, artifacts/[projectId] Team.
+- **Public portfolio (#2, membalik D-P8-5):** backend module `portfolio` — `GET /portfolio/:userId` PUBLIC (services/portfolio.service.ts, modules/portfolio/portfolio.controller.ts, routes/portfolio.routes.ts, validators/portfolio.validator.ts, +artifact.repository.listPortfolioArtifacts). Mount di routes/index.ts. NO migration. Return user publik(no email/phone)+stats+artifacts[rich]. Verified curl 200/404/400.
+- **Frontend portfolio:** `components/portfolio/PortfolioPreviewDialog.tsx` (modal "Preview di Portofolio" dari gambar user + `qrcode.react`@4.2.0 QR), `components/portfolio/PublicPortfolioView.tsx`, `app/portfolio/[id]/page.tsx` (PUBLIC no AuthGuard), `services/portfolioApi.ts`. Kartu /artifacts += "Preview di Portofolio" + tombol dead lama kini live.
+- tsc 0 (backend+frontend). Playwright: public page /portfolio/:id + modal render benar (Test Beginner, EDN-2026-000001), team → /users/:id, QR → /verify. Console 0 err.
+- CLAUDE.md OUT OF SCOPE diamandemen (Public Portfolio Pages NOW IN SCOPE, D-P8-5→D-P13-1). CV PDF tetap out.
+
+➡️ QUICK ACTION berikutnya (urut):
+1. `git add -A && git commit` (Conventional Commit, Co-Authored-By Claude) di branch feature/portfolio-profile-connectivity.
+2. Merge → main (--no-ff) + push origin/main (repo private). Pertimbangkan buka PR.
+3. Lanjut **PHASE 11 — QA menyeluruh + review RLS pra-produksi** (RLS masih off ~semua tabel kecuali discussion+notifications; endpoint /portfolio publik baca via Express — aman tapi catat di review RLS).
+Test fixtures: p4-beginner/senior/umkm + p43-admin @test.edunomad.com pw TestPass123!; siap-tes portofolio-in-profil: login p4-beginner → `/profile` tab "Sertifikat" → kartu → "Preview" (artifact EDN-2026-000001, user 18318fbf-9e1a-497b-9ed7-9cd9e2a5a2e6); project a1a1a1a1-…0005. (URL lama /portfolio/:id sekarang 404 — memang dihapus.)
+⚠️ Servers dev backend(3001)+frontend(3000) MASIH NYALA di akhir sesi (background). Matikan bila perlu.
+
+--- arsip handoff #13 ---
+============================================================
 ⚡ ACTIVE HANDOFF (2026-07-04 #13) — PHASE 9 MERGED → main. NEXT = PHASE 10 Profiles & Polish
 ============================================================
 main = **01fcbe7** (Phase 0–9 + PHASE 12, semua MERGED --no-ff & PUSHED origin/main). Branch feature/phase-9-notifications sudah masuk main (WIP lokal, tak pernah di-remote).

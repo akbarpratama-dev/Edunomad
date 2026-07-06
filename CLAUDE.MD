@@ -394,7 +394,7 @@ Never implement:
 - Wallet
 - Gamification
 - Achievement System
-- Public Portfolio Pages
+- Public Portfolio Pages (standalone page REMAINS OUT OF SCOPE; portfolio now lives INSIDE the profile page — see D-P8-5 amendment below)
 - WhatsApp Integration
 - Video Calls
 - Voice Calls
@@ -406,6 +406,8 @@ Unless explicitly approved.
 NOTE (2026-07-02): Public Portfolio Pages stay OUT OF SCOPE for now — deferred to their own later phase. The artifact pages only expose placeholder BUTTONS ("Lihat di Portofolio" / "Bagikan Profil Portofolio") that link to the future `/portfolio/:id` route; the page and its backend are NOT built yet. See decision D-P8-5.
 
 NOTE (2026-07-05, amends D-P8-5): The Phase 10 profile page (`/profile`, `/users/:id`) DOES include a "Sertifikat" tab showing the user's own VERIFIED certificates (reusing existing artifact data) — user-approved. This is the in-app profile tab, NOT the standalone public portfolio page `/portfolio/:id`, which remains deferred. CV PDF download stays OUT OF SCOPE (rendered as a disabled placeholder). See decision D-P10-1.
+
+NOTE (2026-07-06, amends D-P8-5, user-approved): Portfolio is now surfaced as a SUB-SECTION of the profile, NOT a standalone public page. The "Sertifikat" tab on the profile (`/profile`, `/users/:id`) shows the user's VERIFIED certificates as rich cards; clicking one opens a "Preview di Portofolio" modal (per user reference design: role, contribution %, status, dates, tech, team, verification + scannable QR → `/verify/:code`). Data is folded into `GET /users/:id/profile-overview` (enriched `artifacts`) — there is NO standalone `/portfolio/:id` page and NO separate public `/portfolio/:userId` endpoint (both were built 2026-07-06 then REMOVED same day per user: "portofolio tampil di page profile aja, kyk sub profile", D-P13-2). Also wired profile connectivity: names/avatars across member lists, applicants, reviews, discussion authors, and the certificate team sections now link to `/users/:id`. The old "Bagikan/Lihat di Portofolio" buttons now point to `/profile`. CV PDF download STAYS OUT OF SCOPE. See decisions D-P13-1 (build) + D-P13-2 (fold into profile).
 
 ⸻
 

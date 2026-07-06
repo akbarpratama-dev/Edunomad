@@ -14,6 +14,7 @@ import { ListSkeleton } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { EmptyState } from "@/components/common/EmptyState";
 import { UserAvatar } from "@/components/common/UserAvatar";
+import { ProfileLink } from "@/components/common/ProfileLink";
 import { ApiError } from "@/lib/apiClient";
 import { projectApi, type ProjectDetail } from "@/services/projectApi";
 import {
@@ -117,19 +118,19 @@ function Content() {
                 className="app-reveal flex flex-col gap-3 rounded-[20px] border border-border bg-card p-5"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex min-w-0 items-start gap-3">
+                  <ProfileLink userId={app.beginner.id} className="flex min-w-0 items-start gap-3 hover:no-underline">
                     <UserAvatar
                       name={app.beginner.name}
                       className="size-11 shrink-0 bg-sky-200 text-sm font-bold text-sky-900"
                     />
                     <div className="min-w-0">
-                      <p className="font-semibold tracking-tight text-foreground">{app.beginner.name}</p>
+                      <p className="font-semibold tracking-tight text-foreground hover:text-[#5f8c00]">{app.beginner.name}</p>
                       <p className="text-sm text-muted-foreground">
                         Peran: {app.projectRole.roleName}
                         {app.beginner.profile?.headline ? ` · ${app.beginner.profile.headline}` : ""}
                       </p>
                     </div>
-                  </div>
+                  </ProfileLink>
                   <StatusBadge status={app.status} />
                 </div>
                 {app.beginner.userSkills.length > 0 && (

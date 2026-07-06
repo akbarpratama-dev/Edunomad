@@ -1,7 +1,9 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-07-05. main = **c1c20fe** (Phase 9 + Diskusi-page-split, pushed origin/main).
+> Last updated: 2026-07-06 (D-P13-1→2→3). WORKING BRANCH = **feature/portfolio-profile-connectivity** (dari main df2b5e8, BELUM di-commit/merge). main terakhir = df2b5e8 (Phase 10 selesai, pushed).
+> **PORTFOLIO (fold ke PROFIL) + PROFILE CONNECTIVITY SELESAI (D-P13-1 → DIREVISI D-P13-2)** — jawaban audit user "portfolio/sertifikat/proyek sudah saling nyambung lintas role?". 2 putus ditutup: (1) `/users/:id` ORPHANED → `common/ProfileLink.tsx` bikin nama/avatar klik ke profil di ProjectMembersPanel, applicants, manage(senior), reviews, ProfileView reviews, DiscussionFeed author, artifacts/[projectId] Team. (2) Portofolio → dibangun sbg halaman publik dulu, TAPI user minta "portofolio tampil di page profile aja kyk sub profile" → **halaman/endpoint publik /portfolio/:id DIHAPUS**; portofolio kini = tab "Sertifikat" DI DALAM profil (`/profile`,`/users/:id`): kartu KAYA (role+tech) + tombol "Preview" → modal `PortfolioPreviewDialog` (Peran/Kontribusi/Status/Durasi/Teknologi/Tim ProfileLinks + QR qrcode.react@4.2.0 → /verify/:code). Data via `GET /users/:id/profile-overview` (artifacts diperkaya `portfolio.service.buildPortfolioArtifacts`). Tombol lama /artifacts → "Lihat di Profil"→/profile. **D-P13-3:** modal + kartu Sertifikat kini juga menampilkan **Catatan Mentor** (rating+komentar SENIOR_TO_BEGINNER) + **Kontribusi Saya** (contributionSummary — "membangun apa") biar publik lihat. NO migration. tsc 0 backend+frontend; Playwright p4-beginner verified (/profile tab Sertifikat + modal + Catatan Mentor ★4 "revisi" + Kontribusi "Built landing + nav"; /portfolio/:id lama → not-found); console 0 err. "Public Portfolio Pages" standalone TETAP OUT OF SCOPE. ➡️ NEXT = commit + merge → main, lalu Phase 11 QA/RLS. Dev servers backend(3001)+frontend(3000) masih nyala.
+> --- arsip: main = **c1c20fe** (Phase 9 + Diskusi-page-split, pushed origin/main).
 > **Diskusi dipisah** jadi route `/my-projects/:id/workspace/diskusi` (bukan tab lagi); workspace punya tombol "Buka Diskusi". Diskusi page sidebar: Informasi Proyek (cover+status+Bersama+avatar stack+Lihat Detail Proyek→workspace) + Aktivitas Terbaru + Milestone Berikutnya. List card tampil author (backend listGroupForUser include first-message sender). BeginnerProjectBoard "Lihat Diskusi"→diskusi page. build 0, tsc 0.
 > --- arsip: main = **01fcbe7** (Phase 9 Notifications MERGED --no-ff & pushed origin/main).
 > **PHASE 9 SELESAI:** notification module + 10 trigger site + Realtime (RLS SELECT-only own + publication) + frontend NotificationBell dropdown + NotificationProvider (layout, bootstrap+subscribe+toast) + /notifications page. E2E verified (realtime badge live, mark-all, trigger REVIEW_RECEIVED). NO migration (tabel ada 0.2.11). backend build 0, frontend tsc 0. ➡️ NEXT = **PHASE 10** (profil /profile+/profile/edit+/users/:id, portofolio publik /portfolio/:id, static/error pages help/privacy/terms+not-found+error, /auth/forgot-password, admin project monitoring + senior replacement). Lalu Phase 11 QA + review RLS pra-prod (RLS masih disabled di ~semua tabel kecuali discussion+notifications).
@@ -81,29 +83,41 @@ DRAFT â PENDING_REVIEW â RECRUITING (approve) / REJECTED â ACTIVE
 ## 📌 NEXT-SESSION INIT PROMPT
 
 ```
-Lanjutkan EduNomad: PHASE 10 — Dashboards, Profiles & Polish.
-Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-07-04 #13"
-+ task-breakdown §10 + docs 08 (UI) + 06 (RBAC portfolio D-P8-5).
+Lanjutkan EduNomad: COMMIT + MERGE Portfolio & Profile Connectivity, lalu PHASE 11 (QA + RLS pra-prod).
+Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-07-06 #14"
++ decisions.md D-P13-1.
 
-main = 01fcbe7 (Phase 0–9 + PHASE 12, semua MERGED --no-ff & pushed origin/main). PHASE 9 Notifications
-SELESAI (module + 10 trigger + Realtime + bell dropdown + /notifications + NotificationProvider). Dashboards
-role sudah ada (beginner bento, dll). NEXT sisa Phase 10:
-(1) Profil: /profile (My Profile), /profile/edit (RHF+Zod, pakai PUT /users/me yang SUDAH ADA), /users/:id
-    (lihat profil orang, pakai GET /users/:id + /users/:id/portfolio yang SUDAH ADA).
-(2) Portofolio publik /portfolio/:id (D-P8-5, dulu ditunda; tombol placeholder SUDAH nempel di sertifikat) —
-    perlu GET /portfolio/:userId PUBLIC (belum dibuat) + halaman publik. Cek CLAUDE.md OUT OF SCOPE (hapus
-    "Public Portfolio Pages" saat benar-benar dibangun, sesuai izin user D-P8-5).
-(3) Static/error pages: /help /privacy /terms (footer), not-found.tsx + error.tsx global, /auth/forgot-password
-    (login nge-link ke sini). Ini quick-win hilangkan 404.
-(4) Admin: /admin/projects/monitoring + admin senior replacement.
+WORKING BRANCH = feature/portfolio-profile-connectivity (dari main df2b5e8, BELUM di-commit). Semua perubahan
+Portfolio & Profile Connectivity SELESAI & verified (tsc 0 backend+frontend, curl 200/404/400, Playwright
+public page+modal, console 0 err) tapi masih di working tree.
 
-Dev: backend :3001 (npm run dev), frontend :3000. tsc TS2882 CSS-ambient transient saat .next/types regen
-(hapus .next/types/app/<deleted> kalau ada page dihapus) → re-run. Deps tak lengkap → npm cache clean --force
-&& rm -rf node_modules package-lock.json && npm install. Test users p4-beginner/senior/umkm + p43-admin
-@test.edunomad.com pw TestPass123!; project ACTIVE a1a1a1a1-0000-4000-8000-000000000005. base-ui
-DropdownMenuTrigger TANPA asChild. Verify per fitur + tsc 0 + console 0. Context7 MCP sebelum kode
-library/framework. .env* sandboxed. RLS masih disabled ~semua tabel (kecuali discussion+notifications) —
-review sebelum prod. Setelah selesai: commit + merge → main.
+QUICK ACTION (urut):
+(1) Review `git status` / `git diff` di branch feature/portfolio-profile-connectivity, lalu
+    `git add -A && git commit` (Conventional Commit + Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>).
+    File utama (final, pasca D-P13-2): backend {services/portfolio.service [buildPortfolioArtifacts],
+    services/user.service [getProfileOverview pakai builder], repositories/artifact.repository +listPortfolioArtifacts};
+    frontend {components/common/ProfileLink, components/portfolio/PortfolioPreviewDialog, services/portfolioApi
+    [types+durationWeeks], profileApi [ProfileArtifact=PortfolioArtifact], ProfileView [Sertifikat tab kaya+modal],
+    +wiring di ProjectMembersPanel/applicants/manage/reviews/DiscussionFeed/artifacts, package.json +qrcode.react}.
+    (Note: git status akan tampil DELETE utk app/portfolio/*, PublicPortfolioView, backend modules/portfolio +
+    routes/portfolio.routes + validators/portfolio.validator — itu memang dihapus, jangan di-restore.)
+(2) Merge --no-ff → main + push origin/main (private). Pertimbangkan PR.
+(3) PHASE 11 — QA menyeluruh + review RLS pra-produksi. RLS masih OFF ~semua tabel (kecuali discussion+
+    notifications). CATAT: profil-overview + tab Sertifikat baca artifacts via Express (RLS off) — aman krn
+    hanya expose verified artifacts, tapi masukkan ke review RLS. (TIDAK ada lagi endpoint publik /portfolio.)
+
+Dev: backend :3001 + frontend :3000 MASIH NYALA (background) dari sesi lalu — cek/pakai ulang atau restart.
+tsc TS2882 CSS-ambient transient saat .next/types regen → re-run. Test users p4-beginner/senior/umkm +
+p43-admin @test.edunomad.com pw TestPass123!; project ACTIVE a1a1a1a1-…0005. Portofolio-in-profil siap-tes:
+login p4-beginner → /profile tab "Sertifikat" → kartu → "Preview" (artifact EDN-2026-000001). URL lama
+/portfolio/:id sekarang 404 (dihapus, D-P13-2). Context7 MCP sebelum kode library. .env* sandboxed.
+Verify per fitur + tsc 0 + console 0.
+
+=== arsip init prompt #13 (Phase 10, SELESAI) ===
+Lanjutkan EduNomad: PHASE 10 — Dashboards, Profiles & Polish. [SELESAI 2026-07-05, main df2b5e8:
+profil /profile+/profile/edit+/users/:id, static/error pages, forgot/reset-password, admin project monitoring
++ senior replacement, profile sub-resource mgmt. Portofolio publik /portfolio/:id waktu itu MASIH deferred —
+sekarang SUDAH dibangun di #14.]
 
 === arsip init prompt #10 (Phase 12, SELESAI & merged) ===
 Lanjutkan EduNomad: PHASE 12 — Discussion Forum Upgrade (lanjut sub-phase 12.2+).

@@ -21,13 +21,19 @@ import {
   Sparkles,
   Briefcase,
   MessageSquare,
+  Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/common/UserAvatar";
 import { EmptyState } from "@/components/common/EmptyState";
+import { ProfileLink } from "@/components/common/ProfileLink";
 import { ProjectThumb } from "@/components/artifact/shared";
+import {
+  PortfolioPreviewDialog,
+  previewFromPortfolioArtifact,
+} from "@/components/portfolio/PortfolioPreviewDialog";
 import {
   SKILL_LEVEL_PCT,
   SKILL_LEVEL_LABEL,
@@ -35,6 +41,7 @@ import {
   type ProfileOverview,
   type ProfileProject,
 } from "@/services/profileApi";
+import type { PortfolioArtifact } from "@/services/portfolioApi";
 import { reviewApi, type UserReview } from "@/services/reviewApi";
 import type { Role } from "@/types/user";
 
@@ -488,6 +495,9 @@ function ProjectsTab({ projects }: { projects: ProfileProject[] }) {
 }
 
 function PortfolioTab({ artifacts }: { artifacts: ProfileOverview["artifacts"] }) {
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState<PortfolioArtifact | null>(null);
+
   if (artifacts.length === 0) {
     return (
       <EmptyState
@@ -497,38 +507,91 @@ function PortfolioTab({ artifacts }: { artifacts: ProfileOverview["artifacts"] }
       />
     );
   }
+
+  const openPreview = (a: PortfolioArtifact) => {
+    setActive(a);
+    setOpen(true);
+  };
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {artifacts.map((a) => (
-        <article
-          key={a.id}
-          className="flex flex-col overflow-hidden rounded-[20px] border border-border bg-card"
-        >
-          <div className="relative">
-            <ProjectThumb title={a.project.title} imageUrl={a.project.imageUrl} className="h-32 w-full" />
-            <Badge className="absolute left-2 top-2 gap-1 border-emerald-300 bg-emerald-50 text-emerald-700" variant="outline">
-              <ShieldCheck className="size-3" />
-              Terverifikasi
-            </Badge>
-          </div>
-          <div className="flex flex-1 flex-col gap-2 p-4">
-            <Badge variant="outline" className="w-fit text-[11px]">{a.project.category.name}</Badge>
-            <p className="font-semibold leading-tight tracking-tight text-foreground">{a.project.title}</p>
-            <p className="text-xs text-muted-foreground">
-              {a.artifactCode} · Diterbitkan {fmtDate(a.issuedAt)}
-            </p>
-            <a
-              href={a.verificationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 inline-flex w-fit items-center gap-1 text-sm font-medium text-[#5f8c00] hover:underline"
+    <>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {artifacts.map((a) => (
+          <article
+            key={a.id}
+            className="flex flex-col overflow-hidden rounded-[20px] border border-border bg-card"
+          >
+            <button
+              type="button"
+              onClick={() => openPreview(a)}
+              className="relative text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Verifikasi <ExternalLink className="size-3.5" />
-            </a>
-          </div>
-        </article>
-      ))}
-    </div>
+              <ProjectThumb title={a.project.title} imageUrl={a.project.imageUrl} className="h-32 w-full" />
+              <Badge className="absolute left-2 top-2 gap-1 border-emerald-300 bg-emerald-50 text-emerald-700" variant="outline">
+                <ShieldCheck className="size-3" />
+                Terverifikasi
+              </Badge>
+            </button>
+            <div className="flex flex-1 flex-col gap-2 p-4">
+              <Badge variant="outline" className="w-fit text-[11px]">{a.project.category.name}</Badge>
+              <p className="font-semibold leading-tight tracking-tight text-foreground">{a.project.title}</p>
+              <p className="text-xs text-muted-foreground">
+                {a.roleName ? `${a.roleName} · ` : ""}
+                {a.artifactCode} · Diterbitkan {fmtDate(a.issuedAt)}
+              </p>
+              {a.technologies.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {a.technologies.slice(0, 4).map((t) => (
+                    <span key={t} className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {a.seniorReview && (
+                <div className="rounded-lg border border-[#cfe89a] bg-[#f6fbe8] px-2.5 py-2">
+                  <div className="flex items-center gap-1.5">
+                    <MessageSquare className="size-3.5 text-[#5f8c00]" />
+                    <span className="text-[11px] font-semibold text-[#5f8c00]">Catatan Mentor</span>
+                    <span className="ml-auto inline-flex items-center gap-0.5 text-[11px] font-medium text-amber-600">
+                      <Star className="size-3 fill-amber-400 text-amber-400" />
+                      {a.seniorReview.rating.toFixed(1)}
+                    </span>
+                  </div>
+                  {a.seniorReview.comment && (
+                    <p className="mt-1 line-clamp-2 text-xs italic text-foreground/75">
+                      “{a.seniorReview.comment}”
+                    </p>
+                  )}
+                </div>
+              )}
+              <div className="mt-auto flex items-center gap-2 pt-2">
+                <Button size="sm" className="flex-1" onClick={() => openPreview(a)}>
+                  <Eye className="size-4" /> Preview
+                </Button>
+                <a
+                  href={a.verificationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-sm font-medium text-[#5f8c00] hover:bg-muted"
+                  title="Verifikasi"
+                >
+                  <ExternalLink className="size-3.5" />
+                </a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <PortfolioPreviewDialog
+        open={open}
+        onOpenChange={setOpen}
+        preview={active ? previewFromPortfolioArtifact(active) : null}
+        primaryHref={active ? `/verify/${active.artifactCode}` : null}
+        primaryLabel="Verifikasi Sertifikat"
+      />
+    </>
   );
 }
 
@@ -547,7 +610,9 @@ function ReviewsTab({ reviews, loading }: { reviews: UserReview[] | null; loadin
             <div className="flex items-center gap-2.5">
               <UserAvatar name={r.reviewer.name} className="size-9 text-sm" />
               <div>
-                <p className="text-sm font-semibold text-foreground">{r.reviewer.name}</p>
+                <ProfileLink userId={r.reviewer.id} className="text-sm font-semibold text-foreground">
+                  {r.reviewer.name}
+                </ProfileLink>
                 <p className="text-xs text-muted-foreground">{r.project.title}</p>
               </div>
             </div>

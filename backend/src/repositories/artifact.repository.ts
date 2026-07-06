@@ -39,6 +39,48 @@ export const artifactRepository = {
     });
   },
 
+  // Rich payload for the PUBLIC portfolio (GET /portfolio/:userId) — an artifact
+  // row only exists once a certificate is issued, so every row here is a
+  // verified showcase item. Pulls the extra project fields (description, image,
+  // dates, category) + the active/completed team the profile card needs, in one
+  // query. Technologies + the beginner's own role are composed in the service.
+  listPortfolioArtifacts(beginnerId: string) {
+    return prisma.artifact.findMany({
+      where: { beginnerId },
+      orderBy: { issuedAt: "desc" },
+      select: {
+        id: true,
+        artifactCode: true,
+        verificationUrl: true,
+        currentVersion: true,
+        issuedAt: true,
+        senior: { select: { id: true, name: true } },
+        project: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            imageUrl: true,
+            status: true,
+            startDate: true,
+            deadline: true,
+            completedAt: true,
+            category: { select: { id: true, name: true } },
+            umkm: { select: { id: true, name: true } },
+            projectMembers: {
+              where: { status: { in: ["ACTIVE", "COMPLETED"] } },
+              select: {
+                userId: true,
+                user: { select: { id: true, name: true } },
+                projectRole: { select: { roleName: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+  },
+
   // Admin monitoring — all artifacts.
   listAll() {
     return prisma.artifact.findMany({ include: detailInclude, orderBy: { issuedAt: "desc" } });
