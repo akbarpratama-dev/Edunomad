@@ -31,6 +31,8 @@ import { submitContributionSchema } from "../validators/contribution.validator";
 import { reviewBeginnerSchema, reviewSeniorSchema } from "../validators/review.validator";
 import { artifactController } from "../modules/artifact/artifact.controller";
 import { generateArtifactsSchema } from "../validators/artifact.validator";
+import { aiController } from "../modules/ai/ai.controller";
+import { regenerateQuerySchema } from "../validators/ai.validator";
 
 const router = Router();
 const umkm = [roleMiddleware(["UMKM"])];
@@ -262,6 +264,25 @@ router.post(
   requireVerified,
   validateRequest({ params: projectIdParamSchema, body: generateArtifactsSchema }),
   artifactController.generate
+);
+
+// AI (D-AI-1) — additive, cache-backed, gracefully degrading.
+// Candidate ranking: SENIOR lead only (ownership enforced in the service).
+router.get(
+  "/:id/applicants/ranking",
+  authMiddleware,
+  roleMiddleware(["SENIOR"]),
+  validateRequest({ params: projectIdParamSchema, query: regenerateQuerySchema }),
+  aiController.applicantRanking
+);
+// Portfolio recommendation for the applying BEGINNER (own profile vs this vacancy).
+router.get(
+  "/:id/portfolio-recommendation",
+  authMiddleware,
+  roleMiddleware(["BEGINNER"]),
+  requireVerified,
+  validateRequest({ params: projectIdParamSchema, query: regenerateQuerySchema }),
+  aiController.portfolioRecommendation
 );
 
 export default router;

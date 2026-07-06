@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
-import { Inbox } from "lucide-react";
+import { Inbox, Sparkles, ArrowUpDown, RefreshCw } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import { ErrorState } from "@/components/common/ErrorState";
 import { EmptyState } from "@/components/common/EmptyState";
 import { UserAvatar } from "@/components/common/UserAvatar";
 import { ProfileLink } from "@/components/common/ProfileLink";
+import { MatchScoreBadge } from "@/components/ai/MatchScoreBadge";
+import { AiUnavailable } from "@/components/ai/AiUnavailable";
 import { ApiError } from "@/lib/apiClient";
 import { projectApi, type ProjectDetail } from "@/services/projectApi";
 import {
@@ -23,6 +25,7 @@ import {
   type ApplicationStatus,
   type BeginnerApplicant,
 } from "@/services/applicationApi";
+import { aiApi, type AiResult, type ApplicantRanking, type ApplicantRankingRow } from "@/services/aiApi";
 
 type TabKey = ApplicationStatus;
 const TAB_DEFS: { key: TabKey; label: string }[] = [
@@ -52,6 +55,24 @@ function Content() {
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
+  // AI ranking (D-AI-1) — fetched separately so it never blocks the applicant
+  // list; failure only affects the badges, not the page.
+  const [rank, setRank] = useState<AiResult<ApplicantRanking> | null>(null);
+  const [rankLoading, setRankLoading] = useState(false);
+  const [sortByMatch, setSortByMatch] = useState(false);
+
+  const loadRanking = useCallback(
+    (regenerate?: boolean) => {
+      setRankLoading(true);
+      aiApi
+        .applicantRanking(id, regenerate)
+        .then(setRank)
+        .catch(() => setRank({ available: false, reason: "Gagal memuat peringkat AI." }))
+        .finally(() => setRankLoading(false));
+    },
+    [id]
+  );
+
   const load = useCallback(() => {
     setLoading(true);
     setError(null);
@@ -64,6 +85,13 @@ function Content() {
       .finally(() => setLoading(false));
   }, [id]);
   useEffect(load, [load]);
+  useEffect(() => loadRanking(), [loadRanking]);
+
+  const rankMap = useMemo(() => {
+    const m = new Map<string, ApplicantRankingRow>();
+    if (rank?.available) rank.data.rankings.forEach((r) => m.set(r.applicationId, r));
+    return m;
+  }, [rank]);
 
   const decide = async (app: BeginnerApplicant, action: "accept" | "reject") => {
     setBusyId(app.id);
@@ -76,6 +104,7 @@ function Content() {
         toast.success("Lamaran ditolak");
       }
       load();
+      loadRanking(); // pending set changed → refresh scores
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Gagal memproses lamaran");
     } finally {
@@ -83,7 +112,16 @@ function Content() {
     }
   };
 
-  const visible = items.filter((a) => a.status === tab);
+  const visible = useMemo(() => {
+    const rows = items.filter((a) => a.status === tab);
+    if (tab === "PENDING" && sortByMatch) {
+      return [...rows].sort(
+        (a, b) => (rankMap.get(b.id)?.score ?? -1) - (rankMap.get(a.id)?.score ?? -1)
+      );
+    }
+    return rows;
+  }, [items, tab, sortByMatch, rankMap]);
+  const showAiControls = tab === "PENDING" && items.some((a) => a.status === "PENDING");
   const tabs = TAB_DEFS.map((t) => ({
     ...t,
     count: items.filter((a) => a.status === t.key).length,
@@ -99,6 +137,39 @@ function Content() {
 
         <PillTabs tabs={tabs} value={tab} onChange={setTab} ariaLabel="Filter status pelamar" />
 
+        {/* AI ranking controls — PENDING tab only (D-AI-1) */}
+        {showAiControls && (
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant={sortByMatch ? "default" : "outline"}
+                size="sm"
+                className="gap-1.5"
+                disabled={!rank?.available}
+                onClick={() => setSortByMatch((v) => !v)}
+              >
+                <ArrowUpDown className="size-4" />
+                Urutkan berdasarkan kecocokan AI
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5 text-muted-foreground"
+                disabled={rankLoading}
+                onClick={() => loadRanking(true)}
+              >
+                <RefreshCw className={"size-3.5 " + (rankLoading ? "animate-spin" : "")} /> Perbarui peringkat
+              </Button>
+              {rankLoading && (
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <Sparkles className="size-3.5 animate-pulse" /> AI menilai pelamar…
+                </span>
+              )}
+            </div>
+            {rank && !rank.available && <AiUnavailable compact reason={rank.reason} onRetry={() => loadRanking(true)} />}
+          </div>
+        )}
+
         {loading ? (
           <ListSkeleton rows={4} />
         ) : error ? (
@@ -111,7 +182,9 @@ function Content() {
           />
         ) : (
           <div className="flex flex-col gap-3">
-            {visible.map((app, i) => (
+            {visible.map((app, i) => {
+              const r = app.status === "PENDING" ? rankMap.get(app.id) : undefined;
+              return (
               <article
                 key={app.id}
                 style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
@@ -131,8 +204,33 @@ function Content() {
                       </p>
                     </div>
                   </ProfileLink>
-                  <StatusBadge status={app.status} />
+                  <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    <StatusBadge status={app.status} />
+                    {r && <MatchScoreBadge score={r.score} reason={r.reason} />}
+                  </div>
                 </div>
+                {r && (r.reason || r.matchedSkills.length > 0 || r.missingSkills.length > 0) && (
+                  <div className="rounded-xl border border-[#cfe89a] bg-[#f6fbe8]/60 p-3">
+                    <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#5f8c00]">
+                      <Sparkles className="size-3.5" /> Analisis AI
+                    </div>
+                    {r.reason && <p className="text-sm text-foreground/85">{r.reason}</p>}
+                    {(r.matchedSkills.length > 0 || r.missingSkills.length > 0) && (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {r.matchedSkills.map((s) => (
+                          <Badge key={"m" + s} variant="outline" className="border-emerald-300 bg-emerald-50 text-emerald-700">
+                            ✓ {s}
+                          </Badge>
+                        ))}
+                        {r.missingSkills.map((s) => (
+                          <Badge key={"x" + s} variant="outline" className="text-muted-foreground">
+                            {s}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
                 {app.beginner.userSkills.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {app.beginner.userSkills.map((us) => (
@@ -163,7 +261,8 @@ function Content() {
                   </div>
                 )}
               </article>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

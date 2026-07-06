@@ -1,5 +1,27 @@
 ============================================================
-⚡ ACTIVE HANDOFF (2026-07-06 #14) — PORTFOLIO (fold ke PROFIL) + PROFILE CONNECTIVITY SELESAI (branch feature/portfolio-profile-connectivity). NEXT = commit + merge → main, lalu PHASE 11 QA/RLS
+⚡ ACTIVE HANDOFF (2026-07-06 #15) — AI FEATURES (D-AI-1) ✅ SELESAI & HAPPY-PATH VERIFIED. NEXT = commit + merge
+============================================================
+✅ HAPPY-PATH VERIFIED (Gemini gemini-2.5-flash): ketiga fitur output nyata. Provider MULTI (`services/llm.service.ts`: Groq preferred bila GROQ_API_KEY else Gemini). Default model gemini-2.5-flash (2.0-flash kuota free 0; 2.5 thinking dimatikan + tokens 2048 + strip fence). Ranking demo: proyek …0005 kini punya 2 pelamar PENDING (Beginner Two 85% / Three 30%) + role Frontend …051 dikasih required skills JS/React/TS (data demo — cleanup bila mau DB bersih). NEXT = commit branch feature/ai-matching + merge. ⚠️ user pakai GEMINI_API_KEY (auth-key format AQ.*), key ada di backend/.env.
+--- detail build di bawah ---
+Branch `feature/ai-matching` (dari commit portofolio ece0e95). Tugas dosen "Penggunaan AI". Plan disetujui (plan mode): /Users/muhammadakbarpratama/.claude/plans/encapsulated-juggling-dijkstra.md.
+
+✅ DIBANGUN & fallback-verified (tsc 0 backend+frontend): 3 fitur Gemini gemini-2.0-flash (LLM structured-JSON Explainable, cache tabel `ai_insights`, gracefully-degrading, NO embeddings/pgvector/queue/bg-job):
+- Candidate Ranking `GET /projects/:id/applicants/ranking` (SENIOR lead) — skor+matched/missing+alasan pelamar PENDING, batch. UI applicants page: toggle "Urutkan berdasarkan kecocokan AI" + MatchScoreBadge + blok "Analisis AI" + Perbarui peringkat + fallback.
+- Portfolio Recommendation `GET /projects/:id/portfolio-recommendation` (BEGINNER own) — UI apply dialog PortfolioRecPanel.
+- Professional Summary `GET /users/{me,:id}/ai-summary` — UI ProfileView AiSummaryCard (non-UMKM).
+Backend: config/env (SOFT key) + gemini.service (fetch+AiUnavailableError) + aiInsight.service (cachedInsight+zod) + aiInsight.repository + constants/aiInsightKind + modules/ai/ai.controller + validators/ai.validator + routes project/user + schema AiInsight + migration `20260706160000_ai_insights` LIVE + _prisma_migrations synced + prisma generate. Frontend: aiApi + components/ai/{AiUnavailable,MatchScoreBadge,AiSummaryCard,PortfolioRecPanel}.
+Verified: curl no-key → available:false reason jelas; RBAC beginner→ranking 403, senior→portfolio-rec 403; Playwright /profile AiSummaryCard fallback mulus, profil utuh.
+
+➡️ QUICK ACTION (urut):
+1. **User isi `GEMINI_API_KEY=...` di `backend/.env`** (gratis: aistudio.google.com/apikey). Restart backend. Cek GET /users/me/ai-summary (beginner) → available:true.
+2. **Buat 1 pelamar PENDING** di proyek …0005 (skrg 0, sudah di-accept) utk demo ranking: login p43-b2/p43-b3 → apply role, atau via API/DB.
+3. **Happy-path** curl+Playwright 3 fitur; cek cache (2x → cached:true; ?regenerate=true → cached:false; row ai_insights).
+4. Commit (Conventional + Co-Authored-By Claude Opus 4.8). Pertimbangkan merge portofolio(ece0e95)+AI → main.
+⚠️ AI additive: key salah/AI down → HTTP 200 available:false (bukan 5xx), inti rekrutmen utuh. Context7 sebelum ubah kode Gemini. Test users p4-* + p43-* @test.edunomad.com pw TestPass123!.
+
+--- arsip handoff #14 (Portofolio, SUDAH di-commit ece0e95) ---
+============================================================
+⚡ ACTIVE HANDOFF (2026-07-06 #14) — PORTFOLIO (fold ke PROFIL) + PROFILE CONNECTIVITY SELESAI (commit ece0e95). NEXT = commit + merge → main, lalu PHASE 11 QA/RLS
 ============================================================
 Branch `feature/portfolio-profile-connectivity` (dari main df2b5e8). D-P13-1 lalu DIREVISI D-P13-2 (user minta portofolio jadi sub-section profil, BUKAN halaman terpisah). BELUM di-commit — working tree.
 

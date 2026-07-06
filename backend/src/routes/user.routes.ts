@@ -6,6 +6,8 @@ import { userController } from "../modules/user/user.controller";
 import { directMessageController } from "../modules/directMessage/directMessage.controller";
 import { reviewController } from "../modules/review/review.controller";
 import { updateProfileSchema, userIdParamSchema } from "../validators/user.validator";
+import { aiController } from "../modules/ai/ai.controller";
+import { regenerateQuerySchema } from "../validators/ai.validator";
 import userSkillRoutes from "./userSkill.routes";
 import experienceRoutes from "./experience.routes";
 import portfolioLinkRoutes from "./portfolioLink.routes";
@@ -20,6 +22,15 @@ router.put(
   requireActiveAccount,
   validateRequest({ body: updateProfileSchema }),
   userController.updateMe
+);
+
+// AI Professional Summary of the caller's own profile (D-AI-1). Declared before
+// the dynamic /:id routes.
+router.get(
+  "/me/ai-summary",
+  authMiddleware,
+  validateRequest({ query: regenerateQuerySchema }),
+  aiController.mySummary
 );
 
 // --- Own sub-resources ---
@@ -59,6 +70,13 @@ router.get(
   authMiddleware,
   validateRequest({ params: userIdParamSchema }),
   userController.getPortfolio
+);
+// AI Professional Summary of another user's profile (D-AI-1). Auth required.
+router.get(
+  "/:id/ai-summary",
+  authMiddleware,
+  validateRequest({ params: userIdParamSchema, query: regenerateQuerySchema }),
+  aiController.userSummary
 );
 router.get(
   "/:id",

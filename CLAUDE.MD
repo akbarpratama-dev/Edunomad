@@ -399,7 +399,7 @@ Never implement:
 - Video Calls
 - Voice Calls
 - Mobile Apps
-- AI Features
+- AI Features (APPROVED for this assignment — see D-AI-1 note below; core flow must never depend on AI)
 
 Unless explicitly approved.
 
@@ -408,6 +408,12 @@ NOTE (2026-07-02): Public Portfolio Pages stay OUT OF SCOPE for now — deferred
 NOTE (2026-07-05, amends D-P8-5): The Phase 10 profile page (`/profile`, `/users/:id`) DOES include a "Sertifikat" tab showing the user's own VERIFIED certificates (reusing existing artifact data) — user-approved. This is the in-app profile tab, NOT the standalone public portfolio page `/portfolio/:id`, which remains deferred. CV PDF download stays OUT OF SCOPE (rendered as a disabled placeholder). See decision D-P10-1.
 
 NOTE (2026-07-06, amends D-P8-5, user-approved): Portfolio is now surfaced as a SUB-SECTION of the profile, NOT a standalone public page. The "Sertifikat" tab on the profile (`/profile`, `/users/:id`) shows the user's VERIFIED certificates as rich cards; clicking one opens a "Preview di Portofolio" modal (per user reference design: role, contribution %, status, dates, tech, team, verification + scannable QR → `/verify/:code`). Data is folded into `GET /users/:id/profile-overview` (enriched `artifacts`) — there is NO standalone `/portfolio/:id` page and NO separate public `/portfolio/:userId` endpoint (both were built 2026-07-06 then REMOVED same day per user: "portofolio tampil di page profile aja, kyk sub profile", D-P13-2). Also wired profile connectivity: names/avatars across member lists, applicants, reviews, discussion authors, and the certificate team sections now link to `/users/:id`. The old "Bagikan/Lihat di Portofolio" buttons now point to `/profile`. CV PDF download STAYS OUT OF SCOPE. See decisions D-P13-1 (build) + D-P13-2 (fold into profile).
+
+NOTE (2026-07-06, amends OUT OF SCOPE "AI Features" — user-approved, tugas dosen "Penggunaan AI"): AI Features are IN SCOPE, implemented as THREE additive, read-only, cache-backed, gracefully-degrading features via Google Gemini (`gemini-2.0-flash`, structured JSON + Explainable reasons):
+1. AI Candidate Matching & Ranking — `GET /projects/:id/applicants/ranking` (SENIOR lead): scores/ranks PENDING applicants vs role needs + matched/missing skills + reason. Surfaced on the applicants page (sort toggle + score badge + analysis block).
+2. AI Portfolio Recommendation — `GET /projects/:id/portfolio-recommendation` (BEGINNER, own): which porto/cert/experience to highlight for a vacancy. Surfaced in the apply dialog.
+3. AI Professional Summary — `GET /users/:id/ai-summary` & `/users/me/ai-summary`: concise profile summary. Surfaced as a card on the profile (non-UMKM).
+Results cached in table `ai_insights` (kind SUMMARY|MATCH|PORTFOLIO_REC, inputHash invalidation, `?regenerate=true` bypass). PROVIDER is multi (transport `services/llm.service.ts`): **Groq preferred** (`GROQ_API_KEY`, model `llama-3.3-70b-versatile`) else **Gemini** (`GEMINI_API_KEY`, default model `gemini-2.5-flash` — NOTE: `gemini-2.0-flash` free-tier quota was 0 for the user's account → switched to 2.5-flash; Gemini 2.5 "thinking" is disabled via `thinkingConfig.thinkingBudget:0` + `maxOutputTokens:2048` so JSON isn't truncated). HARD RULES kept: NO embeddings/pgvector, NO new service/queue (modular monolith preserved — one `fetch` call inside the request), NO background jobs. Requires ONE of `GROQ_API_KEY`/`GEMINI_API_KEY` in `backend/.env` (added MANUALLY — env sandboxed). If no key or the LLM is down, endpoints return HTTP 200 `{available:false, reason}` and the UI shows a fallback — the recruitment flow NEVER breaks. Config keys are SOFT (not `required()`). VERIFIED end-to-end 2026-07-06 (all 3 features real Gemini output + UI). See decision D-AI-1.
 
 ⸻
 

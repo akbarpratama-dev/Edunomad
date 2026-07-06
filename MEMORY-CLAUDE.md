@@ -1,7 +1,10 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-07-06 (D-P13-1→2→3). WORKING BRANCH = **feature/portfolio-profile-connectivity** (dari main df2b5e8, BELUM di-commit/merge). main terakhir = df2b5e8 (Phase 10 selesai, pushed).
+> Last updated: 2026-07-06 (D-AI-1). WORKING BRANCH = **feature/ai-matching** (dari commit portofolio ece0e95). Portofolio D-P13-1/2/3 SUDAH di-commit (ece0e95) di branch feature/portfolio-profile-connectivity; branch ai-matching stack di atasnya. Belum merge ke main (df2b5e8).
+> **AI FEATURES (D-AI-1) ✅ SELESAI & HAPPY-PATH VERIFIED (Gemini gemini-2.5-flash).** Provider multi (`services/llm.service.ts`: Groq preferred else Gemini). Ketiga fitur output nyata: ai-summary, portfolio-recommendation, ranking (Beginner Two 85% vs Three 30% Explainable). Cache OK. Playwright applicants page OK. Catatan: 2.0-flash kuota-0 → default 2.5-flash + thinking-off + tokens 2048. NEXT = commit + merge. (arsip di bawah "menunggu key" sudah tak berlaku.)
+> **AI FEATURES (D-AI-1) — arsip build note:** Tugas dosen "Penggunaan AI" → 3 fitur Google Gemini (gemini-2.0-flash, LLM structured-JSON Explainable, cache tabel `ai_insights`, gracefully-degrading): (1) Candidate Ranking `GET /projects/:id/applicants/ranking` senior; (2) Portfolio Recommendation `GET /projects/:id/portfolio-recommendation` beginner; (3) Professional Summary `GET /users/{me,:id}/ai-summary`. Backend: gemini.service (fetch+AiUnavailableError) + aiInsight.service (cachedInsight+zod) + aiInsight.repository + modules/ai + validator + routes + env SOFT key; migration ai_insights LIVE + _prisma_migrations synced + prisma generate. Frontend: aiApi + ai/{AiUnavailable,MatchScoreBadge,AiSummaryCard,PortfolioRecPanel} + wiring applicants/apply-dialog/ProfileView. tsc 0. curl fallback available:false + RBAC 403 OK; Playwright /profile fallback mulus. RULES: no embeddings/pgvector/queue/bg-job; key manual di backend/.env; AI mati → 200 available:false, inti utuh. ➡️ NEXT: user isi `GEMINI_API_KEY` di backend/.env (aistudio.google.com/apikey, gratis) → happy-path (butuh 1 pelamar PENDING utk demo ranking di proyek …0005) → commit + merge. Servers :3001/:3000 nyala.
+> --- arsip: D-P13 (portofolio, commit ece0e95) ---
 > **PORTFOLIO (fold ke PROFIL) + PROFILE CONNECTIVITY SELESAI (D-P13-1 → DIREVISI D-P13-2)** — jawaban audit user "portfolio/sertifikat/proyek sudah saling nyambung lintas role?". 2 putus ditutup: (1) `/users/:id` ORPHANED → `common/ProfileLink.tsx` bikin nama/avatar klik ke profil di ProjectMembersPanel, applicants, manage(senior), reviews, ProfileView reviews, DiscussionFeed author, artifacts/[projectId] Team. (2) Portofolio → dibangun sbg halaman publik dulu, TAPI user minta "portofolio tampil di page profile aja kyk sub profile" → **halaman/endpoint publik /portfolio/:id DIHAPUS**; portofolio kini = tab "Sertifikat" DI DALAM profil (`/profile`,`/users/:id`): kartu KAYA (role+tech) + tombol "Preview" → modal `PortfolioPreviewDialog` (Peran/Kontribusi/Status/Durasi/Teknologi/Tim ProfileLinks + QR qrcode.react@4.2.0 → /verify/:code). Data via `GET /users/:id/profile-overview` (artifacts diperkaya `portfolio.service.buildPortfolioArtifacts`). Tombol lama /artifacts → "Lihat di Profil"→/profile. **D-P13-3:** modal + kartu Sertifikat kini juga menampilkan **Catatan Mentor** (rating+komentar SENIOR_TO_BEGINNER) + **Kontribusi Saya** (contributionSummary — "membangun apa") biar publik lihat. NO migration. tsc 0 backend+frontend; Playwright p4-beginner verified (/profile tab Sertifikat + modal + Catatan Mentor ★4 "revisi" + Kontribusi "Built landing + nav"; /portfolio/:id lama → not-found); console 0 err. "Public Portfolio Pages" standalone TETAP OUT OF SCOPE. ➡️ NEXT = commit + merge → main, lalu Phase 11 QA/RLS. Dev servers backend(3001)+frontend(3000) masih nyala.
 > --- arsip: main = **c1c20fe** (Phase 9 + Diskusi-page-split, pushed origin/main).
 > **Diskusi dipisah** jadi route `/my-projects/:id/workspace/diskusi` (bukan tab lagi); workspace punya tombol "Buka Diskusi". Diskusi page sidebar: Informasi Proyek (cover+status+Bersama+avatar stack+Lihat Detail Proyek→workspace) + Aktivitas Terbaru + Milestone Berikutnya. List card tampil author (backend listGroupForUser include first-message sender). BeginnerProjectBoard "Lihat Diskusi"→diskusi page. build 0, tsc 0.
@@ -83,28 +86,31 @@ DRAFT â PENDING_REVIEW â RECRUITING (approve) / REJECTED â ACTIVE
 ## 📌 NEXT-SESSION INIT PROMPT
 
 ```
-Lanjutkan EduNomad: COMMIT + MERGE Portfolio & Profile Connectivity, lalu PHASE 11 (QA + RLS pra-prod).
-Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-07-06 #14"
-+ decisions.md D-P13-1.
+Lanjutkan EduNomad: SELESAIKAN happy-path AI Features (D-AI-1), lalu commit + merge.
+Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-07-06 #15"
++ decisions.md D-AI-1 + plan /Users/muhammadakbarpratama/.claude/plans/encapsulated-juggling-dijkstra.md.
 
-WORKING BRANCH = feature/portfolio-profile-connectivity (dari main df2b5e8, BELUM di-commit). Semua perubahan
-Portfolio & Profile Connectivity SELESAI & verified (tsc 0 backend+frontend, curl 200/404/400, Playwright
-public page+modal, console 0 err) tapi masih di working tree.
+WORKING BRANCH = feature/ai-matching (dari commit portofolio ece0e95). AI Features SUDAH dibangun & fallback-
+verified (tsc 0, curl available:false + RBAC 403, Playwright /profile fallback mulus) TAPI happy-path menunggu
+GEMINI_API_KEY. Portofolio D-P13 sudah di-commit (ece0e95).
 
 QUICK ACTION (urut):
-(1) Review `git status` / `git diff` di branch feature/portfolio-profile-connectivity, lalu
-    `git add -A && git commit` (Conventional Commit + Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>).
-    File utama (final, pasca D-P13-2): backend {services/portfolio.service [buildPortfolioArtifacts],
-    services/user.service [getProfileOverview pakai builder], repositories/artifact.repository +listPortfolioArtifacts};
-    frontend {components/common/ProfileLink, components/portfolio/PortfolioPreviewDialog, services/portfolioApi
-    [types+durationWeeks], profileApi [ProfileArtifact=PortfolioArtifact], ProfileView [Sertifikat tab kaya+modal],
-    +wiring di ProjectMembersPanel/applicants/manage/reviews/DiscussionFeed/artifacts, package.json +qrcode.react}.
-    (Note: git status akan tampil DELETE utk app/portfolio/*, PublicPortfolioView, backend modules/portfolio +
-    routes/portfolio.routes + validators/portfolio.validator — itu memang dihapus, jangan di-restore.)
-(2) Merge --no-ff → main + push origin/main (private). Pertimbangkan PR.
-(3) PHASE 11 — QA menyeluruh + review RLS pra-produksi. RLS masih OFF ~semua tabel (kecuali discussion+
-    notifications). CATAT: profil-overview + tab Sertifikat baca artifacts via Express (RLS off) — aman krn
-    hanya expose verified artifacts, tapi masukkan ke review RLS. (TIDAK ada lagi endpoint publik /portfolio.)
+(1) Pastikan user sudah menaruh `GEMINI_API_KEY=...` di backend/.env (aistudio.google.com/apikey, gratis).
+    Restart backend (:3001) bila perlu. Cek: GET /api/v1/users/me/ai-summary (beginner token) → available:true.
+(2) Demo ranking butuh ≥1 pelamar PENDING di proyek …0005 (skrg 0 — sudah di-accept). Buat 1 lamaran PENDING:
+    login beginner lain (p43-b2/p43-b3) → apply ke role proyek …0005, ATAU insert via API. Lalu senior
+    (p4-senior) GET /projects/…0005/applicants/ranking → rankings[] terisi (skor/matched/missing/reason).
+(3) Happy-path test 3 fitur (curl + Playwright): applicants page (badge skor + toggle "Urutkan kecocokan AI" +
+    blok Analisis AI), apply dialog beginner (PortfolioRecPanel), /profile (AiSummaryCard). Cek cache: 2x call
+    → cached:true; ?regenerate=true → cached:false; row di tabel ai_insights.
+(4) tsc 0 + console 0. Commit (Conventional + Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>).
+    File AI: backend {config/env, services/{gemini,aiInsight}.service, repositories/aiInsight.repository,
+    constants/aiInsightKind, modules/ai/ai.controller, validators/ai.validator, routes/{project,user}.routes,
+    prisma/schema + migration 20260706160000_ai_insights}; frontend {services/aiApi, components/ai/*, wiring
+    projects/[id]/{page,applicants/page}, components/profile/ProfileView}. Lalu pertimbangkan merge portofolio+AI → main.
+
+CATATAN: AI additive & gracefully-degrading — kalau key salah/AI down → available:false (bukan 5xx), inti utuh.
+RULES D-AI-1: no embeddings/pgvector/queue/bg-job (modular monolith). Context7 sebelum ubah kode Gemini.
 
 Dev: backend :3001 + frontend :3000 MASIH NYALA (background) dari sesi lalu — cek/pakai ulang atau restart.
 tsc TS2882 CSS-ambient transient saat .next/types regen → re-run. Test users p4-beginner/senior/umkm +

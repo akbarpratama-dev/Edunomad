@@ -48,6 +48,7 @@ model User {
   verificationRequests          VerificationRequest[] @relation("VerificationRequestUser")
   verificationRequestsReviewed  VerificationRequest[] @relation("VerificationRequestReviewer")
   auditLogs                     AuditLog[]
+  aiInsights                    AiInsight[]
 
   @@index([role])
   @@index([status])
@@ -185,12 +186,37 @@ model Project {
   contributionReports ContributionReport[]
   artifacts           Artifact[]
   reviews             Review[]
+  aiInsights          AiInsight[]
 
   @@index([status])
   @@index([deadline])
   @@index([umkmId])
   @@index([seniorId])
   @@map("projects")
+}
+
+// Cached AI-generated insights (D-AI-1). One row per (kind, subject_user, project)
+// — kind ∈ SUMMARY | MATCH | PORTFOLIO_REC. resultJson holds the structured model
+// output; inputHash (sha256 of the exact inputs) drives cache invalidation:
+// a hit only counts when the current input hash matches, otherwise the row is
+// recomputed and overwritten. No DB enum (VARCHAR + raw-SQL CHECK), matching the
+// project convention.
+model AiInsight {
+  id            String   @id @default(uuid()) @db.Uuid
+  kind          String   @db.VarChar(20)
+  subjectUserId String   @map("subject_user_id") @db.Uuid
+  projectId     String?  @map("project_id") @db.Uuid
+  inputHash     String   @map("input_hash") @db.VarChar(64)
+  resultJson    Json     @map("result_json")
+  model         String   @db.VarChar(40)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  subject User     @relation(fields: [subjectUserId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([kind, subjectUserId, projectId])
+  @@map("ai_insights")
 }
 
 // status: PENDING | IN_PROGRESS | COMPLETED

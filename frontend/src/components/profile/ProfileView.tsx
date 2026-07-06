@@ -34,6 +34,7 @@ import {
   PortfolioPreviewDialog,
   previewFromPortfolioArtifact,
 } from "@/components/portfolio/PortfolioPreviewDialog";
+import { AiSummaryCard } from "@/components/ai/AiSummaryCard";
 import {
   SKILL_LEVEL_PCT,
   SKILL_LEVEL_LABEL,
@@ -221,6 +222,9 @@ export function ProfileView({
             )}
           </div>
         </section>
+
+        {/* AI Professional Summary — contributor-oriented (non-UMKM) */}
+        {professional && <AiSummaryCard userId={user.id} />}
 
         {/* Tabs */}
         <div className="border-b border-border">
