@@ -263,13 +263,16 @@ export function DashboardLayout({
   sidebar: ReactNode;
 }) {
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_336px] lg:gap-8">
       <div className="flex min-w-0 flex-col gap-5">
         {header}
         {toolbar}
         {main}
       </div>
-      <aside className="flex flex-col gap-5">{sidebar}</aside>
+      {/* Offset the right rail below the ~56px overlay header band so its top
+          card never sits under the notif/profile controls (aligns with the
+          left column's content body, not the title). */}
+      <aside className="flex flex-col gap-5 lg:mt-14">{sidebar}</aside>
     </div>
   );
 }
