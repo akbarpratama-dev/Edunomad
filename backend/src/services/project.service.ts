@@ -116,13 +116,13 @@ export const projectService = {
   async getMyProjects(umkmId: string, query: MyProjectsQuery) {
     const where: Prisma.ProjectWhereInput = { umkmId };
     if (query.status) where.status = query.status;
-    const { data, total } = await projectRepository.findManyPaginated(where, query.page, query.limit);
+    const { data, total } = await projectRepository.findManyForDashboard(where, query.page, query.limit);
     return { data, total, page: query.page, limit: query.limit };
   },
 
   // GET /me/mentored-projects (SENIOR) — projects the caller mentors, any status.
   async getMentoredProjects(seniorId: string) {
-    const { data } = await projectRepository.findManyPaginated({ seniorId }, 1, 100);
+    const { data } = await projectRepository.findManyForDashboard({ seniorId }, 1, 100);
     return data;
   },
 

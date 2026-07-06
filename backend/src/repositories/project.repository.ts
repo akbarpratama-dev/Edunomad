@@ -32,6 +32,29 @@ const browseInclude = {
   },
 } satisfies Prisma.ProjectInclude;
 
+// Rich payload for the "Proyek Saya" (UMKM) / "Proyek Mentoring" (SENIOR)
+// dashboards: cover image (scalar), technologies (role skills), team avatars
+// (active/completed members), and milestone progress. Scalars (imageUrl,
+// startDate, deadline, ...) come back automatically alongside `include`.
+const dashboardInclude = {
+  umkm: { select: { id: true, name: true } },
+  category: true,
+  senior: { select: { id: true, name: true } },
+  projectRoles: {
+    select: {
+      id: true,
+      roleName: true,
+      capacity: true,
+      roleSkills: { select: { skill: { select: { id: true, name: true } } } },
+    },
+  },
+  projectMembers: {
+    where: { status: { in: [MemberStatus.ACTIVE, MemberStatus.COMPLETED] } },
+    select: { user: { select: { id: true, name: true } } },
+  },
+  milestones: { select: { id: true, status: true } },
+} satisfies Prisma.ProjectInclude;
+
 export const projectRepository = {
   findById(id: string) {
     // Soft-deleted projects are treated as non-existent.
@@ -72,6 +95,22 @@ export const projectRepository = {
         skip: (page - 1) * limit,
         take: limit,
         include: browseInclude,
+      }),
+      prisma.project.count({ where: fullWhere }),
+    ]);
+    return { data, total };
+  },
+
+  // "Proyek Saya" (UMKM) / "Proyek Mentoring" (SENIOR) dashboard cards.
+  async findManyForDashboard(where: Prisma.ProjectWhereInput, page: number, limit: number) {
+    const fullWhere: Prisma.ProjectWhereInput = { ...where, deletedAt: null };
+    const [data, total] = await Promise.all([
+      prisma.project.findMany({
+        where: fullWhere,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: dashboardInclude,
       }),
       prisma.project.count({ where: fullWhere }),
     ]);
