@@ -113,6 +113,7 @@ export interface MyMembership {
     status: ProjectStatus;
     deadline: string;
     startDate: string;
+    imageUrl?: string | null;
     umkm: { id: string; name: string };
     senior: { id: string; name: string } | null;
     category: Category;

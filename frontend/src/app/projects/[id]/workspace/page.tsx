@@ -15,6 +15,7 @@ import { ErrorState } from "@/components/common/ErrorState";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PillTabs } from "@/components/common/PillTabs";
 import { ProjectMembersPanel } from "@/components/project/ProjectMembersPanel";
+import { ProjectThumb } from "@/components/artifact/shared";
 import { DeliverablesTab } from "@/components/workspace/DeliverablesTab";
 import { ContributionTab } from "@/components/workspace/ContributionTab";
 import { ReviewTab } from "@/components/workspace/ReviewTab";
@@ -86,16 +87,25 @@ function WorkspaceInner() {
   return (
     <div className="flex flex-col gap-5">
       <div className="app-reveal flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">
-              {project.title}
-            </h1>
-            <Badge variant={statusMeta.variant} className={statusMeta.className}>
-              {statusMeta.label}
-            </Badge>
+        <div className="flex min-w-0 items-start gap-4">
+          {project.imageUrl && (
+            <ProjectThumb
+              title={project.title}
+              imageUrl={project.imageUrl}
+              className="hidden h-16 w-24 shrink-0 rounded-xl sm:block"
+            />
+          )}
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-h1 tracking-tight text-balance">
+                {project.title}
+              </h1>
+              <Badge variant={statusMeta.variant} className={statusMeta.className}>
+                {statusMeta.label}
+              </Badge>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">Workspace proyek — kolaborasi tim & progres.</p>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">Workspace proyek — kolaborasi tim & progres.</p>
         </div>
         <Button variant="outline" render={<Link href={`${wsBase}/${id}/workspace/diskusi`} />}>
           <MessageSquare className="size-4" /> Buka Diskusi

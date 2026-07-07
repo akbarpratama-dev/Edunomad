@@ -2,6 +2,7 @@ import { CalendarDays, CalendarClock, Building2, GraduationCap, Flag, Users } fr
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ProjectThumb } from "@/components/artifact/shared";
 import {
   PROJECT_STATUS_META,
   type ProjectDetail,
@@ -63,7 +64,14 @@ function MetaRow({
 export function ProjectDetailView({ project }: { project: ProjectDetail }) {
   return (
     <div className="flex flex-col gap-4">
-      <Card className="app-reveal">
+      <Card className="app-reveal overflow-hidden">
+        {project.imageUrl && (
+          <ProjectThumb
+            title={project.title}
+            imageUrl={project.imageUrl}
+            className="-mt-5 aspect-[16/7] w-full rounded-t-[20px]"
+          />
+        )}
         <CardContent className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{project.category.name}</Badge>

@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/common/UserAvatar";
+import { ProjectThumb } from "@/components/artifact/shared";
 import { useAuthStore } from "@/stores/authStore";
 import { projectApi, type ProjectDetail, type ProjectMember } from "@/services/projectApi";
 import { deliverableApi, type Deliverable } from "@/services/deliverableApi";
@@ -193,23 +194,31 @@ export function BeginnerProjectBoard() {
       {/* ── Hero (navy) ── */}
       <section className="app-reveal overflow-hidden rounded-[24px] bg-[#201f31] p-5 text-[#e8e8ec] sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-stretch">
-          {/* decorative project panel */}
-          <div className="hidden w-44 shrink-0 flex-col gap-2 rounded-2xl bg-black/30 p-4 sm:flex">
-            <div className="flex gap-1.5">
-              <span className="size-2.5 rounded-full bg-[#e5484d]" />
-              <span className="size-2.5 rounded-full bg-[#ffa500]" />
-              <span className="size-2.5 rounded-full bg-[#67c957]" />
+          {/* Project cover (real image when set, decorative mock otherwise) */}
+          {project.imageUrl ? (
+            <ProjectThumb
+              title={project.title}
+              imageUrl={project.imageUrl}
+              className="hidden min-h-40 w-44 shrink-0 self-stretch rounded-2xl sm:block"
+            />
+          ) : (
+            <div className="hidden w-44 shrink-0 flex-col gap-2 rounded-2xl bg-black/30 p-4 sm:flex">
+              <div className="flex gap-1.5">
+                <span className="size-2.5 rounded-full bg-[#e5484d]" />
+                <span className="size-2.5 rounded-full bg-[#ffa500]" />
+                <span className="size-2.5 rounded-full bg-[#67c957]" />
+              </div>
+              <div className="mt-2 h-2 w-3/4 rounded-full bg-[#d8f277]/70" />
+              <div className="grid grid-cols-2 gap-2">
+                <div className="h-10 rounded-lg bg-white/5" />
+                <div className="h-10 rounded-lg bg-white/5" />
+                <div className="h-10 rounded-lg bg-white/5" />
+                <div className="h-10 rounded-lg bg-white/5" />
+              </div>
+              <div className="mt-1 h-2 w-full rounded-full bg-white/10" />
+              <div className="h-6 w-full rounded-lg bg-[#d8f277]/30" />
             </div>
-            <div className="mt-2 h-2 w-3/4 rounded-full bg-[#d8f277]/70" />
-            <div className="grid grid-cols-2 gap-2">
-              <div className="h-10 rounded-lg bg-white/5" />
-              <div className="h-10 rounded-lg bg-white/5" />
-              <div className="h-10 rounded-lg bg-white/5" />
-              <div className="h-10 rounded-lg bg-white/5" />
-            </div>
-            <div className="mt-1 h-2 w-full rounded-full bg-white/10" />
-            <div className="h-6 w-full rounded-lg bg-[#d8f277]/30" />
-          </div>
+          )}
 
           {/* main */}
           <div className="flex flex-1 flex-col">
@@ -218,7 +227,7 @@ export function BeginnerProjectBoard() {
                 <Badge className="border-transparent bg-[#67c957]/15 text-[#9be88e]">
                   ● {project.status === "ACTIVE" ? "Aktif" : "Menunggu Penyelesaian"}
                 </Badge>
-                <h1 className="mt-2 text-2xl font-bold tracking-tight text-white">
+                <h1 className="mt-2 text-h1 tracking-tight text-balance text-white">
                   {project.title}
                 </h1>
               </div>

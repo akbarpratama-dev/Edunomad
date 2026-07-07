@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Search,
   FolderSearch,
@@ -159,8 +160,8 @@ function Content() {
       <div className="flex flex-col gap-5">
         {/* Title — full width, aligned with the floating header controls */}
         <div className="app-reveal max-w-3xl pr-2">
-          <h1 className="text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">Jelajahi Proyek</h1>
-          <p className="mt-1 text-sm text-muted-foreground text-pretty">
+          <h1 className="text-h1 tracking-tight text-balance">Jelajahi Proyek</h1>
+          <p className="mt-1.5 text-body-lg text-muted-foreground text-pretty">
             Temukan proyek nyata dari berbagai UMKM dan bergabung bersama mentor profesional untuk
             membangun pengalaman yang dapat dibuktikan.
           </p>
@@ -347,7 +348,24 @@ function RailCard({ title, children }: { title: string; children: React.ReactNod
   );
 }
 
-function Thumb({ i, className }: { i: number; className?: string }) {
+function Thumb({
+  i,
+  imageUrl,
+  title,
+  className,
+}: {
+  i: number;
+  imageUrl?: string | null;
+  title?: string;
+  className?: string;
+}) {
+  if (imageUrl) {
+    return (
+      <div className={cn("relative overflow-hidden bg-muted", className)}>
+        <Image src={imageUrl} alt={title ?? "Cover proyek"} fill className="object-cover" unoptimized />
+      </div>
+    );
+  }
   return (
     <div className={cn("relative overflow-hidden bg-gradient-to-br", THUMB_TONES[i % THUMB_TONES.length], className)}>
       <div className="absolute inset-3 rounded-lg bg-white/10" />
@@ -405,7 +423,7 @@ function FeaturedCard({ p }: { p: ProjectListItem }) {
           <Meta icon={Building2} label="UMKM" value={p.umkm.name} />
           <Meta icon={Users} label="Posisi" value={`${slotsOf(p)} slot`} />
         </div>
-        <Thumb i={3} className="h-28 w-full rounded-2xl" />
+        <Thumb i={3} imageUrl={p.imageUrl} title={p.title} className="h-28 w-full rounded-2xl" />
         <Button className="self-end bg-[#201f31] text-white hover:bg-[#2c2b42]" render={<Link href={`/projects/${p.id}`} />}>
           Lihat Detail Proyek <ArrowRight className="size-4" />
         </Button>
@@ -435,7 +453,7 @@ function ProjectCard({ p, i }: { p: ProjectListItem; i: number }) {
       className="app-reveal group flex flex-col overflow-hidden rounded-[20px] border border-border bg-card transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(32,31,49,0.10)]"
     >
       <div className="relative">
-        <Thumb i={i} className="h-32 w-full" />
+        <Thumb i={i} imageUrl={p.imageUrl} title={p.title} className="h-32 w-full" />
         <Badge className={cn("absolute left-3 top-3 border", meta.className)}>{meta.label}</Badge>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
