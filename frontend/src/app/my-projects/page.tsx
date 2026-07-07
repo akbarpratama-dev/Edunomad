@@ -14,6 +14,7 @@ import {
   ClipboardList,
   GraduationCap,
   Lightbulb,
+  MessageSquare,
 } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
@@ -162,9 +163,18 @@ function SeniorView() {
                   actions={
                     <>
                       {(item.status === "ACTIVE" || item.status === "AWAITING_COMPLETION") && (
-                        <Button size="sm" render={<Link href={`/my-projects/${item.id}/workspace`} />}>
-                          {item.status === "AWAITING_COMPLETION" ? "Review Proyek" : "Buka Workspace"}
-                        </Button>
+                        <>
+                          <Button size="sm" render={<Link href={`/my-projects/${item.id}/workspace`} />}>
+                            {item.status === "AWAITING_COMPLETION" ? "Review Proyek" : "Buka Workspace"}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            render={<Link href={`/my-projects/${item.id}/workspace/diskusi`} />}
+                          >
+                            <MessageSquare className="size-4" /> Diskusi
+                          </Button>
+                        </>
                       )}
                       <Button variant="outline" size="sm" render={<Link href={`/my-projects/${item.id}`} />}>
                         Lihat Detail

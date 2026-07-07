@@ -3,7 +3,22 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { CalendarDays, Building2, GraduationCap, CalendarClock, Users, ArrowRight, MessageSquare } from "lucide-react";
+import {
+  CalendarDays,
+  Building2,
+  GraduationCap,
+  CalendarClock,
+  Users,
+  ArrowRight,
+  MessageSquare,
+  TrendingUp,
+  ClipboardList,
+  FileText,
+  Star,
+  ShieldCheck,
+  CheckCircle2,
+  Flag,
+} from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +31,8 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { PillTabs } from "@/components/common/PillTabs";
 import { ProjectMembersPanel } from "@/components/project/ProjectMembersPanel";
 import { ProjectThumb } from "@/components/artifact/shared";
+import { ProgressBar } from "@/components/project/ProjectDashboardShell";
+import { deliverableApi, type Deliverable } from "@/services/deliverableApi";
 import { DeliverablesTab } from "@/components/workspace/DeliverablesTab";
 import { ContributionTab } from "@/components/workspace/ContributionTab";
 import { ReviewTab } from "@/components/workspace/ReviewTab";
@@ -114,7 +131,7 @@ function WorkspaceInner() {
 
       <PillTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Navigasi workspace" />
 
-      {tab === "overview" && <OverviewTab project={project} />}
+      {tab === "overview" && <OverviewTab project={project} onTab={setTab} base={wsBase} />}
       {tab === "milestones" && <MilestonesTab project={project} />}
       {tab === "deliverables" && <DeliverablesTab project={project} />}
       {tab === "contributions" && <ContributionTab project={project} />}
@@ -139,74 +156,244 @@ function MetaRow({ icon: Icon, label, value }: { icon: typeof Building2; label: 
   );
 }
 
-function OverviewTab({ project }: { project: ProjectDetail }) {
-  const pathname = usePathname();
-  const base = pathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
+// Small metric tile for the overview stat grid.
+function StatTile({
+  icon: Icon,
+  tone,
+  value,
+  label,
+  sub,
+}: {
+  icon: typeof Users;
+  tone: string;
+  value: string;
+  label: string;
+  sub?: string;
+}) {
+  return (
+    <div className="app-reveal rounded-[18px] border border-border bg-card p-4">
+      <span className={`grid size-9 place-items-center rounded-xl ${tone}`} aria-hidden="true">
+        <Icon className="size-4" />
+      </span>
+      <p className="mt-2.5 text-2xl font-bold tabular-nums tracking-tight">{value}</p>
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      {sub && <p className="text-[11px] text-muted-foreground/80">{sub}</p>}
+    </div>
+  );
+}
+
+// Quick-access card that either switches a workspace tab or links out (Diskusi).
+function QuickCard({
+  icon: Icon,
+  label,
+  desc,
+  tone,
+  onClick,
+  href,
+}: {
+  icon: typeof Users;
+  label: string;
+  desc: string;
+  tone: string;
+  onClick?: () => void;
+  href?: string;
+}) {
+  const inner = (
+    <>
+      <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${tone}`} aria-hidden="true">
+        <Icon className="size-5" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-semibold tracking-tight text-foreground">{label}</p>
+        <p className="truncate text-xs text-muted-foreground">{desc}</p>
+      </div>
+      <ArrowRight className="ml-auto size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+    </>
+  );
+  const cls =
+    "group app-reveal flex items-center gap-3 rounded-[18px] border border-border bg-card p-4 text-left transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(32,31,49,0.08)]";
+  return href ? (
+    <Link href={href} className={cls}>
+      {inner}
+    </Link>
+  ) : (
+    <button type="button" onClick={onClick} className={cls}>
+      {inner}
+    </button>
+  );
+}
+
+function OverviewTab({
+  project,
+  onTab,
+  base,
+}: {
+  project: ProjectDetail;
+  onTab: (t: TabKey) => void;
+  base: string;
+}) {
   const [members, setMembers] = useState<ProjectMember[] | null>(null);
+  const [deliverables, setDeliverables] = useState<Deliverable[]>([]);
   useEffect(() => {
     let active = true;
     projectApi.members(project.id).then((m) => active && setMembers(m)).catch(() => {});
+    deliverableApi.listForProject(project.id).then((d) => active && setDeliverables(d)).catch(() => {});
     return () => {
       active = false;
     };
   }, [project.id]);
+
   const team = (members ?? []).filter((m) => m.status === "ACTIVE");
+  const ms = project.milestones;
+  const doneM = ms.filter((m) => m.status === "COMPLETED").length;
+  const pct = ms.length > 0 ? Math.round((doneM / ms.length) * 100) : 0;
+  const approvedD = deliverables.filter((d) => d.status === "APPROVED").length;
+  const daysLeft = Math.max(0, Math.ceil((new Date(project.deadline).getTime() - Date.now()) / 86_400_000));
+  const diskusiHref = `${base}/${project.id}/workspace/diskusi`;
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Anggota tim + jalan ke detail proyek (judul/status sudah di header halaman). */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-4">
-        <div className="flex items-center gap-3">
-          {team.length > 0 && (
-            <div className="flex -space-x-2">
-              {team.slice(0, 5).map((m) => (
-                <UserAvatar
-                  key={m.user.id}
-                  name={m.user.name}
-                  className="size-8 text-[11px] font-bold ring-2 ring-card bg-[#d8f277] text-[#0b0b0b]"
-                />
-              ))}
-              {team.length > 5 && (
-                <span className="grid size-8 place-items-center rounded-full bg-muted text-[11px] font-bold text-muted-foreground ring-2 ring-card">
-                  +{team.length - 5}
-                </span>
-              )}
-            </div>
-          )}
-          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Users className="size-4" /> {team.length} anggota
-          </span>
-        </div>
-        <Button variant="outline" size="sm" render={<Link href={`${base}/${project.id}`} />}>
-          Lihat Detail Proyek <ArrowRight className="size-4" />
-        </Button>
+      {/* Stat grid */}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatTile icon={TrendingUp} tone="bg-[#eef7d6] text-[#5f8c00]" value={`${pct}%`} label="Progres Proyek" sub={`${doneM}/${ms.length} milestone`} />
+        <StatTile icon={ClipboardList} tone="bg-sky-100 text-sky-700" value={String(deliverables.length)} label="Deliverable" sub={`${approvedD} disetujui`} />
+        <StatTile icon={Users} tone="bg-violet-100 text-violet-700" value={String(team.length)} label="Anggota Tim" sub="Aktif" />
+        <StatTile icon={CalendarDays} tone="bg-rose-100 text-rose-700" value={String(daysLeft)} label="Hari Tersisa" sub="Sebelum deadline" />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-      <Card className="app-reveal md:col-span-2">
-        <CardContent className="space-y-4">
-          <div>
-            <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Deskripsi</h2>
-            <p className="mt-1.5 whitespace-pre-wrap text-sm text-foreground/90">{project.description}</p>
+      {/* Progress bar */}
+      <Card className="app-reveal">
+        <CardContent className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-semibold">Progres Keseluruhan</span>
+            <span className="font-bold tabular-nums text-[#5f8c00]">{pct}%</span>
           </div>
-          <div>
-            <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Ekspektasi Deliverable</h2>
-            <p className="mt-1.5 whitespace-pre-wrap text-sm text-foreground/90">{project.expectedDeliverables}</p>
-          </div>
+          <ProgressBar pct={pct} />
+          <p className="text-xs text-muted-foreground">
+            {ms.length > 0 ? `${doneM} dari ${ms.length} milestone selesai` : "Belum ada milestone"}
+          </p>
         </CardContent>
       </Card>
+
+      {/* Akses cepat ke fitur workspace */}
+      <div>
+        <h2 className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Akses Cepat</h2>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <QuickCard icon={Flag} label="Milestone" desc="Pantau tahapan proyek" tone="bg-[#eef7d6] text-[#5f8c00]" onClick={() => onTab("milestones")} />
+          <QuickCard icon={FileText} label="Deliverables" desc="Kiriman & bukti kerja" tone="bg-sky-100 text-sky-700" onClick={() => onTab("deliverables")} />
+          <QuickCard icon={CheckCircle2} label="Kontribusi" desc="Laporan kontribusi tim" tone="bg-emerald-100 text-emerald-700" onClick={() => onTab("contributions")} />
+          <QuickCard icon={MessageSquare} label="Diskusi" desc="Ruang diskusi & tanya jawab" tone="bg-violet-100 text-violet-700" href={diskusiHref} />
+          <QuickCard icon={Star} label="Review" desc="Penilaian & feedback" tone="bg-amber-100 text-amber-700" onClick={() => onTab("reviews")} />
+          <QuickCard icon={ShieldCheck} label="Sertifikat" desc="Artefak terverifikasi" tone="bg-teal-100 text-teal-700" onClick={() => onTab("artifacts")} />
+        </div>
+      </div>
+
+      {/* Deskripsi + info + tim */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="app-reveal md:col-span-2">
+          <CardContent className="space-y-4">
+            <div>
+              <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Deskripsi</h2>
+              <p className="mt-1.5 whitespace-pre-wrap text-sm text-foreground/90">{project.description}</p>
+            </div>
+            <div>
+              <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Ekspektasi Deliverable</h2>
+              <p className="mt-1.5 whitespace-pre-wrap text-sm text-foreground/90">{project.expectedDeliverables}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex flex-col gap-4">
+          <Card className="app-reveal">
+            <CardContent className="space-y-3">
+              <MetaRow icon={Building2} label="UMKM" value={project.umkm.name} />
+              <MetaRow icon={GraduationCap} label="Mentor" value={project.senior?.name ?? "Belum ada"} />
+              <MetaRow
+                icon={CalendarDays}
+                label="Deadline"
+                value={new Date(project.deadline).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="app-reveal">
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-bold tracking-tight">Tim Proyek</h2>
+                <button type="button" onClick={() => onTab("members")} className="text-xs font-semibold text-[#5f8c00] hover:underline">
+                  Lihat semua
+                </button>
+              </div>
+              {team.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Belum ada anggota aktif.</p>
+              ) : (
+                <ul className="flex flex-col gap-2.5">
+                  {team.slice(0, 5).map((m) => (
+                    <li key={m.user.id} className="flex items-center gap-2.5">
+                      <UserAvatar name={m.user.name} className="size-8 shrink-0 text-[11px] font-bold bg-[#d8f277] text-[#0b0b0b]" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{m.user.name}</p>
+                        <p className="truncate text-xs text-muted-foreground">{m.projectRole.roleName}</p>
+                      </div>
+                    </li>
+                  ))}
+                  {team.length > 5 && (
+                    <li className="text-xs text-muted-foreground">+{team.length - 5} anggota lainnya</li>
+                  )}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Milestone timeline */}
       <Card className="app-reveal">
         <CardContent className="space-y-3">
-          <MetaRow icon={Building2} label="UMKM" value={project.umkm.name} />
-          <MetaRow icon={GraduationCap} label="Mentor" value={project.senior?.name ?? "Belum ada"} />
-          <MetaRow
-            icon={CalendarDays}
-            label="Deadline"
-            value={new Date(project.deadline).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
-          />
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold tracking-tight">Timeline Milestone</h2>
+            <button type="button" onClick={() => onTab("milestones")} className="text-xs font-semibold text-[#5f8c00] hover:underline">
+              Kelola
+            </button>
+          </div>
+          {ms.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Belum ada milestone.</p>
+          ) : (
+            <ol>
+              {ms.map((m, i) => {
+                const done = m.status === "COMPLETED";
+                const current = !done && ms.slice(0, i).every((p) => p.status === "COMPLETED");
+                const last = i === ms.length - 1;
+                return (
+                  <li key={m.id} className="flex gap-3">
+                    <div className="flex flex-col items-center">
+                      {done ? (
+                        <span className="flex size-6 items-center justify-center rounded-full bg-[#d8f277] text-[#0b0b0b]">
+                          <CheckCircle2 className="size-4" />
+                        </span>
+                      ) : current ? (
+                        <span className="size-6 rounded-full border-[3px] border-[#0b0b0b] bg-card" />
+                      ) : (
+                        <span className="size-6 rounded-full border border-border bg-muted" />
+                      )}
+                      {!last && <span className={`w-0.5 flex-1 ${done ? "bg-[#d8f277]" : "bg-border"}`} style={{ minHeight: 20 }} />}
+                    </div>
+                    <div className={last ? "pb-0" : "pb-4"}>
+                      <p className={`text-sm font-semibold ${done ? "text-muted-foreground line-through" : current ? "text-foreground" : ""}`}>
+                        {m.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Tenggat {new Date(m.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                        {current && <span className="ml-2 font-medium text-[#5f8c00]">· Sedang berjalan</span>}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
         </CardContent>
       </Card>
-      </div>
     </div>
   );
 }
