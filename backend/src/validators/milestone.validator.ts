@@ -6,6 +6,11 @@ export const createMilestoneSchema = z.object({
   due_date: z.coerce.date(),
 });
 
-export const updateMilestoneSchema = createMilestoneSchema;
+// Update also allows changing the milestone status (PENDING → IN_PROGRESS →
+// COMPLETED) so the project lead can mark progress; drives the progress bar.
+export const updateMilestoneSchema = createMilestoneSchema.extend({
+  status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED"]).optional(),
+});
 export const milestoneIdParamSchema = z.object({ id: z.string().uuid() });
 export type CreateMilestoneInput = z.infer<typeof createMilestoneSchema>;
+export type UpdateMilestoneInput = z.infer<typeof updateMilestoneSchema>;

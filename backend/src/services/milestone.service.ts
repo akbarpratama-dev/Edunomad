@@ -1,7 +1,7 @@
 import { milestoneRepository } from "../repositories/milestone.repository";
 import { projectRepository } from "../repositories/project.repository";
 import { ForbiddenError, NotFoundError } from "../utils/errors";
-import type { CreateMilestoneInput } from "../validators/milestone.validator";
+import type { CreateMilestoneInput, UpdateMilestoneInput } from "../validators/milestone.validator";
 
 // Milestone management is allowed for the project owner (UMKM) or the assigned
 // senior (project lead) — merges API spec (SENIOR) + task 3.1.4 (UMKM at create).
@@ -33,7 +33,7 @@ export const milestoneService = {
     });
   },
 
-  async update(userId: string, milestoneId: string, input: CreateMilestoneInput) {
+  async update(userId: string, milestoneId: string, input: UpdateMilestoneInput) {
     const milestone = await milestoneRepository.findById(milestoneId);
     if (!milestone) throw new NotFoundError("Milestone not found");
     await assertManager(userId, milestone.projectId);
@@ -41,6 +41,7 @@ export const milestoneService = {
       title: input.title,
       description: input.description ?? null,
       dueDate: input.due_date,
+      ...(input.status ? { status: input.status } : {}),
     });
   },
 

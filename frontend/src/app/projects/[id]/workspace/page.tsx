@@ -18,6 +18,9 @@ import {
   ShieldCheck,
   CheckCircle2,
   Flag,
+  Plus,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
@@ -40,11 +43,32 @@ import { ArtifactTab } from "@/components/workspace/ArtifactTab";
 import { DirectMessageDialog } from "@/components/workspace/DirectMessageDialog";
 import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import {
   projectApi,
   PROJECT_STATUS_META,
   type ProjectDetail,
   type ProjectMember,
+  type Milestone,
+  type MilestoneStatus,
 } from "@/services/projectApi";
 
 type TabKey =
@@ -398,41 +422,243 @@ function OverviewTab({
   );
 }
 
+const MS_STATUS_META: Record<MilestoneStatus, { label: string; className: string }> = {
+  PENDING: { label: "Belum Mulai", className: "border-border bg-muted text-muted-foreground" },
+  IN_PROGRESS: { label: "Berjalan", className: "border-amber-300 bg-amber-50 text-amber-700" },
+  COMPLETED: { label: "Selesai", className: "border-emerald-300 bg-emerald-50 text-emerald-700" },
+};
+const MS_STATUS_ORDER: MilestoneStatus[] = ["PENDING", "IN_PROGRESS", "COMPLETED"];
+
+// yyyy-mm-dd for <input type="date"> (from an ISO string).
+function toDateInput(iso: string): string {
+  return new Date(iso).toISOString().slice(0, 10);
+}
+
 function MilestonesTab({ project }: { project: ProjectDetail }) {
-  if (project.milestones.length === 0) {
-    return (
-      <EmptyState
-        icon={CalendarClock}
-        heading="Belum Ada Milestone"
-        message="Milestone proyek akan tampil di sini setelah ditetapkan."
-      />
-    );
-  }
+  const appId = useAuthStore((s) => s.appUser?.id);
+  const isManager = !!appId && (appId === project.senior?.id || appId === project.umkm.id);
+  const [items, setItems] = useState<Milestone[]>(project.milestones);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<Milestone | null>(null);
+  const [deleting, setDeleting] = useState<Milestone | null>(null);
+  const [busy, setBusy] = useState(false);
+  // form fields
+  const [fTitle, setFTitle] = useState("");
+  const [fDesc, setFDesc] = useState("");
+  const [fDue, setFDue] = useState("");
+  const [fStatus, setFStatus] = useState<MilestoneStatus>("PENDING");
+
+  const openCreate = () => {
+    setEditing(null);
+    setFTitle("");
+    setFDesc("");
+    setFDue("");
+    setFStatus("PENDING");
+    setDialogOpen(true);
+  };
+  const openEdit = (m: Milestone) => {
+    setEditing(m);
+    setFTitle(m.title);
+    setFDesc(m.description ?? "");
+    setFDue(toDateInput(m.dueDate));
+    setFStatus((m.status as MilestoneStatus) ?? "PENDING");
+    setDialogOpen(true);
+  };
+
+  const save = async () => {
+    if (!fTitle.trim()) return toast.error("Judul milestone wajib diisi");
+    if (!fDue) return toast.error("Tenggat wajib diisi");
+    setBusy(true);
+    try {
+      if (editing) {
+        const updated = await projectApi.updateMilestone(editing.id, {
+          title: fTitle.trim(),
+          description: fDesc.trim() || undefined,
+          due_date: fDue,
+          status: fStatus,
+        });
+        setItems((xs) => xs.map((x) => (x.id === updated.id ? updated : x)));
+        toast.success("Milestone diperbarui");
+      } else {
+        const created = await projectApi.addMilestone(project.id, {
+          title: fTitle.trim(),
+          description: fDesc.trim() || undefined,
+          due_date: fDue,
+        });
+        setItems((xs) => [...xs, created]);
+        toast.success("Milestone ditambahkan");
+      }
+      setDialogOpen(false);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal menyimpan milestone");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const changeStatus = async (m: Milestone, status: MilestoneStatus) => {
+    try {
+      const updated = await projectApi.updateMilestone(m.id, {
+        title: m.title,
+        description: m.description ?? undefined,
+        due_date: toDateInput(m.dueDate),
+        status,
+      });
+      setItems((xs) => xs.map((x) => (x.id === updated.id ? updated : x)));
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal mengubah status");
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleting) return;
+    setBusy(true);
+    try {
+      await projectApi.deleteMilestone(deleting.id);
+      setItems((xs) => xs.filter((x) => x.id !== deleting.id));
+      toast.success("Milestone dihapus");
+      setDeleting(null);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal menghapus milestone");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-3">
-      {project.milestones.map((m, i) => (
-        <article
-          key={m.id}
-          style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
-          className="app-reveal flex items-start justify-between gap-4 rounded-[20px] border border-border bg-card p-5"
-        >
-          <div className="flex min-w-0 gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]" aria-hidden="true">
-              <CalendarClock className="size-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="font-semibold tracking-tight">{m.title}</p>
-              {m.description && (
-                <p className="mt-0.5 text-sm text-muted-foreground">{m.description}</p>
-              )}
-              <p className="mt-1 text-xs text-muted-foreground">
-                Tenggat {new Date(m.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
-              </p>
-            </div>
+      {isManager && (
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">{items.length} milestone</p>
+          <Button size="sm" onClick={openCreate}>
+            <Plus className="size-4" /> Tambah Milestone
+          </Button>
+        </div>
+      )}
+
+      {items.length === 0 ? (
+        isManager ? (
+          <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border py-14 text-center">
+            <CalendarClock className="size-8 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Belum ada milestone. Tambahkan tahapan pertama.</p>
+            <Button size="sm" onClick={openCreate}>
+              <Plus className="size-4" /> Tambah Milestone
+            </Button>
           </div>
-          <Badge variant="outline" className="shrink-0">{m.status}</Badge>
-        </article>
-      ))}
+        ) : (
+          <EmptyState
+            icon={CalendarClock}
+            heading="Belum Ada Milestone"
+            message="Milestone proyek akan tampil di sini setelah ditetapkan."
+          />
+        )
+      ) : (
+        items.map((m, i) => {
+          const meta = MS_STATUS_META[(m.status as MilestoneStatus) ?? "PENDING"];
+          return (
+            <article
+              key={m.id}
+              style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+              className="app-reveal flex flex-col gap-3 rounded-[20px] border border-border bg-card p-5 sm:flex-row sm:items-start sm:justify-between"
+            >
+              <div className="flex min-w-0 gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eef7d6] text-[#5f8c00]" aria-hidden="true">
+                  <CalendarClock className="size-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-semibold tracking-tight">{m.title}</p>
+                  {m.description && <p className="mt-0.5 text-sm text-muted-foreground">{m.description}</p>}
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Tenggat {new Date(m.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">
+                {isManager ? (
+                  <>
+                    <Select value={m.status} onValueChange={(v) => v && changeStatus(m, v as MilestoneStatus)}>
+                      <SelectTrigger className="h-8 w-[140px] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MS_STATUS_ORDER.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {MS_STATUS_META[s].label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button variant="outline" size="icon" className="size-8" onClick={() => openEdit(m)} aria-label="Edit milestone">
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="size-8" onClick={() => setDeleting(m)} aria-label="Hapus milestone">
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <Badge variant="outline" className={meta.className}>{meta.label}</Badge>
+                )}
+              </div>
+            </article>
+          );
+        })
+      )}
+
+      {/* Create / Edit dialog */}
+      <Dialog open={dialogOpen} onOpenChange={(o) => !busy && setDialogOpen(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editing ? "Edit Milestone" : "Tambah Milestone"}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="ms-title">Judul</Label>
+              <Input id="ms-title" placeholder="cth. Setup Proyek & Desain UI" value={fTitle} maxLength={255} onChange={(e) => setFTitle(e.target.value)} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="ms-desc">Deskripsi (opsional)</Label>
+              <Textarea id="ms-desc" placeholder="Detail tahapan…" value={fDesc} onChange={(e) => setFDesc(e.target.value)} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="ms-due">Tenggat</Label>
+              <Input id="ms-due" type="date" value={fDue} onChange={(e) => setFDue(e.target.value)} />
+            </div>
+            {editing && (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="ms-status">Status</Label>
+                <Select value={fStatus} onValueChange={(v) => v && setFStatus(v as MilestoneStatus)}>
+                  <SelectTrigger id="ms-status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MS_STATUS_ORDER.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {MS_STATUS_META[s].label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={busy}>Batal</Button>
+            <Button onClick={save} disabled={busy}>{busy ? "Menyimpan…" : editing ? "Simpan" : "Tambah"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={!!deleting}
+        onOpenChange={(o) => !o && setDeleting(null)}
+        title="Hapus Milestone"
+        description={`Yakin ingin menghapus milestone "${deleting?.title}"?`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        destructive
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

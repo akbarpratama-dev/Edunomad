@@ -131,10 +131,12 @@ export interface ProjectBasicInput {
   start_date: string;
   deadline: string;
 }
+export type MilestoneStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED";
 export interface MilestoneInput {
   title: string;
   description?: string;
   due_date: string;
+  status?: MilestoneStatus; // only honored by updateMilestone
 }
 export interface RoleInput {
   role_name: string;
@@ -229,6 +231,11 @@ export const projectApi = {
       `/projects/${projectId}/milestones`,
       input
     );
+    return res.data.data;
+  },
+
+  async updateMilestone(milestoneId: string, input: MilestoneInput): Promise<Milestone> {
+    const res = await apiClient.put<Envelope<Milestone>>(`/milestones/${milestoneId}`, input);
     return res.data.data;
   },
 
