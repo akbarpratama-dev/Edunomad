@@ -200,6 +200,82 @@ git push origin feature/nama-fitur       # lalu buka PR di GitHub
 
 ---
 
+## Panduan Penggunaan Aplikasi (Alur Bisnis)
+
+Bagian ini menjelaskan cara memakai aplikasi **yang sudah dihosting** (cukup buka URL aplikasi di browser), mulai dari mendaftar sampai memperoleh sertifikat, untuk keempat peran.
+
+### 0. Onboarding — Daftar, Pilih Peran & Isi Form
+
+Alur pendaftaran bertahap (sama untuk semua peran, dengan sedikit perbedaan isi form):
+
+1. **Buat Akun** — buka **Daftar** → isi **email & password** → klik *Buat Akun*.
+2. **Pilih Peran** — pilih salah satu: **Mahasiswa (Beginner)**, **Mentor (Senior)**, atau **UMKM**.
+3. **Data Diri** — lengkapi profil (nama, headline, dan info sesuai peran: Mentor mengisi keahlian/pengalaman, UMKM mengisi info usaha).
+4. **Portofolio** — isi bio singkat dan tautan (GitHub/LinkedIn/Behance/website) — opsional tapi disarankan untuk Mahasiswa & Mentor.
+5. **Keahlian (Skill)** — pilih skill yang dikuasai dan minat belajar (relevan untuk Mahasiswa & Mentor). Setelah selesai, kamu masuk ke **Dashboard**.
+6. **Login** berikutnya cukup lewat halaman **Masuk** (email + password).
+7. **Verifikasi Akun** — akun baru berstatus *belum terverifikasi*. Beberapa aksi (melamar, membuat proyek) butuh status **Terverifikasi**. Ajukan verifikasi dari profil; **Admin** meninjau dan menyetujui.
+
+> Elemen tetap di semua halaman: **lonceng Notifikasi** (real-time), menu **Profil**, dan **Dashboard** sesuai peran.
+
+### 1. Alur Bisnis Inti (ringkas)
+
+```
+UMKM buat proyek → Admin setujui → Senior melamar & dipilih UMKM
+→ Beginner melamar & dipilih Senior → Senior mulai proyek
+→ tim kerja (deliverable, kontribusi, diskusi) → Senior & UMKM review
+→ Senior ajukan penyelesaian → UMKM konfirmasi → SERTIFIKAT terbit (ber-QR, verifikasi publik)
+```
+
+### 2. Panduan UMKM
+
+1. **Buat Proyek** — Dashboard → **Proyek Saya** → **Buat Proyek**. Isi wizard: info dasar (judul, deskripsi, hasil yang diharapkan), **gambar sampul**, **milestone**, dan **peran + skill** yang dibutuhkan.
+2. **Ajukan ke Admin** — klik **Ajukan Proyek** (status *Menunggu Tinjauan*), tunggu persetujuan.
+3. **Rekrut Mentor** — setelah disetujui (*Rekrutmen*): buka proyek → **Kelola Lamaran Senior** → **Terima** satu mentor.
+4. **Pantau** — ikuti progres & ikut **Diskusi**.
+5. **Konfirmasi Penyelesaian** — saat mentor mengajukan penyelesaian, **Konfirmasi** + **beri review** anggota & mentor. Proyek *Selesai*, sertifikat terbit.
+
+> Batasan: UMKM maksimal **5 proyek aktif**.
+
+### 3. Panduan Senior (Mentor)
+
+1. **Lamar Mentor** — **Jelajahi Proyek** → pilih proyek *Rekrutmen* → **Lamar sebagai Mentor**. UMKM yang memilih.
+2. **Seleksi Anggota (bantuan AI)** — buka daftar pelamar → aktifkan **"Urutkan berdasarkan kecocokan AI"** (skor + skill cocok/kurang + alasan) → **Terima / Tolak**.
+3. **Mulai Proyek** — setelah tim lengkap, klik **Mulai Proyek** (status *Aktif*).
+4. **Bimbing di Ruang Kerja** — pantau **milestone**; tinjau **deliverable** (*Setujui* / *Minta Revisi* + feedback); setujui **laporan kontribusi**; koordinasi via **Diskusi / DM**.
+5. **Beri Review** — nilai tiap anggota (bintang + komentar).
+6. **Ajukan Penyelesaian** — bila deliverable & kontribusi disetujui dan review lengkap → **Ajukan Penyelesaian**. Setelah UMKM konfirmasi, **sertifikat per anggota terbit**.
+
+> Batasan: Senior maksimal **5 proyek aktif**; satu proyek = **satu** Senior.
+
+### 4. Panduan Beginner (Mahasiswa)
+
+1. **Cari & Lamar** — **Jelajahi Proyek** → pilih **peran** sesuai keahlian → lihat **Rekomendasi Portofolio AI** → isi **motivasi** → **Kirim Lamaran**.
+2. **Bergabung** — jika diterima, kamu jadi anggota *Aktif* dan bisa masuk **Ruang Kerja**.
+3. **Berkolaborasi** — kirim **deliverable** (bukti tautan/berkas), buat **laporan kontribusi** (ringkasan + skill), ikut/**buat topik diskusi**.
+4. **Terima Review** — lihat penilaian mentor & UMKM di **Review Saya**.
+5. **Sertifikat & Portofolio** — setelah proyek selesai, **Sertifikat** muncul di **Profil** (tab Sertifikat) + ringkasan kontribusi. Sertifikat punya **QR** untuk verifikasi publik.
+6. **Ringkasan Profesional AI** — kartu ringkasan otomatis di profil.
+
+> Batasan: boleh melamar banyak proyek, tetapi hanya **satu proyek Aktif** pada satu waktu.
+
+### 5. Panduan Admin
+
+1. **Persetujuan Proyek** — Dashboard Admin → antrian proyek *Menunggu Tinjauan* → **Setujui** / **Tolak** (beri alasan).
+2. **Verifikasi Akun** — tinjau antrian verifikasi → **Setujui / Tolak**; status pengguna langsung diperbarui.
+3. **Monitoring Proyek** — **Pantau Proyek**: seluruh proyek lintas status + mentor + jumlah anggota.
+4. **Ganti Mentor** — pada proyek aktif, ganti mentor dengan Senior lain yang memenuhi syarat (terverifikasi, kapasitas < 5); kedua mentor dapat notifikasi.
+5. **Kelola Skill** — setujui/tolak skill kustom sebelum jadi master skill.
+
+### 6. Fitur AI, Diskusi & Verifikasi
+
+- **AI** (pembantu, tidak wajib — bila AI mati, aplikasi tetap jalan): pemeringkatan kandidat (Senior), rekomendasi portofolio (Beginner), ringkasan profesional (Beginner & Senior).
+- **Diskusi grup**: semua peserta proyek — termasuk **Beginner** — dapat **membuat topik**, membalas, memberi reaksi, melampirkan berkas. **Pin** hanya mentor/UMKM. **Pesan Langsung (DM)** antar peserta proyek.
+- **Notifikasi real-time** di lonceng untuk tiap aktivitas penting.
+- **Verifikasi sertifikat publik**: setiap sertifikat punya **kode + QR**; siapa pun (mis. perusahaan) bisa mengecek keasliannya lewat halaman verifikasi publik tanpa login.
+
+---
+
 ## Dokumentasi
 
 Spesifikasi lengkap ada di folder `/docs` (PRD, ERD, Database Schema, API Specification, RBAC & Business Rules, Workflow Map, UI Spec). Aturan pengembangan ada di `CLAUDE.MD`.
