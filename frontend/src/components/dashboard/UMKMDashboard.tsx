@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { useAuthStore } from "@/stores/authStore";
 import { projectApi, type ProjectListItem } from "@/services/projectApi";
+import { applicationApi } from "@/services/applicationApi";
+import { artifactApi } from "@/services/artifactApi";
 import {
   Panel,
   StatCard,
@@ -14,20 +16,55 @@ import {
   CardHead,
   AgendaCard,
   ProjectMiniRow,
-  PlaceholderActivityCard,
-  PlaceholderNotifCard,
+  ActivityCard,
+  NotifCard,
   type AgendaItem,
 } from "./dashboardKit";
 
 export function UMKMDashboard() {
   const appUser = useAuthStore((s) => s.appUser)!;
   const [projects, setProjects] = useState<ProjectListItem[] | null>(null);
+  // Real aggregates derived once projects load (see effect below).
+  const [pendingSenior, setPendingSenior] = useState(0);
+  const [reviewProjectId, setReviewProjectId] = useState<string | null>(null);
+  const [certCount, setCertCount] = useState(0);
 
   useEffect(() => {
     let active = true;
     projectApi
       .myProjects({ limit: 100 })
-      .then((r) => active && setProjects(r.data))
+      .then(async (r) => {
+        if (!active) return;
+        setProjects(r.data);
+
+        // Pending senior applications across RECRUITING projects → "Lamaran Senior".
+        const recruiting = r.data.filter((p) => p.status === "RECRUITING");
+        const seniorLists = await Promise.all(
+          recruiting.map((p) =>
+            applicationApi.projectSeniorApplications(p.id).catch(() => [])
+          )
+        );
+        if (!active) return;
+        let total = 0;
+        let firstNeedsReview: string | null = null;
+        recruiting.forEach((p, i) => {
+          const pending = seniorLists[i].filter((a) => a.status === "PENDING").length;
+          total += pending;
+          if (pending > 0 && !firstNeedsReview) firstNeedsReview = p.id;
+        });
+        setPendingSenior(total);
+        setReviewProjectId(firstNeedsReview);
+
+        // Issued certificates across finished/finishing projects → "Sertifikat Terbit".
+        const finished = r.data.filter(
+          (p) => p.status === "COMPLETED" || p.status === "AWAITING_COMPLETION"
+        );
+        const artifactLists = await Promise.all(
+          finished.map((p) => artifactApi.listForProject(p.id).catch(() => []))
+        );
+        if (!active) return;
+        setCertCount(artifactLists.reduce((sum, a) => sum + a.length, 0));
+      })
       .catch(() => active && setProjects([]));
     return () => {
       active = false;
@@ -73,22 +110,34 @@ export function UMKMDashboard() {
           trend="Membuka lowongan tim"
           trendTone="text-amber-600"
         />
-        <StatCard
-          icon={FileSignature}
-          tone="bg-sky-100 text-sky-700"
-          value="4"
-          label="Lamaran Senior"
-          trend="Perlu ditinjau"
-          trendTone="text-amber-600"
-          sample
-        />
+        {reviewProjectId ? (
+          <Link href={`/my-projects/${reviewProjectId}/manage`} className="block">
+            <StatCard
+              icon={FileSignature}
+              tone="bg-sky-100 text-sky-700"
+              value={String(pendingSenior)}
+              label="Lamaran Senior"
+              trend="Perlu ditinjau →"
+              trendTone="text-amber-600"
+            />
+          </Link>
+        ) : (
+          <StatCard
+            icon={FileSignature}
+            tone="bg-sky-100 text-sky-700"
+            value={String(pendingSenior)}
+            label="Lamaran Senior"
+            trend={pendingSenior > 0 ? "Perlu ditinjau" : "Tidak ada yang menunggu"}
+            trendTone={pendingSenior > 0 ? "text-amber-600" : "text-muted-foreground"}
+          />
+        )}
         <StatCard
           icon={Award}
           tone="bg-amber-100 text-amber-700"
-          value="0"
+          value={String(certCount)}
           label="Sertifikat Terbit"
-          trend="Terbit usai proyek selesai"
-          trendTone="text-muted-foreground"
+          trend={certCount > 0 ? "Sudah diterbitkan" : "Terbit usai proyek selesai"}
+          trendTone={certCount > 0 ? "text-[#5f8c00]" : "text-muted-foreground"}
         />
       </div>
 
@@ -133,10 +182,10 @@ export function UMKMDashboard() {
           </Link>
         </Panel>
 
-        <PlaceholderActivityCard />
+        <ActivityCard />
 
         <div className="flex flex-col gap-4">
-          <PlaceholderNotifCard />
+          <NotifCard />
           <AgendaCard items={agenda} />
         </div>
       </div>

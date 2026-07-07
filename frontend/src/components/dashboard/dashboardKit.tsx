@@ -7,12 +7,21 @@ import {
   ClipboardCheck,
   BadgeCheck,
   FileText,
+  Star,
+  Award,
+  Briefcase,
+  ShieldCheck,
+  Bell,
+  UserPlus,
+  UserX,
+  GraduationCap,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/common/UserAvatar";
 import { PROJECT_STATUS_META, type ProjectListItem } from "@/services/projectApi";
+import { useNotificationStore, type AppNotification } from "@/stores/notificationStore";
 
 // ── primitives ───────────────────────────────────────────────────────────────
 export function initials(name: string) {
@@ -61,10 +70,10 @@ export function Panel({ className, children }: { className?: string; children: R
 export function WelcomeHeader({ name, subtitle }: { name: string; subtitle: string }) {
   return (
     <div className="app-reveal">
-      <h1 className="text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">
+      <h1 className="text-h1 tracking-tight text-balance">
         Selamat datang kembali, {name}! <span className="align-middle">👋</span>
       </h1>
-      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{subtitle}</p>
+      <p className="mt-1.5 max-w-[65ch] text-body-lg text-pretty text-muted-foreground">{subtitle}</p>
     </div>
   );
 }
@@ -142,97 +151,139 @@ export function AgendaCard({ items }: { items: AgendaItem[] }) {
   );
 }
 
-// Placeholder activity feed — no activity-feed backend yet (Phase 9).
-const SAMPLE_ACTIVITY = [
-  {
-    who: "Budi Santoso",
-    text: "memberikan feedback pada desain UI/UX.",
-    time: "2 jam lalu",
-    icon: MessageSquare,
-    tone: "bg-violet-100 text-violet-700",
-  },
-  {
-    who: "Tugas",
-    text: '"Revisi Landing Page" diperbarui.',
-    time: "4 jam lalu",
-    icon: ClipboardCheck,
-    tone: "bg-sky-100 text-sky-700",
-  },
-  {
-    who: "Sertifikat",
-    text: '"Sistem Kasir UMKM" berhasil diverifikasi.',
-    time: "1 hari lalu",
-    icon: BadgeCheck,
-    tone: "bg-[#eef7d6] text-[#5f8c00]",
-  },
-  {
-    who: "Rina Hidayah",
-    text: "mengunggah file baru di diskusi.",
-    time: "1 hari lalu",
-    icon: FileText,
-    tone: "bg-amber-100 text-amber-700",
-  },
-];
+// ── real notifications feed (Phase 9) ────────────────────────────────────────
+// The notification store is bootstrapped app-wide by NotificationProvider and
+// kept live via Supabase Realtime, so these cards read straight from it — no
+// extra fetch. Icon/tone are derived from the notification type.
+const NOTIF_META: Record<string, { icon: LucideIcon; tone: string }> = {
+  APPLICATION_ACCEPTED: { icon: UserPlus, tone: "bg-[#eef7d6] text-[#5f8c00]" },
+  APPLICATION_REJECTED: { icon: UserX, tone: "bg-rose-100 text-rose-700" },
+  DELIVERABLE_SUBMITTED: { icon: FileText, tone: "bg-sky-100 text-sky-700" },
+  DELIVERABLE_APPROVED: { icon: ClipboardCheck, tone: "bg-[#eef7d6] text-[#5f8c00]" },
+  DELIVERABLE_REVISION: { icon: FileText, tone: "bg-amber-100 text-amber-700" },
+  CONTRIBUTION_APPROVED: { icon: BadgeCheck, tone: "bg-[#eef7d6] text-[#5f8c00]" },
+  REVIEW_RECEIVED: { icon: Star, tone: "bg-amber-100 text-amber-700" },
+  ARTIFACT_GENERATED: { icon: Award, tone: "bg-[#eef7d6] text-[#5f8c00]" },
+  VERIFICATION_APPROVED: { icon: ShieldCheck, tone: "bg-[#eef7d6] text-[#5f8c00]" },
+  VERIFICATION_REJECTED: { icon: ShieldCheck, tone: "bg-rose-100 text-rose-700" },
+  PROJECT_APPROVED: { icon: Briefcase, tone: "bg-[#eef7d6] text-[#5f8c00]" },
+  PROJECT_REJECTED: { icon: Briefcase, tone: "bg-rose-100 text-rose-700" },
+  COMPLETION_REQUESTED: { icon: ClipboardCheck, tone: "bg-violet-100 text-violet-700" },
+  MEMBER_REMOVED: { icon: UserX, tone: "bg-rose-100 text-rose-700" },
+  SENIOR_ASSIGNED: { icon: GraduationCap, tone: "bg-[#eef7d6] text-[#5f8c00]" },
+  SENIOR_REMOVED: { icon: GraduationCap, tone: "bg-rose-100 text-rose-700" },
+};
 
-export function PlaceholderActivityCard() {
+function notifMeta(type: string) {
+  return NOTIF_META[type] ?? { icon: MessageSquare, tone: "bg-muted text-muted-foreground" };
+}
+
+// Relative "x lalu" timestamp in Indonesian.
+export function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return "Baru saja";
+  if (min < 60) return `${min} menit lalu`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} jam lalu`;
+  const day = Math.floor(hr / 24);
+  if (day < 7) return `${day} hari lalu`;
+  const wk = Math.floor(day / 7);
+  if (wk < 5) return `${wk} minggu lalu`;
+  return new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+}
+
+// Recent activity feed — real notifications rendered as an activity stream.
+export function ActivityCard({ limit = 5 }: { limit?: number }) {
+  const notifications = useNotificationStore((s) => s.notifications);
+  const items = notifications.slice(0, limit);
+
   return (
     <Panel className="app-reveal flex flex-col p-5">
-      <div className="flex items-center gap-2">
-        <h2 className="text-base font-bold tracking-tight">Aktivitas Terbaru</h2>
-        <SampleTag />
-      </div>
-      <ul className="mt-4 flex-1 space-y-4">
-        {SAMPLE_ACTIVITY.map((a) => (
-          <li key={a.text} className="flex gap-3">
-            <span className={cn("grid size-9 shrink-0 place-items-center rounded-xl", a.tone)}>
-              <a.icon className="size-4" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm leading-snug">
-                <span className="font-semibold">{a.who}</span> {a.text}
-              </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{a.time}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
-      <button
-        disabled
-        title="Segera hadir"
-        className="mt-4 w-full cursor-not-allowed rounded-2xl border border-border py-2.5 text-sm font-semibold text-muted-foreground opacity-60"
-      >
-        Lihat Semua Aktivitas
-      </button>
+      <CardHead title="Aktivitas Terbaru" href="/notifications" />
+      {items.length === 0 ? (
+        <div className="mt-4 flex flex-1 flex-col items-center justify-center gap-2 py-10 text-center">
+          <Bell className="size-7 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Belum ada aktivitas.</p>
+        </div>
+      ) : (
+        <ul className="mt-4 flex-1 space-y-4">
+          {items.map((n) => {
+            const meta = notifMeta(n.type);
+            return (
+              <li key={n.id}>
+                <Link
+                  href={n.actionUrl || "/notifications"}
+                  className="group -m-1.5 flex gap-3 rounded-xl p-1.5 transition-colors hover:bg-muted/50"
+                >
+                  <span className={cn("grid size-9 shrink-0 place-items-center rounded-xl", meta.tone)}>
+                    <meta.icon className="size-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-snug">{n.title}</p>
+                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">{n.message}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(n.createdAt)}</p>
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </Panel>
   );
 }
 
-const SAMPLE_NOTIF = [
-  { text: 'Deadline tugas "Revisi Landing Page" tinggal 2 hari lagi.', time: "2 jam lalu", unread: true },
-  { text: "Mentor memberikan feedback baru pada proyek Anda.", time: "4 jam lalu", unread: true },
-  { text: 'Diskusi baru pada proyek "Sistem Kasir UMKM".', time: "6 jam lalu", unread: false },
-];
+// Notifications card — unread-first view of the same live store.
+export function NotifCard({ limit = 5 }: { limit?: number }) {
+  const notifications = useNotificationStore((s) => s.notifications);
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
+  const unread = notifications.filter((n) => !n.isRead);
+  const items: AppNotification[] = (unread.length > 0 ? unread : notifications).slice(0, limit);
 
-export function PlaceholderNotifCard() {
   return (
     <Panel className="app-reveal p-5">
-      <div className="flex items-center gap-2">
-        <h2 className="text-base font-bold tracking-tight">Notifikasi</h2>
-        <SampleTag />
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-bold tracking-tight">Notifikasi</h2>
+          {unreadCount > 0 && (
+            <span className="grid min-w-5 place-items-center rounded-full bg-[#8ef05a] px-1.5 text-[11px] font-bold text-[#0b0b0b]">
+              {unreadCount}
+            </span>
+          )}
+        </div>
+        <Link
+          href="/notifications"
+          className="rounded-full border border-border px-3 py-1 text-xs font-semibold transition-colors hover:bg-muted"
+        >
+          Lihat Semua
+        </Link>
       </div>
-      <ul className="mt-4 space-y-4">
-        {SAMPLE_NOTIF.map((n) => (
-          <li key={n.text} className="flex items-start gap-2.5">
-            <span
-              className={cn("mt-1.5 size-2 shrink-0 rounded-full", n.unread ? "bg-[#8ef05a]" : "bg-border")}
-            />
-            <div className="min-w-0">
-              <p className="text-sm leading-snug text-foreground/90">{n.text}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{n.time}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
+      {items.length === 0 ? (
+        <p className="mt-4 text-sm text-muted-foreground">Tidak ada notifikasi baru.</p>
+      ) : (
+        <ul className="mt-4 space-y-4">
+          {items.map((n) => (
+            <li key={n.id}>
+              <Link
+                href={n.actionUrl || "/notifications"}
+                className="group flex items-start gap-2.5"
+              >
+                <span
+                  className={cn("mt-1.5 size-2 shrink-0 rounded-full", !n.isRead ? "bg-[#8ef05a]" : "bg-border")}
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium leading-snug text-foreground/90 group-hover:text-foreground">
+                    {n.title}
+                  </p>
+                  <p className="line-clamp-1 text-xs text-muted-foreground">{n.message}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(n.createdAt)}</p>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </Panel>
   );
 }

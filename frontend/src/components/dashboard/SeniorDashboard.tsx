@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { GraduationCap, FileSignature, ClipboardCheck, Award, Search } from "lucide-react";
+import { GraduationCap, FileSignature, Users, Award, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { useAuthStore } from "@/stores/authStore";
 import { projectApi, type ProjectListItem } from "@/services/projectApi";
+import { artifactApi } from "@/services/artifactApi";
 import {
   applicationApi,
   APPLICATION_STATUS_META,
@@ -20,7 +21,7 @@ import {
   CardHead,
   AgendaCard,
   ProjectMiniRow,
-  PlaceholderActivityCard,
+  ActivityCard,
   type AgendaItem,
 } from "./dashboardKit";
 
@@ -28,12 +29,24 @@ export function SeniorDashboard() {
   const appUser = useAuthStore((s) => s.appUser)!;
   const [projects, setProjects] = useState<ProjectListItem[] | null>(null);
   const [apps, setApps] = useState<SeniorApplicationMine[]>([]);
+  const [certCount, setCertCount] = useState(0);
 
   useEffect(() => {
     let active = true;
     projectApi
       .mentoredProjects()
-      .then((p) => active && setProjects(p))
+      .then(async (p) => {
+        if (!active) return;
+        setProjects(p);
+        // Issued certificates across finished/finishing mentored projects.
+        const finished = p.filter(
+          (x) => x.status === "COMPLETED" || x.status === "AWAITING_COMPLETION"
+        );
+        const lists = await Promise.all(
+          finished.map((x) => artifactApi.listForProject(x.id).catch(() => []))
+        );
+        if (active) setCertCount(lists.reduce((sum, a) => sum + a.length, 0));
+      })
       .catch(() => active && setProjects([]));
     applicationApi
       .mySeniorApplications()
@@ -48,6 +61,10 @@ export function SeniorDashboard() {
   const activeCount = list.filter((p) => p.status === "ACTIVE").length;
   const recruitingCount = list.filter((p) => p.status === "RECRUITING").length;
   const pendingApps = apps.filter((a) => a.status === "PENDING");
+  // Students mentored = active members across the mentor's ACTIVE projects.
+  const mentoredStudents = list
+    .filter((p) => p.status === "ACTIVE")
+    .reduce((sum, p) => sum + (p.projectMembers?.length ?? 0), 0);
 
   const agenda: AgendaItem[] = useMemo(
     () =>
@@ -85,21 +102,20 @@ export function SeniorDashboard() {
           trendTone="text-amber-600"
         />
         <StatCard
-          icon={ClipboardCheck}
+          icon={Users}
           tone="bg-sky-100 text-sky-700"
-          value="3"
-          label="Review Tertunda"
-          trend="Deliverable & kontribusi"
-          trendTone="text-amber-600"
-          sample
+          value={String(mentoredStudents)}
+          label="Mahasiswa Dibimbing"
+          trend={mentoredStudents > 0 ? "Di proyek aktif" : "Belum ada"}
+          trendTone="text-[#5f8c00]"
         />
         <StatCard
           icon={Award}
           tone="bg-amber-100 text-amber-700"
-          value="0"
+          value={String(certCount)}
           label="Sertifikat Terbit"
-          trend="Terbit usai proyek selesai"
-          trendTone="text-muted-foreground"
+          trend={certCount > 0 ? "Sudah diterbitkan" : "Terbit usai proyek selesai"}
+          trendTone={certCount > 0 ? "text-[#5f8c00]" : "text-muted-foreground"}
         />
       </div>
 
@@ -138,7 +154,7 @@ export function SeniorDashboard() {
           )}
         </Panel>
 
-        <PlaceholderActivityCard />
+        <ActivityCard />
 
         <div className="flex flex-col gap-4">
           {/* Lamaran Mentor Saya (real) */}

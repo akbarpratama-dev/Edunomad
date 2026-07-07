@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Briefcase, ClipboardCheck, Award, Users, Plus } from "lucide-react";
+import { Briefcase, CheckCircle2, Award, Star, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ListSkeleton } from "@/components/common/LoadingState";
+import { ProjectThumb } from "@/components/artifact/shared";
 import { useAuthStore } from "@/stores/authStore";
 import { projectApi, type MyMembership } from "@/services/projectApi";
+import { profileApi, type ProfileStats } from "@/services/profileApi";
 import {
   Avatar,
   Panel,
@@ -15,14 +17,15 @@ import {
   WelcomeHeader,
   CardHead,
   AgendaCard,
-  PlaceholderActivityCard,
-  PlaceholderNotifCard,
+  ActivityCard,
+  NotifCard,
   type AgendaItem,
 } from "./dashboardKit";
 
 export function BeginnerDashboard() {
   const appUser = useAuthStore((s) => s.appUser)!;
   const [memberships, setMemberships] = useState<MyMembership[] | null>(null);
+  const [stats, setStats] = useState<ProfileStats | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -30,10 +33,14 @@ export function BeginnerDashboard() {
       .myMemberships()
       .then((m) => active && setMemberships(m))
       .catch(() => active && setMemberships([]));
+    profileApi
+      .getOverview(appUser.id)
+      .then((o) => active && setStats(o.stats))
+      .catch(() => {});
     return () => {
       active = false;
     };
-  }, []);
+  }, [appUser.id]);
 
   const activeProjects = useMemo(
     () => (memberships ?? []).filter((m) => m.project.status === "ACTIVE"),
@@ -71,30 +78,28 @@ export function BeginnerDashboard() {
           trendTone="text-[#5f8c00]"
         />
         <StatCard
-          icon={ClipboardCheck}
+          icon={CheckCircle2}
           tone="bg-violet-100 text-violet-700"
-          value="5"
-          label="Tugas Berjalan"
-          trend="2 mendekati deadline"
-          trendTone="text-amber-600"
-          sample
+          value={stats ? String(stats.completedProjects) : "—"}
+          label="Proyek Selesai"
+          trend={stats && stats.completedProjects > 0 ? "Berkontribusi nyata" : "Belum ada"}
+          trendTone="text-[#5f8c00]"
         />
         <StatCard
           icon={Award}
           tone="bg-sky-100 text-sky-700"
-          value="0"
+          value={stats ? String(stats.verifiedArtifacts) : "—"}
           label="Sertifikat"
-          trend="Terbit usai proyek selesai"
-          trendTone="text-muted-foreground"
+          trend={stats && stats.verifiedArtifacts > 0 ? "Terverifikasi" : "Terbit usai proyek selesai"}
+          trendTone={stats && stats.verifiedArtifacts > 0 ? "text-[#5f8c00]" : "text-muted-foreground"}
         />
         <StatCard
-          icon={Users}
+          icon={Star}
           tone="bg-amber-100 text-amber-700"
-          value="8"
-          label="Diskusi Baru"
-          trend="3 hari ini"
+          value={stats && stats.avgRating != null ? stats.avgRating.toFixed(1) : "—"}
+          label="Rata Ulasan"
+          trend={stats && stats.reviewCount > 0 ? `${stats.reviewCount} ulasan diterima` : "Belum ada ulasan"}
           trendTone="text-[#5f8c00]"
-          sample
         />
       </div>
 
@@ -132,10 +137,10 @@ export function BeginnerDashboard() {
           </Link>
         </Panel>
 
-        <PlaceholderActivityCard />
+        <ActivityCard />
 
         <div className="flex flex-col gap-4">
-          <PlaceholderNotifCard />
+          <NotifCard />
           <AgendaCard items={agenda} />
         </div>
       </div>
@@ -151,11 +156,11 @@ function ProjectRow({ membership }: { membership: MyMembership }) {
       href={`/my-projects/${p.id}/workspace`}
       className="group -m-2 flex flex-col gap-3 rounded-2xl p-2 transition-colors hover:bg-muted/50 sm:flex-row"
     >
-      <div className="relative hidden h-24 w-36 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-[#201f31] to-[#3a3850] sm:block">
-        <div className="absolute inset-2 rounded-md bg-white/5" />
-        <div className="absolute left-3 top-3 h-1.5 w-10 rounded-full bg-[#d8f277]/70" />
-        <div className="absolute bottom-3 left-3 right-3 h-6 rounded-md bg-[#d8f277]/25" />
-      </div>
+      <ProjectThumb
+        title={p.title}
+        imageUrl={p.imageUrl ?? null}
+        className="hidden h-24 w-36 shrink-0 rounded-xl sm:block"
+      />
       <div className="min-w-0 flex-1">
         <Badge className="border-transparent bg-[#67c957]/15 text-[#3f7a2e]">Aktif</Badge>
         <h3 className="mt-1.5 font-semibold tracking-tight">{p.title}</h3>
