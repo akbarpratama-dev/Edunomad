@@ -62,9 +62,14 @@ export interface ProjectListItem {
   createdAt: string;
   umkm: { id: string; name: string };
   category: Category;
-  // Populated only by the public browse endpoint (GET /projects).
+  imageUrl?: string | null;
+  // Populated by the browse endpoint AND the dashboard endpoints
+  // (GET /my-projects, GET /me/mentored-projects).
   senior?: { id: string; name: string } | null;
   projectRoles?: BrowseRole[];
+  // Populated only by the dashboard endpoints (team avatars + milestone progress).
+  projectMembers?: { user: { id: string; name: string } }[];
+  milestones?: { id: string; status: string }[];
 }
 
 export interface Milestone {

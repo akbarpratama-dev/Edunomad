@@ -1,4 +1,5 @@
 import { userRepository } from "../repositories/user.repository";
+import { buildPortfolioArtifacts } from "./portfolio.service";
 import { NotFoundError } from "../utils/errors";
 import type { UpdateProfileInput } from "../validators/user.validator";
 
@@ -56,7 +57,8 @@ export const userService = {
     if (!user) throw new NotFoundError("User not found");
 
     const [artifacts, completedProjects, currentProjects, reviewAgg, projects] = await Promise.all([
-      userRepository.listVerifiedArtifacts(targetUserId),
+      // Rich verified-certificate list (powers the Sertifikat tab + preview modal).
+      buildPortfolioArtifacts(targetUserId),
       userRepository.countCompletedProjects(targetUserId, user.role),
       userRepository.countCurrentProjects(targetUserId, user.role),
       userRepository.reviewAggregate(targetUserId),

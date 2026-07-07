@@ -16,6 +16,7 @@ import { ErrorState } from "@/components/common/ErrorState";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PillTabs } from "@/components/common/PillTabs";
 import { UserAvatar } from "@/components/common/UserAvatar";
+import { ProfileLink } from "@/components/common/ProfileLink";
 import { StarRating } from "@/components/review/StarRating";
 import { ProjectThumb, STATUS_META, StageRow } from "@/components/artifact/shared";
 import { useAuthStore } from "@/stores/authStore";
@@ -259,11 +260,9 @@ function Content() {
                 ));
               })()}
             </div>
-            {userId && (
-              <Button className="mt-4 w-full" render={<Link href={`/portfolio/${userId}`} target="_blank" rel="noopener noreferrer" />}>
-                <Award className="size-4" /> Lihat di Portofolio
-              </Button>
-            )}
+            <Button className="mt-4 w-full" render={<Link href="/profile" />}>
+              <Award className="size-4" /> Lihat di Profil
+            </Button>
           </div>
 
           <div className="app-reveal rounded-[20px] border border-border bg-card p-5">
@@ -293,16 +292,16 @@ function Content() {
         ) : (
           <div className="mt-4 flex flex-wrap gap-4">
             {d.team.map((m) => (
-              <div key={m.id} className="flex items-center gap-2.5">
+              <ProfileLink key={m.id} userId={m.id} className="flex items-center gap-2.5 hover:no-underline">
                 <UserAvatar name={m.name} className="size-9 bg-[#d8f277] text-[#0b0b0b] text-xs font-bold" />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">
+                  <p className="truncate text-sm font-medium hover:text-[#5f8c00]">
                     {m.name}
                     {m.id === userId && <span className="ml-1 rounded bg-[#eef7d6] px-1.5 py-0.5 text-[10px] font-semibold text-[#5f8c00]">Anda</span>}
                   </p>
                   <p className="truncate text-xs text-muted-foreground">{m.roleName ?? "Anggota"}</p>
                 </div>
-              </div>
+              </ProfileLink>
             ))}
           </div>
         )}

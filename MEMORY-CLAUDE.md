@@ -1,7 +1,12 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
-> Last updated: 2026-07-05. main = **c1c20fe** (Phase 9 + Diskusi-page-split, pushed origin/main).
+> Last updated: 2026-07-06 (D-AI-1). WORKING BRANCH = **feature/ai-matching** (dari commit portofolio ece0e95). Portofolio D-P13-1/2/3 SUDAH di-commit (ece0e95) di branch feature/portfolio-profile-connectivity; branch ai-matching stack di atasnya. Belum merge ke main (df2b5e8).
+> **AI FEATURES (D-AI-1) ✅ SELESAI & HAPPY-PATH VERIFIED (Gemini gemini-2.5-flash).** Provider multi (`services/llm.service.ts`: Groq preferred else Gemini). Ketiga fitur output nyata: ai-summary, portfolio-recommendation, ranking (Beginner Two 85% vs Three 30% Explainable). Cache OK. Playwright applicants page OK. Catatan: 2.0-flash kuota-0 → default 2.5-flash + thinking-off + tokens 2048. NEXT = commit + merge. (arsip di bawah "menunggu key" sudah tak berlaku.)
+> **AI FEATURES (D-AI-1) — arsip build note:** Tugas dosen "Penggunaan AI" → 3 fitur Google Gemini (gemini-2.0-flash, LLM structured-JSON Explainable, cache tabel `ai_insights`, gracefully-degrading): (1) Candidate Ranking `GET /projects/:id/applicants/ranking` senior; (2) Portfolio Recommendation `GET /projects/:id/portfolio-recommendation` beginner; (3) Professional Summary `GET /users/{me,:id}/ai-summary`. Backend: gemini.service (fetch+AiUnavailableError) + aiInsight.service (cachedInsight+zod) + aiInsight.repository + modules/ai + validator + routes + env SOFT key; migration ai_insights LIVE + _prisma_migrations synced + prisma generate. Frontend: aiApi + ai/{AiUnavailable,MatchScoreBadge,AiSummaryCard,PortfolioRecPanel} + wiring applicants/apply-dialog/ProfileView. tsc 0. curl fallback available:false + RBAC 403 OK; Playwright /profile fallback mulus. RULES: no embeddings/pgvector/queue/bg-job; key manual di backend/.env; AI mati → 200 available:false, inti utuh. ➡️ NEXT: user isi `GEMINI_API_KEY` di backend/.env (aistudio.google.com/apikey, gratis) → happy-path (butuh 1 pelamar PENDING utk demo ranking di proyek …0005) → commit + merge. Servers :3001/:3000 nyala.
+> --- arsip: D-P13 (portofolio, commit ece0e95) ---
+> **PORTFOLIO (fold ke PROFIL) + PROFILE CONNECTIVITY SELESAI (D-P13-1 → DIREVISI D-P13-2)** — jawaban audit user "portfolio/sertifikat/proyek sudah saling nyambung lintas role?". 2 putus ditutup: (1) `/users/:id` ORPHANED → `common/ProfileLink.tsx` bikin nama/avatar klik ke profil di ProjectMembersPanel, applicants, manage(senior), reviews, ProfileView reviews, DiscussionFeed author, artifacts/[projectId] Team. (2) Portofolio → dibangun sbg halaman publik dulu, TAPI user minta "portofolio tampil di page profile aja kyk sub profile" → **halaman/endpoint publik /portfolio/:id DIHAPUS**; portofolio kini = tab "Sertifikat" DI DALAM profil (`/profile`,`/users/:id`): kartu KAYA (role+tech) + tombol "Preview" → modal `PortfolioPreviewDialog` (Peran/Kontribusi/Status/Durasi/Teknologi/Tim ProfileLinks + QR qrcode.react@4.2.0 → /verify/:code). Data via `GET /users/:id/profile-overview` (artifacts diperkaya `portfolio.service.buildPortfolioArtifacts`). Tombol lama /artifacts → "Lihat di Profil"→/profile. **D-P13-3:** modal + kartu Sertifikat kini juga menampilkan **Catatan Mentor** (rating+komentar SENIOR_TO_BEGINNER) + **Kontribusi Saya** (contributionSummary — "membangun apa") biar publik lihat. NO migration. tsc 0 backend+frontend; Playwright p4-beginner verified (/profile tab Sertifikat + modal + Catatan Mentor ★4 "revisi" + Kontribusi "Built landing + nav"; /portfolio/:id lama → not-found); console 0 err. "Public Portfolio Pages" standalone TETAP OUT OF SCOPE. ➡️ NEXT = commit + merge → main, lalu Phase 11 QA/RLS. Dev servers backend(3001)+frontend(3000) masih nyala.
+> --- arsip: main = **c1c20fe** (Phase 9 + Diskusi-page-split, pushed origin/main).
 > **Diskusi dipisah** jadi route `/my-projects/:id/workspace/diskusi` (bukan tab lagi); workspace punya tombol "Buka Diskusi". Diskusi page sidebar: Informasi Proyek (cover+status+Bersama+avatar stack+Lihat Detail Proyek→workspace) + Aktivitas Terbaru + Milestone Berikutnya. List card tampil author (backend listGroupForUser include first-message sender). BeginnerProjectBoard "Lihat Diskusi"→diskusi page. build 0, tsc 0.
 > --- arsip: main = **01fcbe7** (Phase 9 Notifications MERGED --no-ff & pushed origin/main).
 > **PHASE 9 SELESAI:** notification module + 10 trigger site + Realtime (RLS SELECT-only own + publication) + frontend NotificationBell dropdown + NotificationProvider (layout, bootstrap+subscribe+toast) + /notifications page. E2E verified (realtime badge live, mark-all, trigger REVIEW_RECEIVED). NO migration (tabel ada 0.2.11). backend build 0, frontend tsc 0. ➡️ NEXT = **PHASE 10** (profil /profile+/profile/edit+/users/:id, portofolio publik /portfolio/:id, static/error pages help/privacy/terms+not-found+error, /auth/forgot-password, admin project monitoring + senior replacement). Lalu Phase 11 QA + review RLS pra-prod (RLS masih disabled di ~semua tabel kecuali discussion+notifications).
@@ -81,29 +86,44 @@ DRAFT â PENDING_REVIEW â RECRUITING (approve) / REJECTED â ACTIVE
 ## 📌 NEXT-SESSION INIT PROMPT
 
 ```
-Lanjutkan EduNomad: PHASE 10 — Dashboards, Profiles & Polish.
-Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-07-04 #13"
-+ task-breakdown §10 + docs 08 (UI) + 06 (RBAC portfolio D-P8-5).
+Lanjutkan EduNomad: SELESAIKAN happy-path AI Features (D-AI-1), lalu commit + merge.
+Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-07-06 #15"
++ decisions.md D-AI-1 + plan /Users/muhammadakbarpratama/.claude/plans/encapsulated-juggling-dijkstra.md.
 
-main = 01fcbe7 (Phase 0–9 + PHASE 12, semua MERGED --no-ff & pushed origin/main). PHASE 9 Notifications
-SELESAI (module + 10 trigger + Realtime + bell dropdown + /notifications + NotificationProvider). Dashboards
-role sudah ada (beginner bento, dll). NEXT sisa Phase 10:
-(1) Profil: /profile (My Profile), /profile/edit (RHF+Zod, pakai PUT /users/me yang SUDAH ADA), /users/:id
-    (lihat profil orang, pakai GET /users/:id + /users/:id/portfolio yang SUDAH ADA).
-(2) Portofolio publik /portfolio/:id (D-P8-5, dulu ditunda; tombol placeholder SUDAH nempel di sertifikat) —
-    perlu GET /portfolio/:userId PUBLIC (belum dibuat) + halaman publik. Cek CLAUDE.md OUT OF SCOPE (hapus
-    "Public Portfolio Pages" saat benar-benar dibangun, sesuai izin user D-P8-5).
-(3) Static/error pages: /help /privacy /terms (footer), not-found.tsx + error.tsx global, /auth/forgot-password
-    (login nge-link ke sini). Ini quick-win hilangkan 404.
-(4) Admin: /admin/projects/monitoring + admin senior replacement.
+WORKING BRANCH = feature/ai-matching (dari commit portofolio ece0e95). AI Features SUDAH dibangun & fallback-
+verified (tsc 0, curl available:false + RBAC 403, Playwright /profile fallback mulus) TAPI happy-path menunggu
+GEMINI_API_KEY. Portofolio D-P13 sudah di-commit (ece0e95).
 
-Dev: backend :3001 (npm run dev), frontend :3000. tsc TS2882 CSS-ambient transient saat .next/types regen
-(hapus .next/types/app/<deleted> kalau ada page dihapus) → re-run. Deps tak lengkap → npm cache clean --force
-&& rm -rf node_modules package-lock.json && npm install. Test users p4-beginner/senior/umkm + p43-admin
-@test.edunomad.com pw TestPass123!; project ACTIVE a1a1a1a1-0000-4000-8000-000000000005. base-ui
-DropdownMenuTrigger TANPA asChild. Verify per fitur + tsc 0 + console 0. Context7 MCP sebelum kode
-library/framework. .env* sandboxed. RLS masih disabled ~semua tabel (kecuali discussion+notifications) —
-review sebelum prod. Setelah selesai: commit + merge → main.
+QUICK ACTION (urut):
+(1) Pastikan user sudah menaruh `GEMINI_API_KEY=...` di backend/.env (aistudio.google.com/apikey, gratis).
+    Restart backend (:3001) bila perlu. Cek: GET /api/v1/users/me/ai-summary (beginner token) → available:true.
+(2) Demo ranking butuh ≥1 pelamar PENDING di proyek …0005 (skrg 0 — sudah di-accept). Buat 1 lamaran PENDING:
+    login beginner lain (p43-b2/p43-b3) → apply ke role proyek …0005, ATAU insert via API. Lalu senior
+    (p4-senior) GET /projects/…0005/applicants/ranking → rankings[] terisi (skor/matched/missing/reason).
+(3) Happy-path test 3 fitur (curl + Playwright): applicants page (badge skor + toggle "Urutkan kecocokan AI" +
+    blok Analisis AI), apply dialog beginner (PortfolioRecPanel), /profile (AiSummaryCard). Cek cache: 2x call
+    → cached:true; ?regenerate=true → cached:false; row di tabel ai_insights.
+(4) tsc 0 + console 0. Commit (Conventional + Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>).
+    File AI: backend {config/env, services/{gemini,aiInsight}.service, repositories/aiInsight.repository,
+    constants/aiInsightKind, modules/ai/ai.controller, validators/ai.validator, routes/{project,user}.routes,
+    prisma/schema + migration 20260706160000_ai_insights}; frontend {services/aiApi, components/ai/*, wiring
+    projects/[id]/{page,applicants/page}, components/profile/ProfileView}. Lalu pertimbangkan merge portofolio+AI → main.
+
+CATATAN: AI additive & gracefully-degrading — kalau key salah/AI down → available:false (bukan 5xx), inti utuh.
+RULES D-AI-1: no embeddings/pgvector/queue/bg-job (modular monolith). Context7 sebelum ubah kode Gemini.
+
+Dev: backend :3001 + frontend :3000 MASIH NYALA (background) dari sesi lalu — cek/pakai ulang atau restart.
+tsc TS2882 CSS-ambient transient saat .next/types regen → re-run. Test users p4-beginner/senior/umkm +
+p43-admin @test.edunomad.com pw TestPass123!; project ACTIVE a1a1a1a1-…0005. Portofolio-in-profil siap-tes:
+login p4-beginner → /profile tab "Sertifikat" → kartu → "Preview" (artifact EDN-2026-000001). URL lama
+/portfolio/:id sekarang 404 (dihapus, D-P13-2). Context7 MCP sebelum kode library. .env* sandboxed.
+Verify per fitur + tsc 0 + console 0.
+
+=== arsip init prompt #13 (Phase 10, SELESAI) ===
+Lanjutkan EduNomad: PHASE 10 — Dashboards, Profiles & Polish. [SELESAI 2026-07-05, main df2b5e8:
+profil /profile+/profile/edit+/users/:id, static/error pages, forgot/reset-password, admin project monitoring
++ senior replacement, profile sub-resource mgmt. Portofolio publik /portfolio/:id waktu itu MASIH deferred —
+sekarang SUDAH dibangun di #14.]
 
 === arsip init prompt #10 (Phase 12, SELESAI & merged) ===
 Lanjutkan EduNomad: PHASE 12 — Discussion Forum Upgrade (lanjut sub-phase 12.2+).

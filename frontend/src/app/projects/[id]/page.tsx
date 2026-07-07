@@ -29,6 +29,7 @@ import { ErrorState } from "@/components/common/ErrorState";
 import { ProjectDetailView } from "@/components/project/ProjectDetailView";
 import { ProjectMembersPanel } from "@/components/project/ProjectMembersPanel";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { PortfolioRecPanel } from "@/components/ai/PortfolioRecPanel";
 import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
 import { projectApi, type ProjectDetail } from "@/services/projectApi";
@@ -211,6 +212,7 @@ function BeginnerApplyDialog({ project }: { project: ProjectDetail }) {
               onChange={(e) => setMotivation(e.target.value)}
             />
           </div>
+          <PortfolioRecPanel projectId={project.id} enabled={open} />
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)} disabled={busy}>
               Batal

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Box, ShieldCheck, Clock, Sparkles, Share2, GraduationCap, Users } from "lucide-react";
+import { Box, ShieldCheck, Clock, Sparkles, Share2, GraduationCap, Users, Eye } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -14,7 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/common/UserAvatar";
 import { ProjectThumb, STATUS_META, ArtifactInfoDialog, StageRow } from "@/components/artifact/shared";
-import { useAuthStore } from "@/stores/authStore";
+import {
+  PortfolioPreviewDialog,
+  previewFromPipelineDetail,
+  type PortfolioPreview,
+} from "@/components/portfolio/PortfolioPreviewDialog";
 import { ApiError } from "@/lib/apiClient";
 import { artifactApi, type PipelineItem, type PipelineStatus } from "@/services/artifactApi";
 
@@ -56,7 +60,7 @@ function StatCard({
   );
 }
 
-function Card({ item }: { item: PipelineItem }) {
+function Card({ item, onPreview }: { item: PipelineItem; onPreview: (projectId: string) => void }) {
   const meta = STATUS_META[item.status];
   return (
     <article className="app-reveal flex flex-col gap-4 rounded-[20px] border border-border bg-card p-4 sm:flex-row">
@@ -118,9 +122,16 @@ function Card({ item }: { item: PipelineItem }) {
             </>
           )}
         </div>
-        <Button variant="outline" size="sm" render={<Link href={`/artifacts/${item.projectId}`} />}>
-          {item.artifact ? "Lihat Detail" : "Lihat Progress"}
-        </Button>
+        <div className="flex flex-col gap-2">
+          {item.artifact && (
+            <Button size="sm" onClick={() => onPreview(item.projectId)}>
+              <Eye className="size-4" /> Preview di Portofolio
+            </Button>
+          )}
+          <Button variant="outline" size="sm" render={<Link href={`/artifacts/${item.projectId}`} />}>
+            {item.artifact ? "Lihat Detail" : "Lihat Progress"}
+          </Button>
+        </div>
       </div>
     </article>
   );
@@ -159,11 +170,23 @@ function NextArtifactPanel({ items }: { items: PipelineItem[] }) {
 }
 
 function Content() {
-  const userId = useAuthStore((s) => s.appUser?.id);
   const [items, setItems] = useState<PipelineItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabKey>("ALL");
   const [infoOpen, setInfoOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [preview, setPreview] = useState<PortfolioPreview | null>(null);
+
+  // Fetch the full per-project detail on demand so the modal shows dates,
+  // duration, team roles, and the verification QR (the list rows don't carry it).
+  const openPreview = (projectId: string) => {
+    setPreview(null);
+    setPreviewOpen(true);
+    artifactApi
+      .pipelineDetail(projectId)
+      .then((d) => setPreview(previewFromPipelineDetail(d)))
+      .catch(() => setPreviewOpen(false));
+  };
 
   useEffect(() => {
     let active = true;
@@ -203,11 +226,8 @@ function Content() {
         subtitle="Semua sertifikat terverifikasi dari proyek yang telah Anda kontribusikan. Dapat digunakan sebagai bukti pengalaman dan portofolio Anda."
         action={
           <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              render={<Link href={userId ? `/portfolio/${userId}` : "/portfolio"} />}
-            >
-              <Share2 className="size-4" /> Bagikan Profil Portofolio
+            <Button variant="outline" render={<Link href="/profile" />}>
+              <Share2 className="size-4" /> Lihat di Profil
             </Button>
             <Button onClick={() => setInfoOpen(true)}>
               <Sparkles className="size-4" /> Lihat Cara Mendapatkan Sertifikat
@@ -238,7 +258,7 @@ function Content() {
               }
             />
           ) : (
-            visible.map((i) => <Card key={i.projectId} item={i} />)
+            visible.map((i) => <Card key={i.projectId} item={i} onPreview={openPreview} />)
           )}
         </div>
 
@@ -266,6 +286,14 @@ function Content() {
       </div>
 
       <ArtifactInfoDialog open={infoOpen} onOpenChange={setInfoOpen} />
+      <PortfolioPreviewDialog
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        preview={preview}
+        loading={preview === null}
+        primaryHref={preview?.artifactCode ? `/verify/${preview.artifactCode}` : null}
+        primaryLabel="Verifikasi Sertifikat"
+      />
     </div>
   );
 }

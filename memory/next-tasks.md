@@ -1,4 +1,48 @@
 ============================================================
+⚡ ACTIVE HANDOFF (2026-07-06 #15) — AI FEATURES (D-AI-1) ✅ SELESAI & HAPPY-PATH VERIFIED. NEXT = commit + merge
+============================================================
+✅ HAPPY-PATH VERIFIED (Gemini gemini-2.5-flash): ketiga fitur output nyata. Provider MULTI (`services/llm.service.ts`: Groq preferred bila GROQ_API_KEY else Gemini). Default model gemini-2.5-flash (2.0-flash kuota free 0; 2.5 thinking dimatikan + tokens 2048 + strip fence). Ranking demo: proyek …0005 kini punya 2 pelamar PENDING (Beginner Two 85% / Three 30%) + role Frontend …051 dikasih required skills JS/React/TS (data demo — cleanup bila mau DB bersih). NEXT = commit branch feature/ai-matching + merge. ⚠️ user pakai GEMINI_API_KEY (auth-key format AQ.*), key ada di backend/.env.
+--- detail build di bawah ---
+Branch `feature/ai-matching` (dari commit portofolio ece0e95). Tugas dosen "Penggunaan AI". Plan disetujui (plan mode): /Users/muhammadakbarpratama/.claude/plans/encapsulated-juggling-dijkstra.md.
+
+✅ DIBANGUN & fallback-verified (tsc 0 backend+frontend): 3 fitur Gemini gemini-2.0-flash (LLM structured-JSON Explainable, cache tabel `ai_insights`, gracefully-degrading, NO embeddings/pgvector/queue/bg-job):
+- Candidate Ranking `GET /projects/:id/applicants/ranking` (SENIOR lead) — skor+matched/missing+alasan pelamar PENDING, batch. UI applicants page: toggle "Urutkan berdasarkan kecocokan AI" + MatchScoreBadge + blok "Analisis AI" + Perbarui peringkat + fallback.
+- Portfolio Recommendation `GET /projects/:id/portfolio-recommendation` (BEGINNER own) — UI apply dialog PortfolioRecPanel.
+- Professional Summary `GET /users/{me,:id}/ai-summary` — UI ProfileView AiSummaryCard (non-UMKM).
+Backend: config/env (SOFT key) + gemini.service (fetch+AiUnavailableError) + aiInsight.service (cachedInsight+zod) + aiInsight.repository + constants/aiInsightKind + modules/ai/ai.controller + validators/ai.validator + routes project/user + schema AiInsight + migration `20260706160000_ai_insights` LIVE + _prisma_migrations synced + prisma generate. Frontend: aiApi + components/ai/{AiUnavailable,MatchScoreBadge,AiSummaryCard,PortfolioRecPanel}.
+Verified: curl no-key → available:false reason jelas; RBAC beginner→ranking 403, senior→portfolio-rec 403; Playwright /profile AiSummaryCard fallback mulus, profil utuh.
+
+➡️ QUICK ACTION (urut):
+1. **User isi `GEMINI_API_KEY=...` di `backend/.env`** (gratis: aistudio.google.com/apikey). Restart backend. Cek GET /users/me/ai-summary (beginner) → available:true.
+2. **Buat 1 pelamar PENDING** di proyek …0005 (skrg 0, sudah di-accept) utk demo ranking: login p43-b2/p43-b3 → apply role, atau via API/DB.
+3. **Happy-path** curl+Playwright 3 fitur; cek cache (2x → cached:true; ?regenerate=true → cached:false; row ai_insights).
+4. Commit (Conventional + Co-Authored-By Claude Opus 4.8). Pertimbangkan merge portofolio(ece0e95)+AI → main.
+⚠️ AI additive: key salah/AI down → HTTP 200 available:false (bukan 5xx), inti rekrutmen utuh. Context7 sebelum ubah kode Gemini. Test users p4-* + p43-* @test.edunomad.com pw TestPass123!.
+
+--- arsip handoff #14 (Portofolio, SUDAH di-commit ece0e95) ---
+============================================================
+⚡ ACTIVE HANDOFF (2026-07-06 #14) — PORTFOLIO (fold ke PROFIL) + PROFILE CONNECTIVITY SELESAI (commit ece0e95). NEXT = commit + merge → main, lalu PHASE 11 QA/RLS
+============================================================
+Branch `feature/portfolio-profile-connectivity` (dari main df2b5e8). D-P13-1 lalu DIREVISI D-P13-2 (user minta portofolio jadi sub-section profil, BUKAN halaman terpisah). BELUM di-commit — working tree.
+
+⚠️ REVISI FINAL (D-P13-2): TIDAK ada halaman/endpoint `/portfolio/:id` publik (dibangun lalu dihapus hari yg sama). Portofolio = tab "Sertifikat" DI DALAM profil (`/profile`, `/users/:id`), kartu kaya + modal Preview. Data via `GET /users/:id/profile-overview` (artifacts diperkaya lewat `portfolio.service.buildPortfolioArtifacts`). File final yg ADA: backend {services/portfolio.service.ts [buildPortfolioArtifacts], services/user.service.ts [pakai builder], repositories/artifact.repository.ts [+listPortfolioArtifacts]}; frontend {components/common/ProfileLink.tsx, components/portfolio/PortfolioPreviewDialog.tsx, services/portfolioApi.ts [types+durationWeeks saja], +wiring}. File yg DIHAPUS: app/portfolio/*, components/portfolio/PublicPortfolioView.tsx, backend modules/portfolio + routes/portfolio.routes + validators/portfolio.validator.
+
+✅ SELESAI & verified: Menutup gap konektivitas lintas-role (audit user). 
+- **Profile connectivity (#1):** `frontend/src/components/common/ProfileLink.tsx` (+`profileHref`) → nama/avatar klik ke `/users/:id`. Wired: ProjectMembersPanel, projects/[id]/applicants (my-projects/applicants = re-export, ikut), projects/[id]/manage (senior applicant), reviews page, ProfileView reviews tab, DiscussionFeed author, artifacts/[projectId] Team.
+- **Public portfolio (#2, membalik D-P8-5):** backend module `portfolio` — `GET /portfolio/:userId` PUBLIC (services/portfolio.service.ts, modules/portfolio/portfolio.controller.ts, routes/portfolio.routes.ts, validators/portfolio.validator.ts, +artifact.repository.listPortfolioArtifacts). Mount di routes/index.ts. NO migration. Return user publik(no email/phone)+stats+artifacts[rich]. Verified curl 200/404/400.
+- **Frontend portfolio:** `components/portfolio/PortfolioPreviewDialog.tsx` (modal "Preview di Portofolio" dari gambar user + `qrcode.react`@4.2.0 QR), `components/portfolio/PublicPortfolioView.tsx`, `app/portfolio/[id]/page.tsx` (PUBLIC no AuthGuard), `services/portfolioApi.ts`. Kartu /artifacts += "Preview di Portofolio" + tombol dead lama kini live.
+- tsc 0 (backend+frontend). Playwright: public page /portfolio/:id + modal render benar (Test Beginner, EDN-2026-000001), team → /users/:id, QR → /verify. Console 0 err.
+- CLAUDE.md OUT OF SCOPE diamandemen (Public Portfolio Pages NOW IN SCOPE, D-P8-5→D-P13-1). CV PDF tetap out.
+
+➡️ QUICK ACTION berikutnya (urut):
+1. `git add -A && git commit` (Conventional Commit, Co-Authored-By Claude) di branch feature/portfolio-profile-connectivity.
+2. Merge → main (--no-ff) + push origin/main (repo private). Pertimbangkan buka PR.
+3. Lanjut **PHASE 11 — QA menyeluruh + review RLS pra-produksi** (RLS masih off ~semua tabel kecuali discussion+notifications; endpoint /portfolio publik baca via Express — aman tapi catat di review RLS).
+Test fixtures: p4-beginner/senior/umkm + p43-admin @test.edunomad.com pw TestPass123!; siap-tes portofolio-in-profil: login p4-beginner → `/profile` tab "Sertifikat" → kartu → "Preview" (artifact EDN-2026-000001, user 18318fbf-9e1a-497b-9ed7-9cd9e2a5a2e6); project a1a1a1a1-…0005. (URL lama /portfolio/:id sekarang 404 — memang dihapus.)
+⚠️ Servers dev backend(3001)+frontend(3000) MASIH NYALA di akhir sesi (background). Matikan bila perlu.
+
+--- arsip handoff #13 ---
+============================================================
 ⚡ ACTIVE HANDOFF (2026-07-04 #13) — PHASE 9 MERGED → main. NEXT = PHASE 10 Profiles & Polish
 ============================================================
 main = **01fcbe7** (Phase 0–9 + PHASE 12, semua MERGED --no-ff & PUSHED origin/main). Branch feature/phase-9-notifications sudah masuk main (WIP lokal, tak pernah di-remote).

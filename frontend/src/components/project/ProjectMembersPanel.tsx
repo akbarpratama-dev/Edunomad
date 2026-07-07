@@ -15,6 +15,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { ProfileLink } from "@/components/common/ProfileLink";
 import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
 import {
@@ -145,7 +146,7 @@ export function ProjectMembersPanel({ project }: { project: ProjectDetail }) {
                 <li key={m.id} className="flex items-center justify-between gap-3 py-2.5">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-foreground">
-                      {m.user.name}
+                      <ProfileLink userId={m.user.id}>{m.user.name}</ProfileLink>
                       {isSelf && <span className="text-muted-foreground"> (Anda)</span>}
                     </p>
                     <p className="truncate text-sm text-muted-foreground">

@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ListSkeleton } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
+import { ProfileLink } from "@/components/common/ProfileLink";
 import { StarRating } from "@/components/review/StarRating";
 import { useAuthStore } from "@/stores/authStore";
 import { ApiError } from "@/lib/apiClient";
@@ -97,7 +98,10 @@ function MyReviewsInner() {
                   <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/90">{r.comment}</p>
                 )}
                 <p className="mt-2 text-xs text-muted-foreground">
-                  dari <span className="font-medium text-foreground">{r.reviewer.name}</span>
+                  dari{" "}
+                  <ProfileLink userId={r.reviewer.id} className="font-medium text-foreground">
+                    {r.reviewer.name}
+                  </ProfileLink>
                   {r.isEdited && " · diedit"}
                 </p>
               </article>

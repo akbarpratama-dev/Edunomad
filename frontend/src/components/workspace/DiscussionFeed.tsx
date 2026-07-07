@@ -9,6 +9,7 @@ import { ApiError } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/common/UserAvatar";
+import { ProfileLink } from "@/components/common/ProfileLink";
 import {
   discussionApi,
   DISCUSSION_CATEGORY_META,
@@ -103,7 +104,9 @@ function Bubble({
       />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-foreground">{m.sender.name}</span>
+          <ProfileLink userId={m.sender.id} className="font-semibold text-foreground">
+            {m.sender.name}
+          </ProfileLink>
           {badge && (
             <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", badge.className)}>
               {badge.label}

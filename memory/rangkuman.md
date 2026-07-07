@@ -5,6 +5,27 @@ Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt us
 ---
 
 Date:
+2026-07-06d (AI Features — tugas dosen)
+
+Prompt: "saya disuruh dosen mengimplementasikan Penggunaan AI. ide: Match matching AI sertifikat/portofolio untuk seleksi lowongan (senior & junior) + /summarize sertifikat/skill. bingung pake model gratis apa & cara pasang." Lalu klarifikasi 3 fitur: (1) AI Portfolio Recommendation (junior), (2) AI Candidate Matching & Ranking Explainable (senior), (3) AI Professional Summary. Via AskUserQuestion pilih: Google Gemini, LLM structured-JSON, ketiganya, skip minat. Plan mode → disetujui.
+
+Hasil: D-AI-1 (branch feature/ai-matching, portofolio di-commit ece0e95 dulu). Dibangun 3 fitur Gemini gemini-2.0-flash (cache tabel ai_insights, gracefully-degrading, no embeddings/pgvector/queue). Backend: gemini.service + aiInsight.service + repository + modules/ai + validator + routes + env soft key + migration ai_insights LIVE. Frontend: aiApi + 4 komponen ai/* + wiring applicants(ranking/sort/badge/analisis)/apply-dialog(rec)/ProfileView(summary). tsc 0. Fallback verified (curl available:false + RBAC 403 + Playwright /profile card fallback mulus). HAPPY PATH menunggu user isi GEMINI_API_KEY di backend/.env (gratis aistudio.google.com/apikey) + butuh 1 pelamar PENDING utk demo ranking. Model gratis rekomendasi = Gemini (free tier besar, JSON mode, embeddings gratis kalau nanti perlu). Belum commit.
+
+---
+
+Date:
+2026-07-06 (Portfolio & Profile Connectivity)
+
+Prompt: "cek apa yg kurang? apakah semua sudah saling nyambung kyk portfolio, sertifikat, project dll dengan semua role lainnya" → lalu "oke buat no 1 dengan ui dan menyajikan info deskripsi seperti ini [gambar modal Preview di Portofolio]". Via AskUserQuestion user pilih: bangun KEDUANYA (profil connectivity + modal) + bangun halaman publik /portfolio/:id sekalian.
+
+Hasil: Audit menemukan 2 putus konektivitas (/users/:id ORPHANED, /portfolio/:id DEAD LINK). Tahap 1 (D-P13-1): ProfileLink → nama/avatar klik ke /users/:id (member panel, pelamar, manage, reviews, diskusi, artifact team) + backend PUBLIC `GET /portfolio/:userId` + modal "Preview di Portofolio" (QR qrcode.react) + halaman publik /portfolio/[id].
+Tahap 2 (D-P13-2, REVISI atas prompt lanjutan user "hapus route /portfolio/:id, portofolio tampil di page profile aja kyk sub profile"): halaman + endpoint publik DIHAPUS; portofolio jadi tab "Sertifikat" DI DALAM profil — kartu kaya (role+tech) + tombol Preview buka modal yg sama; data diperkaya lewat `portfolio.service.buildPortfolioArtifacts` yg dipakai `getProfileOverview`. Tombol lama → "Lihat di Profil"/verify. ProfileLink connectivity tetap. "Public Portfolio Pages" standalone TETAP out of scope (CLAUDE.md dikoreksi).
+Tahap 3 (D-P13-3, prompt user "tambahkan blok Catatan Mentor rating+komentar ke modal + cuplikan di kartu, agar dilihat semua orang saat berkunjung ke profil, seperti peran dan kontribusi membangun apa"): modal + kartu Sertifikat kini tampilkan "Catatan Mentor" (rating+komentar review SENIOR_TO_BEGINNER) + "Kontribusi Saya di Proyek Ini" (contributionSummary). Backend buildPortfolioArtifacts += seniorReview.
+tsc 0 backend+frontend; Playwright p4-beginner verified (/profile tab Sertifikat + modal penuh + Catatan Mentor ★4 "revisi" + Kontribusi "Built landing + nav"; /portfolio/:id lama → not-found); console 0 err. NEXT: commit + merge → main; Phase 11 QA/RLS. Belum di-commit saat entry ditulis.
+
+---
+
+Date:
 2026-07-05 (Pisah Diskusi jadi page + sidebar proyek)
 
 Prompt:

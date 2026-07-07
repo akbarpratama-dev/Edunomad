@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/apiClient";
 import type { Role } from "@/types/user";
 import type { ProjectStatus } from "@/services/projectApi";
+import type { PortfolioArtifact } from "@/services/portfolioApi";
 
 interface Envelope<T> {
   success: boolean;
@@ -73,19 +74,8 @@ export interface ProfileStats {
   contributionHours: number; // placeholder 0 — no tracking field yet (D-P10-2)
 }
 
-export interface ProfileArtifact {
-  id: string;
-  artifactCode: string;
-  verificationUrl: string;
-  currentVersion: number;
-  issuedAt: string;
-  project: {
-    id: string;
-    title: string;
-    imageUrl: string | null;
-    category: { id: string; name: string };
-  };
-}
+// The Sertifikat tab renders the rich portfolio artifact (see portfolioApi).
+export type ProfileArtifact = PortfolioArtifact;
 
 // Role-aware project row. Beginner rows carry membership status + role name;
 // senior/UMKM rows are flat projects.
@@ -120,7 +110,7 @@ export interface ProfileOverview {
   experiences: ProfileExperience[];
   portfolioLinks: ProfileLink[];
   stats: ProfileStats;
-  artifacts: ProfileArtifact[];
+  artifacts: PortfolioArtifact[];
   projects: ProfileProject[];
 }
 
