@@ -5,6 +5,7 @@ import type { Prisma } from "../generated/prisma/client";
 import type { ListVerificationsQuery, SubmitVerificationInput } from "../validators/verification.validator";
 import { notificationService } from "./notification.service";
 import { NotificationType } from "../constants/notificationType";
+import { invalidateUserCache } from "../middleware/authMiddleware";
 
 function composeNotes(input: SubmitVerificationInput): string {
   const lines: string[] = [];
@@ -60,6 +61,7 @@ export const verificationService = {
       throw new BusinessRuleError("Verification request already reviewed");
     }
     const result = await verificationRepository.approve(requestId, request.userId, adminId);
+    invalidateUserCache(request.userId); // status changed → drop stale cache now
     await notificationService.notify({
       userId: request.userId,
       type: NotificationType.VERIFICATION_APPROVED,
@@ -78,6 +80,7 @@ export const verificationService = {
       throw new BusinessRuleError("Verification request already reviewed");
     }
     const result = await verificationRepository.reject(requestId, request.userId, adminId, reason);
+    invalidateUserCache(request.userId); // status changed → drop stale cache now
     await notificationService.notify({
       userId: request.userId,
       type: NotificationType.VERIFICATION_REJECTED,
