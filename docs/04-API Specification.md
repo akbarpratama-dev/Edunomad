@@ -807,7 +807,7 @@ GET /projects/:id/discussions
 POST /projects/:id/discussions
 ```
 
-**Access:** Senior lead or UMKM owner (Phase 12)  
+**Access:** Any ACTIVE project participant — UMKM owner, assigned senior, or an ACTIVE member incl. beginners (rule D-P12-8, supersedes the earlier senior/UMKM-only rule). Must be VERIFIED.  
 **Description:** Create new group discussion (forum topic) for project.  
 **Body (Phase 12 — `title` + `category` now required & persisted):**
 ```json

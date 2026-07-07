@@ -392,7 +392,7 @@ Participants:
 └─ All BEGINNERs
 
 Flow:
-├─ SENIOR or UMKM opens discussion
+├─ Any ACTIVE participant opens discussion (UMKM owner, SENIOR, or a member incl. BEGINNER — rule D-P12-8)
 ├─ Invite members
 ├─ Discussion created
 └─ Members join

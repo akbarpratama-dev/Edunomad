@@ -588,8 +588,8 @@ SUBMITTED
 - ✅ Accepted beginners included
 
 **Phase 12 (Discussion Forum Upgrade — user-approved) additions:**
-- ✅ Create a discussion topic (title + category): **senior lead or UMKM owner only** (beginners post messages/replies, not new topics)
-- ✅ Pin / unpin a topic: **senior lead or UMKM owner only** (`POST /discussions/:id/pin`)
+- ✅ Create a discussion topic (title + category): **any ACTIVE project participant — UMKM owner, assigned senior, or an ACTIVE member (including beginners)** (rule change **D-P12-8**, user-approved 2026-07-07; superseded the earlier "senior lead / UMKM owner only, beginners join-only" rule)
+- ✅ Pin / unpin a topic: **senior lead or UMKM owner only** (`POST /discussions/:id/pin`) — pin stays a lead/owner moderation action, unchanged by D-P12-8
 - ✅ Reply to a message (12.2), react to a message (12.3), attach file/image/link (12.4): **any discussion member**
 - ✅ Topic categories: `ANNOUNCEMENT|QUESTION|IDEA|BLOCKER|MENTOR_REVIEW|UPDATE`
 

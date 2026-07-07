@@ -39,8 +39,10 @@ export const discussionService = {
     return discussionRepository.listGroupForUser(projectId, userId);
   },
 
-  // POST /projects/:id/discussions — only the assigned senior or the UMKM owner
-  // may create (docs/06: Senior/UMKM "Create discussions"; beginners "join").
+  // POST /projects/:id/discussions — any project participant may create a group
+  // discussion: the UMKM owner, the assigned senior, OR an ACTIVE member
+  // (including beginners). Rule change D-P12-8 (user-approved): beginners were
+  // previously "join only"; they can now start discussions too.
   // Phase 12: persists title + category. Membership = creator + senior + members.
   async createGroupDiscussion(
     userId: string,
@@ -51,15 +53,14 @@ export const discussionService = {
     const project = await projectRepository.findRawById(projectId);
     if (!project) throw new NotFoundError("Project not found");
 
-    const isSenior = project.seniorId === userId;
-    const isOwner = project.umkmId === userId;
-    if (!isSenior && !isOwner) {
-      throw new ForbiddenError("Only the project's senior or UMKM owner can create a discussion");
-    }
-
     const participantIds = await getProjectParticipantIds(projectId);
     if (project.seniorId) participantIds.add(project.seniorId);
     participantIds.add(project.umkmId);
+
+    // Creator must be a participant of this project (owner, senior, or ACTIVE member).
+    if (!participantIds.has(userId)) {
+      throw new ForbiddenError("Only a participant of this project can create a discussion");
+    }
 
     // Requested members must themselves be project participants.
     for (const id of memberIds) {

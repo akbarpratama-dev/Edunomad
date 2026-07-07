@@ -96,9 +96,16 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
   const [pinningId, setPinningId] = useState<string | null>(null);
   const [shown, setShown] = useState(6); // "Muat lebih banyak" page size
 
-  const canCreate =
+  // Lead/owner can moderate (pin); any ACTIVE participant can start a discussion.
+  const canManage =
     (appUser?.role === "SENIOR" && project.senior?.id === appUser.id) ||
     (appUser?.role === "UMKM" && project.umkm.id === appUser.id);
+  // Rule D-P12-8 (user-approved): beginners were "join only"; ACTIVE members
+  // (including beginners) can now create discussions too.
+  const isActiveMember = members.some(
+    (m) => m.status === "ACTIVE" && m.user.id === appUser?.id
+  );
+  const canCreate = canManage || isActiveMember;
 
   const load = useCallback(async () => {
     try {
@@ -230,7 +237,7 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
                     key={d.id}
                     discussion={d}
                     active={d.id === activeId}
-                    canPin={canCreate}
+                    canPin={canManage}
                     pinning={pinningId === d.id}
                     onSelect={() => setActiveId(d.id)}
                     onTogglePin={() => togglePin(d)}
