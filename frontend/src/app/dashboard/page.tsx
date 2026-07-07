@@ -135,7 +135,7 @@ function DashboardContent() {
         {/* Greeting hero */}
         <section className="app-dark app-reveal overflow-hidden rounded-3xl border border-border bg-[#201f31] p-8 text-white">
           <p className="text-[13px] font-medium text-[#9b9ba6]">{ROLE_LABEL[appUser.role]}</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">
+          <h1 className="mt-1 text-h1 tracking-tight text-balance">
             Halo, {appUser.name} <span className="align-middle">👋</span>
           </h1>
           <p className="mt-2 max-w-md text-[15px] leading-relaxed text-[#b6b6c0]">

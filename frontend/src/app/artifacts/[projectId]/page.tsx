@@ -87,10 +87,10 @@ function Content() {
       <div className="app-reveal grid gap-5 lg:grid-cols-[1fr_360px]">
         <div>
           <Badge className={meta.badge}>{meta.label}</Badge>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-pretty sm:text-[28px]">
+          <h1 className="mt-2 text-h1 tracking-tight text-balance">
             {d.artifact ? `${d.project.title} — Sertifikat` : d.project.title}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">Proyek: {d.project.title}</p>
+          <p className="mt-1.5 text-body-lg text-muted-foreground">Proyek: {d.project.title}</p>
           <p className="mt-2 max-w-2xl text-sm text-foreground/80">{d.project.description}</p>
           {d.technologies.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">

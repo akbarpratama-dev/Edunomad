@@ -24,12 +24,12 @@ export function PageHeader({
         action && "sm:pt-8"
       )}
     >
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-pretty text-foreground sm:text-[28px]">
-          {title}
-        </h1>
+      <div className="min-w-0">
+        <h1 className="text-h1 tracking-tight text-balance text-foreground">{title}</h1>
         {subtitle && (
-          <p className="mt-1 max-w-2xl text-sm text-pretty text-muted-foreground">{subtitle}</p>
+          <p className="mt-1.5 max-w-[65ch] text-body-lg text-pretty text-muted-foreground">
+            {subtitle}
+          </p>
         )}
       </div>
       {action && <div className="shrink-0 max-sm:ml-auto">{action}</div>}
