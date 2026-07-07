@@ -148,9 +148,14 @@ function WorkspaceInner() {
             <p className="mt-1 text-sm text-muted-foreground">Workspace proyek — kolaborasi tim & progres.</p>
           </div>
         </div>
-        <Button variant="outline" render={<Link href={`${wsBase}/${id}/workspace/diskusi`} />}>
-          <MessageSquare className="size-4" /> Buka Diskusi
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" render={<Link href={`${wsBase}/${id}/workspace/diskusi`} />}>
+            <MessageSquare className="size-4" /> Buka Diskusi
+          </Button>
+          <Button render={<Link href={`${wsBase}/${id}`} />}>
+            <ClipboardList className="size-4" /> Detail & Selesaikan Proyek
+          </Button>
+        </div>
       </div>
 
       <PillTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Navigasi workspace" />
