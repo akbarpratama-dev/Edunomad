@@ -5,18 +5,18 @@ import { Stagger, StaggerItem } from "@/components/landing/motion";
 const ITEMS = [
   {
     icon: GraduationCap,
-    title: "70% Mahasiswa sulit Mendapatkan Pengalaman Nyata",
-    body: "Banyak mahasiswa memiliki kemampuan tetapi belum memiliki pengalaman proyek yang dapat ditunjukkan kepada perusahaan.",
+    title: "70% mahasiswa sulit mendapat pengalaman nyata",
+    body: "Banyak mahasiswa punya kemampuan, tapi belum punya pengalaman proyek yang bisa ditunjukkan ke perusahaan.",
   },
   {
     icon: Building2,
-    title: "UMKM Membutuhkan Solusi Digital",
-    body: "Banyak UMKM membutuhkan website, aplikasi, desain, dan pemasaran digital, namun sulit menemukan talenta yang terjangkau.",
+    title: "UMKM butuh solusi digital",
+    body: "UMKM butuh website, aplikasi, desain, dan pemasaran digital, tapi sulit menemukan talenta yang terjangkau.",
   },
   {
     icon: Users,
-    title: "Mentor Membutuhkan Wadah Berbagi",
-    body: "Profesional ingin membimbing mahasiswa melalui proyek nyata, namun belum ada platform terstruktur untuk berbagi keahlian.",
+    title: "Mentor butuh wadah berbagi",
+    body: "Profesional ingin membimbing mahasiswa lewat proyek nyata, tapi belum ada wadah yang terstruktur untuk itu.",
   },
 ];
 
@@ -24,7 +24,7 @@ export function Problem() {
   return (
     <section className="bg-ln-bg py-20 sm:py-28">
       <Container>
-        <SectionHeading label="Masalah" title="Belajar Saja Tidak Cukup." />
+        <SectionHeading label="Masalah" title="Belajar saja tidak cukup." />
         <Stagger className="mt-14 grid gap-5 md:grid-cols-3">
           {ITEMS.map(({ icon: Icon, title, body }) => (
             <StaggerItem key={title}>

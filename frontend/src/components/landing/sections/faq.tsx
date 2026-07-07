@@ -44,7 +44,7 @@ export function Faq() {
   return (
     <section id="faq" className="bg-ln-bg py-20 sm:py-28">
       <Container className="max-w-3xl">
-        <SectionHeading label="FAQ" title="Pertanyaan Yang Sering Ditanyakan" />
+        <SectionHeading label="FAQ" title="Pertanyaan yang sering ditanyakan" />
 
         <Stagger className="mt-12 flex flex-col gap-3">
           {FAQS.map((item, i) => {

@@ -22,7 +22,7 @@ export function HowItWorks() {
             <Reveal className="max-w-xl">
               <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-ln-accent">Cara Kerja</span>
               <h2 className="mt-4 text-[clamp(1.9rem,1.2rem+2.6vw,2.75rem)] font-extrabold leading-[1.06] tracking-[-0.035em] text-white [text-wrap:balance]">
-                Bagaimana EduNomad Bekerja?
+                Bagaimana EduNomad bekerja?
               </h2>
             </Reveal>
             <Reveal delay={0.1} className="flex items-center gap-3">

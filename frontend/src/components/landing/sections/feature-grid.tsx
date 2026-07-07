@@ -41,7 +41,7 @@ export function FeatureGrid() {
 
         <Stagger className="mt-14 grid gap-5 lg:grid-cols-3">
           {/* Sertifikat Portfolio */}
-          <Card title="Sertifikat Portfolio Terverifikasi" body="Setiap kontribusi dicatat dan diverifikasi oleh mentor dan pemilik bisnis.">
+          <Card title="Sertifikat portofolio terverifikasi" body="Setiap kontribusimu dicatat dan diverifikasi oleh mentor dan pemilik bisnis.">
             <div className="rounded-xl border border-ln-line bg-ln-surface p-4">
               <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-ln-faint">Sistem Kasir UMKM</p>
               <div className="mt-3 flex flex-col gap-2">
@@ -60,7 +60,7 @@ export function FeatureGrid() {
           </Card>
 
           {/* Pendampingan Mentor */}
-          <Card title="Pendampingan Mentor" body="Belajar langsung dari profesional berpengalaman di bidangnya.">
+          <Card title="Pendampingan mentor" body="Belajar langsung dari praktisi yang sudah berpengalaman di bidangnya.">
             <div className="rounded-xl border border-ln-line bg-ln-surface p-4">
               <div className="flex items-center gap-3">
                 <Avatar from="#93c5fd" to="#6366f1" size="size-10" />
@@ -83,8 +83,8 @@ export function FeatureGrid() {
           {/* Verifikasi Sertifikat Digital (tall) */}
           <Card
             className="lg:row-span-2"
-            title="Verifikasi Sertifikat Digital"
-            body="Setiap proyek dilengkapi sertifikat digital dan QR verifikasi."
+            title="Verifikasi sertifikat digital"
+            body="Setiap proyek disertai sertifikat digital dengan QR yang bisa dicek siapa saja."
           >
             <div className="flex h-full flex-col gap-4">
               <div className="grid place-items-center rounded-xl border border-ln-line bg-ln-surface py-6">
@@ -112,7 +112,7 @@ export function FeatureGrid() {
           </Card>
 
           {/* Tim Berdasarkan Role */}
-          <Card title="Tim Berdasarkan Role" body="Bekerja sama dalam tim terstruktur dengan role yang jelas.">
+          <Card title="Tim dengan peran jelas" body="Bekerja dalam tim yang terstruktur, dengan peran masing-masing yang jelas.">
             <div className="flex flex-wrap gap-2">
               {[["Frontend", true], ["UI/UX", false], ["Backend", false], ["Marketing", false]].map(([label, active]) => (
                 <span
@@ -129,7 +129,7 @@ export function FeatureGrid() {
           </Card>
 
           {/* Monitoring Progress */}
-          <Card title="Monitoring Progress" body="Pantau progres, kelola tugas, dan capai setiap milestone proyek.">
+          <Card title="Pantau progres" body="Pantau progres, kelola tugas, dan selesaikan tiap milestone proyek.">
             <div>
               <div className="grid grid-cols-3 gap-2">
                 {[["24", "Proyek Aktif"], ["78%", "Rata-rata"], ["96%", "Tepat Waktu"]].map(([v, l]) => (

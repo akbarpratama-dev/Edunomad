@@ -58,7 +58,7 @@ export function Testimonials() {
               <span className="rounded-full bg-ln-ink px-3 py-1 text-white">Testimoni</span>
             </SectionLabel>
             <h2 className="mt-4 text-[clamp(1.9rem,1.2rem+2.6vw,2.85rem)] font-extrabold tracking-[-0.035em] text-ln-ink">
-              Cerita Dari Mereka
+              Cerita dari mereka
             </h2>
           </Reveal>
           {/* Carousel controls — only meaningful where the track scrolls (mobile) */}

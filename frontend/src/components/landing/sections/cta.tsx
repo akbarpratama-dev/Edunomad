@@ -18,7 +18,7 @@ export function Cta() {
                 Bergabung bersama 500+ mahasiswa, 50+ mentor, 90+ UMKM
               </span>
               <h2 className="mt-6 text-[clamp(2rem,1.3rem+3vw,3.25rem)] font-extrabold leading-[1.04] tracking-[-0.04em] text-ln-ink [text-wrap:balance]">
-                Jangan Hanya Belajar. Kerjakan Proyek Nyata.
+                Jangan cuma belajar. Kerjakan proyek nyata.
               </h2>
               <p className="mx-auto mt-5 max-w-md text-[1.0625rem] leading-[1.6] text-ln-ink/70">
                 Bangun pengalaman, portofolio, dan koneksi profesional melalui proyek yang benar-benar dibutuhkan UMKM.

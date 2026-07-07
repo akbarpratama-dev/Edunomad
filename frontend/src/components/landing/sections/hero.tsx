@@ -94,24 +94,17 @@ export function Hero() {
       <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)]">
         {/* ── Copy ── */}
         <div className="max-w-xl">
-          <motion.div {...fade(0)} className="inline-flex items-center gap-2 rounded-full border border-ln-line bg-ln-card/60 px-3 py-1.5">
-            <span className="inline-block size-1.5 rounded-full bg-ln-accent-strong" />
-            <span className="text-[12px] font-semibold text-ln-muted">
-              Platform kolaborasi proyek nyata
-            </span>
-          </motion.div>
-
           <motion.h1
             {...fade(0.08)}
-            className="mt-5 text-pretty text-[clamp(2.5rem,1.4rem+4.8vw,3.9rem)] font-extrabold leading-[1.05] tracking-[-0.04em] text-ln-ink [text-wrap:balance]"
+            className="text-pretty text-[clamp(2.5rem,1.4rem+4.8vw,3.9rem)] font-extrabold leading-[1.05] tracking-[-0.04em] text-ln-ink [text-wrap:balance]"
           >
-            Belajar, Membimbing, dan Bertumbuh Melalui Proyek Nyata{" "}
+            Belajar, membimbing, dan tumbuh lewat proyek nyata{" "}
             <span className="text-ln-accent-strong">UMKM.</span>
           </motion.h1>
 
           <motion.p {...fade(0.16)} className="mt-6 max-w-md text-[1.0625rem] leading-[1.65] text-ln-muted">
-            EduNomad menghubungkan mahasiswa, mentor profesional, dan UMKM dalam
-            proyek nyata yang menghasilkan sertifikat portofolio terverifikasi.
+            EduNomad mempertemukan mahasiswa, mentor, dan UMKM dalam satu proyek
+            nyata. Hasilnya sertifikat portofolio yang bisa diverifikasi.
           </motion.p>
 
           <motion.div {...fade(0.24)} className="mt-9 flex flex-wrap items-center gap-3">

@@ -17,7 +17,7 @@ export function Impact() {
             Dampak
           </span>
           <h2 className="text-[clamp(1.9rem,1.2rem+2.6vw,2.75rem)] font-extrabold tracking-[-0.035em] text-white">
-            Angka nyata dari dampak nyata
+            Dampak yang bisa diukur
           </h2>
         </Reveal>
 
