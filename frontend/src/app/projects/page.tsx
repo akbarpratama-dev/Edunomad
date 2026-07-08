@@ -71,15 +71,17 @@ function techOf(p: ProjectListItem) {
   (p.projectRoles ?? []).forEach((r) => r.roleSkills.forEach((rs) => names.add(rs.skill.name)));
   return [...names];
 }
-function statusMeta(p: ProjectListItem): { label: string; className: string } {
+// Noticeable solid markers (shared ring/shadow). ACTIVE has no status marker —
+// its "Sedang Dikerjakan" membership badge covers it instead.
+const MARK = "border-transparent text-white shadow-md ring-2 ring-white/70";
+function statusMeta(p: ProjectListItem): { label: string; className: string } | null {
   if (p.status === "RECRUITING") {
     return daysLeft(p) <= 10
-      ? { label: "Segera Ditutup", className: "bg-amber-50 text-amber-700 border-amber-200" }
-      : { label: "Membuka Pendaftaran", className: "bg-[#eef7d6] text-[#3f7a2e] border-transparent" };
+      ? { label: "Segera Ditutup", className: `bg-amber-500 ${MARK}` }
+      : { label: "Membuka Pendaftaran", className: `bg-[#5f8c00] ${MARK}` };
   }
-  if (p.status === "ACTIVE") return { label: "Aktif", className: "bg-sky-50 text-sky-700 border-sky-200" };
-  if (p.status === "COMPLETED") return { label: "Selesai", className: "bg-muted text-muted-foreground border-border" };
-  return { label: p.status, className: "bg-muted text-muted-foreground border-border" };
+  if (p.status === "COMPLETED") return { label: "Proyek Sudah Selesai", className: `bg-emerald-600 ${MARK}` };
+  return null;
 }
 
 function Content() {
@@ -475,23 +477,10 @@ function ProjectCard({ p, i, relation }: { p: ProjectListItem; i: number; relati
     >
       <div className="relative">
         <Thumb i={i} imageUrl={p.imageUrl} title={p.title} className="h-32 w-full" />
-        <Badge className={cn("absolute left-3 top-3 border", meta.className)}>{meta.label}</Badge>
-        {relation && (
-          <span
-            className={cn(
-              "absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold text-white shadow-md ring-2 ring-white/70",
-              relation === "done" ? "bg-emerald-600" : "bg-sky-600"
-            )}
-          >
-            {relation === "done" ? (
-              <>
-                <BadgeCheck className="size-3.5" /> Selesai
-              </>
-            ) : (
-              <>
-                <Clock className="size-3.5" /> Sedang Dikerjakan
-              </>
-            )}
+        {meta && <Badge className={cn("absolute left-3 top-3 border", meta.className)}>{meta.label}</Badge>}
+        {relation === "active" && (
+          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-sky-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-md ring-2 ring-white/70">
+            <Clock className="size-3.5" /> Sedang Dikerjakan
           </span>
         )}
       </div>
