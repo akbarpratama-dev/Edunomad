@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { UserAvatar } from "@/components/common/UserAvatar";
 import { getNavItems, FOOTER_NAV_ITEMS } from "@/constants/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useNotificationStore } from "@/stores/notificationStore";
@@ -113,23 +112,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           );
         })}
       </div>
-
-      {/* Profile mini-card */}
-      {appUser && (
-        <div className="m-3 mt-2 flex items-center gap-3 rounded-xl bg-white/[0.06] p-3">
-          <UserAvatar
-            name={appUser.name}
-            className="size-9 shrink-0 bg-primary text-[13px] font-bold text-primary-foreground"
-          />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-semibold text-white">{appUser.name}</p>
-            <p className="flex items-center gap-1.5 text-[11px] text-[#8a8a96]">
-              <span className="size-1.5 rounded-full bg-primary" aria-hidden />
-              {appUser.status === "VERIFIED" ? "Terverifikasi" : "Belum terverifikasi"}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -69,6 +69,7 @@ import {
   type ProjectMember,
   type Milestone,
   type MilestoneStatus,
+  type WorkspaceSummary,
 } from "@/services/projectApi";
 
 type TabKey =
@@ -95,9 +96,12 @@ function WorkspaceInner() {
   const id = params.id as string;
   const wsPathname = usePathname();
   const wsBase = wsPathname.startsWith("/my-projects") ? "/my-projects" : "/projects";
+  const appUser = useAuthStore((s) => s.appUser);
   const [project, setProject] = useState<ProjectDetail | null>(null);
+  const [summary, setSummary] = useState<WorkspaceSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabKey>("overview");
+  const [completeOpen, setCompleteOpen] = useState(false);
 
   // Deep-link a tab via ?tab=discussion (e.g. "Diskusi" shortcut from Proyek
   // Mentoring / Proyek Saya). Read client-side to skip a Suspense boundary,
@@ -120,10 +124,52 @@ function WorkspaceInner() {
     };
   }, [id]);
 
+  // Tab badge counts ("needs attention" per role). Re-fetched when the active
+  // tab changes so the badges settle after an action (approve, submit, review).
+  useEffect(() => {
+    let active = true;
+    projectApi
+      .workspaceSummary(id)
+      .then((s) => active && setSummary(s))
+      .catch(() => {
+        /* badges are best-effort — never block the workspace */
+      });
+    return () => {
+      active = false;
+    };
+  }, [id, tab]);
+
   if (error) return <ErrorState message={error} />;
   if (!project) return <ListSkeleton />;
 
   const statusMeta = PROJECT_STATUS_META[project.status];
+  const isLeadSenior = appUser?.role === "SENIOR" && project.senior?.id === appUser.id;
+
+  const completeProject = async () => {
+    try {
+      const updated = await projectApi.complete(id);
+      setProject(updated);
+      toast.success("Proyek selesai. Sertifikat mahasiswa telah diterbitkan.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Gagal menyelesaikan proyek");
+    }
+  };
+
+  // Attach the "needs attention" count to each tab (0 hides the badge).
+  const badgeFor: Record<TabKey, number> = {
+    overview: 0,
+    milestones: summary?.milestones ?? 0,
+    deliverables: summary?.deliverables ?? 0,
+    contributions: summary?.contributions ?? 0,
+    reviews: summary?.reviews ?? 0,
+    artifacts: summary?.artifacts ?? 0,
+    members: 0,
+  };
+  const tabsWithBadges = TABS.map((t) => ({
+    ...t,
+    count: badgeFor[t.key],
+    tone: "alert" as const,
+  }));
 
   return (
     <div className="flex flex-col gap-5">
@@ -152,13 +198,28 @@ function WorkspaceInner() {
           <Button variant="outline" render={<Link href={`${wsBase}/${id}/workspace/diskusi`} />}>
             <MessageSquare className="size-4" /> Buka Diskusi
           </Button>
-          <Button render={<Link href={`${wsBase}/${id}`} />}>
-            <ClipboardList className="size-4" /> Detail & Selesaikan Proyek
+          <Button variant="outline" render={<Link href={`${wsBase}/${id}`} />}>
+            <ClipboardList className="size-4" /> Detail Proyek
           </Button>
+          {isLeadSenior && project.status === "ACTIVE" && (
+            <Button onClick={() => setCompleteOpen(true)}>
+              <CheckCircle2 className="size-4" /> Selesaikan Proyek
+            </Button>
+          )}
         </div>
       </div>
 
-      <PillTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Navigasi workspace" />
+      <ConfirmDialog
+        open={completeOpen}
+        onOpenChange={setCompleteOpen}
+        title="Selesaikan proyek ini?"
+        description="Proyek langsung ditandai SELESAI dan sertifikat setiap mahasiswa aktif otomatis diterbitkan. Pastikan deliverable, kontribusi, dan review sudah beres."
+        confirmLabel="Ya, Selesaikan"
+        cancelLabel="Batal"
+        onConfirm={completeProject}
+      />
+
+      <PillTabs tabs={tabsWithBadges} value={tab} onChange={setTab} ariaLabel="Navigasi workspace" variant="underline" />
 
       {tab === "overview" && <OverviewTab project={project} onTab={setTab} base={wsBase} />}
       {tab === "milestones" && <MilestonesTab project={project} />}

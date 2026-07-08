@@ -237,8 +237,8 @@ export function ProfileView({
                 className={cn(
                   "whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors",
                   tab === t.key
-                    ? "border-[#8bc34a] text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                    ? "border-[#201f31] text-foreground"
+                    : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
                 )}
               >
                 {t.label}

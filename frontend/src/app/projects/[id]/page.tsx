@@ -183,36 +183,38 @@ function BeginnerApplyDialog({ project }: { project: ProjectDetail }) {
         <p className="text-sm text-muted-foreground">Proyek ini belum membuka peran.</p>
       )}
       <Dialog open={open} onOpenChange={(o) => !busy && setOpen(o)}>
-        <DialogContent>
+        <DialogContent className="max-h-[88vh] sm:max-w-md [grid-template-rows:auto_minmax(0,1fr)_auto]">
           <DialogHeader>
             <DialogTitle>Apply ke Peran</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="role">Peran</Label>
-            <Select value={roleId} onValueChange={(v) => setRoleId(v ?? "")}>
-              <SelectTrigger id="role">
-                <SelectValue placeholder="Pilih peran" />
-              </SelectTrigger>
-              <SelectContent>
-                {project.projectRoles.map((r) => (
-                  <SelectItem key={r.id} value={r.id}>
-                    {r.roleName} · {r.capacity} orang
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="-mr-1 flex min-w-0 flex-col gap-4 overflow-y-auto pr-1">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="role">Peran</Label>
+              <Select value={roleId} onValueChange={(v) => setRoleId(v ?? "")}>
+                <SelectTrigger id="role">
+                  <SelectValue placeholder="Pilih peran" />
+                </SelectTrigger>
+                <SelectContent>
+                  {project.projectRoles.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.roleName} · {r.capacity} orang
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="motivation">Motivasi (opsional)</Label>
+              <Textarea
+                id="motivation"
+                rows={4}
+                placeholder="Mengapa Anda cocok untuk peran ini?"
+                value={motivation}
+                onChange={(e) => setMotivation(e.target.value)}
+              />
+            </div>
+            <PortfolioRecPanel projectId={project.id} enabled={open} />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="motivation">Motivasi (opsional)</Label>
-            <Textarea
-              id="motivation"
-              rows={4}
-              placeholder="Mengapa Anda cocok untuk peran ini?"
-              value={motivation}
-              onChange={(e) => setMotivation(e.target.value)}
-            />
-          </div>
-          <PortfolioRecPanel projectId={project.id} enabled={open} />
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)} disabled={busy}>
               Batal
@@ -279,14 +281,9 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
             />
           )}
           {project.status === "ACTIVE" && (
-            <LifecycleAction
-              label="Ajukan Penyelesaian"
-              title="Ajukan penyelesaian proyek?"
-              description="UMKM akan diminta mengonfirmasi penyelesaian. Status berubah menjadi Menunggu Konfirmasi."
-              confirmLabel="Ya, Ajukan"
-              run={() => projectApi.requestCompletion(project.id)}
-              onDone={reload}
-            />
+            <Button variant="outline" render={<Link href={`/my-projects/${project.id}/workspace`} />}>
+              Selesaikan di Workspace
+            </Button>
           )}
           <Button render={<Link href={`/my-projects/${project.id}/applicants`} />}>
             Kelola Lamaran Beginner
@@ -318,21 +315,16 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
   }
 
   if (appUser.role === "BEGINNER") {
+    const totalCapacity = project.projectRoles.reduce((s, r) => s + r.capacity, 0);
+    const memberCount = project.projectMembers?.length ?? 0;
+    const full = totalCapacity > 0 && memberCount >= totalCapacity;
+    // Apply hanya saat masih rekrutmen, sudah ada mentor, dan slot belum penuh.
+    // Kalau proyek sudah mulai / tim penuh → tombol apply hilang.
+    if (!recruiting || !hasSenior || full) return null;
     return (
       <Card className="app-reveal">
         <CardContent className="flex flex-col gap-2">
-          {recruiting && hasSenior ? (
-            <BeginnerApplyDialog project={project} />
-          ) : (
-            <>
-              <Button disabled>Apply ke Peran</Button>
-              <p className="text-sm text-muted-foreground">
-                {!recruiting
-                  ? "Proyek ini tidak sedang membuka rekrutmen."
-                  : "Menunggu mentor senior bergabung sebelum rekrutmen beginner dibuka."}
-              </p>
-            </>
-          )}
+          <BeginnerApplyDialog project={project} />
         </CardContent>
       </Card>
     );

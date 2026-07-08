@@ -11,6 +11,11 @@ import { useAuthStore } from "@/stores/authStore";
 import { projectApi, type MyMembership } from "@/services/projectApi";
 import { profileApi, type ProfileStats } from "@/services/profileApi";
 import {
+  applicationApi,
+  APPLICATION_STATUS_META,
+  type BeginnerApplicationMine,
+} from "@/services/applicationApi";
+import {
   Avatar,
   Panel,
   StatCard,
@@ -26,6 +31,7 @@ export function BeginnerDashboard() {
   const appUser = useAuthStore((s) => s.appUser)!;
   const [memberships, setMemberships] = useState<MyMembership[] | null>(null);
   const [stats, setStats] = useState<ProfileStats | null>(null);
+  const [applications, setApplications] = useState<BeginnerApplicationMine[] | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -37,6 +43,10 @@ export function BeginnerDashboard() {
       .getOverview(appUser.id)
       .then((o) => active && setStats(o.stats))
       .catch(() => {});
+    applicationApi
+      .myApplications()
+      .then((a) => active && setApplications(a))
+      .catch(() => active && setApplications([]));
     return () => {
       active = false;
     };
@@ -144,6 +154,44 @@ export function BeginnerDashboard() {
           <AgendaCard items={agenda} />
         </div>
       </div>
+
+      {/* Lamaran Saya — status lamaran proyek (dulu halaman /applications). */}
+      <Panel className="app-reveal flex flex-col p-5">
+        <CardHead title="Lamaran Saya" />
+        {applications === null ? (
+          <div className="mt-4">
+            <ListSkeleton rows={2} />
+          </div>
+        ) : applications.length === 0 ? (
+          <div className="mt-4 rounded-2xl border border-dashed border-border py-10 text-center">
+            <p className="text-sm text-muted-foreground">
+              Belum ada lamaran. Jelajahi proyek dan lamar peran yang cocok.
+            </p>
+            <Button className="mt-3" render={<Link href="/projects" />}>
+              Cari Proyek
+            </Button>
+          </div>
+        ) : (
+          <ul className="mt-4 flex flex-col divide-y divide-border">
+            {applications.map((a) => {
+              const meta = APPLICATION_STATUS_META[a.status];
+              return (
+                <li key={a.id} className="flex items-center justify-between gap-3 py-3">
+                  <Link href={`/projects/${a.project.id}`} className="min-w-0 hover:opacity-80">
+                    <p className="truncate font-medium tracking-tight">{a.project.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {a.projectRole.roleName} · {a.project.umkm.name}
+                    </p>
+                  </Link>
+                  <Badge variant={meta.variant} className={meta.className}>
+                    {meta.label}
+                  </Badge>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </Panel>
     </div>
   );
 }

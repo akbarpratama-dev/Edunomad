@@ -311,7 +311,7 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
                   variant="outline"
                   size="sm"
                   className="mt-4 w-full"
-                  render={<Link href={`${base}/${project.id}/workspace`} />}
+                  render={<Link href={`${base}/${project.id}`} />}
                 >
                   Lihat Detail Proyek
                 </Button>

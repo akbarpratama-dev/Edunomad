@@ -184,6 +184,7 @@ export function BeginnerProjectBoard() {
   const activeMembers = members.filter((m) => m.status === "ACTIVE");
   const workspace = `/my-projects/${project.id}/workspace`;
   const diskusi = `${workspace}/diskusi`;
+  const detail = `/my-projects/${project.id}`;
   const teamAvatars = [
     ...(project.senior ? [project.senior.name] : []),
     ...activeMembers.map((m) => m.user.name),
@@ -275,15 +276,22 @@ export function BeginnerProjectBoard() {
                 </div>
               </div>
               <div className="flex shrink-0 gap-2">
-                <Button render={<Link href={diskusi} />}>
+                <Button render={<Link href={workspace} />}>
+                  <FileText className="size-4" /> Masuk Workspace
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-white/20 bg-transparent text-white hover:bg-white/10"
+                  render={<Link href={diskusi} />}
+                >
                   <MessageSquare className="size-4" /> Lihat Diskusi
                 </Button>
                 <Button
                   variant="outline"
                   className="border-white/20 bg-transparent text-white hover:bg-white/10"
-                  render={<Link href={workspace} />}
+                  render={<Link href={detail} />}
                 >
-                  <FileText className="size-4" /> Lihat Deliverable
+                  <ClipboardList className="size-4" /> Lihat Detail
                 </Button>
               </div>
             </div>

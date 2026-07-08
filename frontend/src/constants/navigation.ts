@@ -4,16 +4,15 @@ import {
   FolderKanban,
   FolderPlus,
   Award,
-  Bell,
   HelpCircle,
   Shield,
   FileText,
   ClipboardCheck,
-  FileSignature,
-  Star,
   ShieldCheck,
   ScrollText,
   Activity,
+  Search,
+  UserRound,
 } from "lucide-react";
 import type { Role } from "@/types/user";
 
@@ -37,9 +36,9 @@ const dashboardItem = (role?: Role): NavItem => ({
 // browses to find one, so it is intentionally excluded (docs/08 only documents
 // "Browse Projects" for Beginner and Senior).
 const BROWSE_PROJECTS: NavItem = {
-  label: "Jelajahi Proyek",
+  label: "Cari Proyek",
   href: "/projects",
-  icon: FolderKanban,
+  icon: Search,
 };
 
 // Role-specific items appended after the common ones (per-role page sets now exist — Phase 3).
@@ -60,30 +59,25 @@ const ROLE_ITEMS: Record<Role, NavItem[]> = {
     BROWSE_PROJECTS,
     // The senior's assigned projects — their route into each project's workspace
     // (and the Diskusi tab), mirroring the Beginner/UMKM "Proyek Saya" entry.
-    { label: "Proyek Mentoring", href: "/my-projects", icon: FolderKanban },
-    { label: "Lamaran Mentor", href: "/applications/mentor", icon: FileSignature },
+    { label: "Proyek Saya", href: "/my-projects", icon: FolderKanban },
   ],
   BEGINNER: [
     BROWSE_PROJECTS,
     { label: "Proyek Saya", href: "/my-projects", icon: FolderKanban },
-    { label: "Lamaran Saya", href: "/applications", icon: FileSignature },
-    { label: "Review Saya", href: "/reviews", icon: Star },
     // "Artifact Saya" is beginner-only. Seniors generate artifacts inside each
     // project workspace (Sertifikat tab); UMKM see them there too; admins have
     // their own /admin/artifacts monitoring — so /artifacts isn't in their nav.
-    { label: "Sertifikat", href: "/artifacts", icon: Award },
+    { label: "Daftar Sertifikat", href: "/artifacts", icon: Award },
   ],
 };
 
-const TRAILING_ITEMS: NavItem[] = [
-  { label: "Notifikasi", href: "/notifications", icon: Bell },
-];
+// Profile access lives in the sidebar (all roles) — the header avatar is just
+// the account menu.
+const profileItem: NavItem = { label: "Profil", href: "/profile", icon: UserRound };
 
 export function getNavItems(role?: Role): NavItem[] {
-  // Notifications don't apply to ADMIN (not built yet), so the admin sidebar
-  // skips the trailing items.
-  const trailing = role === "ADMIN" ? [] : TRAILING_ITEMS;
-  return [dashboardItem(role), ...(role ? ROLE_ITEMS[role] : []), ...trailing];
+  // Notifications live in the header bell only (not the sidebar).
+  return [dashboardItem(role), ...(role ? ROLE_ITEMS[role] : []), profileItem];
 }
 
 export const FOOTER_NAV_ITEMS: NavItem[] = [

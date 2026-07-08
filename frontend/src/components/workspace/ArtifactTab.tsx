@@ -46,7 +46,9 @@ export function ArtifactTab({ project }: { project: ProjectDetail }) {
     return map;
   }, [artifacts]);
 
-  const activeBeginners = members.filter((m) => m.status === "ACTIVE");
+  // Include COMPLETED members so the senior still sees the issued certificates
+  // after the project is finalized (members flip ACTIVE → COMPLETED on complete).
+  const activeBeginners = members.filter((m) => m.status === "ACTIVE" || m.status === "COMPLETED");
 
   const generate = async (beginnerId: string) => {
     setBusy(beginnerId);
