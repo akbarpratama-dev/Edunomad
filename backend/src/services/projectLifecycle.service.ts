@@ -11,13 +11,20 @@ import { DeliverableStatus, ContributionStatus } from "../constants/deliverableS
 import { ReviewType } from "../constants/reviewType";
 import { notificationService } from "./notification.service";
 import { NotificationType } from "../constants/notificationType";
+import { artifactService } from "./artifact.service";
+import { env } from "../config/env";
 
 const SENIOR_MAX_ACTIVE = 5;
 const UMKM_MAX_ACTIVE = 5;
 
 // Workflow 15 completion readiness — every requirement must hold before a
 // project may leave ACTIVE. Returns the list of unmet requirements (empty = ok).
-async function completionBlockers(projectId: string): Promise<string[]> {
+// `requireArtifact` stays false for the one-click flow because certificates are
+// auto-generated as part of completion (no need to pre-generate them).
+async function completionBlockers(
+  projectId: string,
+  requireArtifact = false
+): Promise<string[]> {
   const [members, deliverables, contributions, reviews] = await Promise.all([
     projectMemberRepository.listByProject(projectId),
     deliverableRepository.listByProject(projectId),
@@ -61,9 +68,11 @@ async function completionBlockers(projectId: string): Promise<string[]> {
     if (!umkmReviewedBeginner.has(m.user.id)) {
       blockers.push(`Review UMKM untuk ${name} belum ada`);
     }
-    const artifact = await artifactRepository.findByProjectAndBeginner(projectId, m.user.id);
-    if (!artifact) {
-      blockers.push(`Sertifikat untuk ${name} belum dibuat`);
+    if (requireArtifact) {
+      const artifact = await artifactRepository.findByProjectAndBeginner(projectId, m.user.id);
+      if (!artifact) {
+        blockers.push(`Sertifikat untuk ${name} belum dibuat`);
+      }
     }
   }
 
@@ -107,6 +116,48 @@ export const projectLifecycleService = {
     }
 
     return projectRepository.update(projectId, { status: ProjectStatus.ACTIVE });
+  },
+
+  // POST /projects/:id/complete (SENIOR lead) — ACTIVE → COMPLETED in ONE action
+  // (revised flow, user-approved D-P14-1): the senior finalizes alone, a
+  // certificate for every active beginner is auto-generated, and no separate
+  // UMKM confirmation is needed. The Workflow 15 readiness gate still applies
+  // (deliverables approved + per-beginner contribution + reviews) UNLESS
+  // DEMO_COMPLETE_BYPASS is set (expo demo shortcut → placeholder certificates).
+  async completeProject(seniorId: string, projectId: string, verificationBase: string) {
+    const project = await projectRepository.findRawById(projectId);
+    if (!project) throw new NotFoundError("Project not found");
+    if (project.seniorId !== seniorId) {
+      throw new ForbiddenError("Only the project's senior can complete this project");
+    }
+    if (project.status !== ProjectStatus.ACTIVE) {
+      throw new BusinessRuleError("Only active projects can be completed");
+    }
+
+    const bypass = env.demoCompleteBypass;
+    if (!bypass) {
+      const blockers = await completionBlockers(projectId, false);
+      if (blockers.length > 0) {
+        throw new BusinessRuleError(`Proyek belum siap diselesaikan: ${blockers.join("; ")}`);
+      }
+    }
+
+    // Auto-issue certificates for every active beginner (idempotent). Strict in
+    // real mode; placeholder-tolerant in demo mode.
+    await artifactService.generateForCompletion(seniorId, projectId, verificationBase, {
+      strict: !bypass,
+    });
+
+    // Finalize: COMPLETED + active members → COMPLETED + PROJECT_COMPLETED audit.
+    const result = await projectRepository.completeWithAudit(projectId, seniorId);
+    await notificationService.notify({
+      userId: project.umkmId,
+      type: NotificationType.PROJECT_COMPLETED,
+      title: "Proyek selesai",
+      message: `Proyek "${project.title}" telah diselesaikan mentor. Sertifikat mahasiswa telah terbit.`,
+      actionUrl: `/my-projects/${projectId}`,
+    });
+    return result;
   },
 
   // POST /projects/:id/complete (SENIOR lead) — ACTIVE → AWAITING_COMPLETION

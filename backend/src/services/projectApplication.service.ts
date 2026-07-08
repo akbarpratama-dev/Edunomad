@@ -144,7 +144,7 @@ export const projectApplicationService = {
       type: NotificationType.APPLICATION_REJECTED,
       title: "Lamaran ditolak",
       message: `Lamaranmu untuk proyek "${app.project.title}" belum diterima.`,
-      actionUrl: "/applications",
+      actionUrl: "/dashboard",
     });
     return result;
   },

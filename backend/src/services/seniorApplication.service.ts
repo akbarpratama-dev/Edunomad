@@ -119,7 +119,7 @@ export const seniorApplicationService = {
       type: NotificationType.APPLICATION_REJECTED,
       title: "Lamaran mentor ditolak",
       message: `Lamaran mentormu untuk "${app.project.title}" belum diterima.`,
-      actionUrl: "/applications/mentor",
+      actionUrl: "/dashboard",
     });
     return result;
   },

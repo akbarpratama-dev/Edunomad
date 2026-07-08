@@ -29,4 +29,11 @@ export const env = {
       (process.env.GEMINI_API_KEY ?? "").length > 0
     );
   },
+  // DEMO ONLY — when true, "Selesaikan Proyek" skips the Workflow 15 readiness
+  // gate (deliverables/contributions/reviews) and issues certificates with
+  // placeholder data so an expo demo can complete a project in one click.
+  // Leave unset/false in real use so certificates stay backed by real work.
+  get demoCompleteBypass(): boolean {
+    return (process.env.DEMO_COMPLETE_BYPASS ?? "").toLowerCase() === "true";
+  },
 };

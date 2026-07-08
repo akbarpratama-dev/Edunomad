@@ -45,6 +45,11 @@ export const projectService = {
         : "__none__"
       : { in: PUBLIC_PROJECT_STATUSES };
     if (query.category) where.categoryId = query.category;
+    // Beginners only see projects that already have a mentor (senior) assigned —
+    // recruitment for beginners only opens after a senior joins. Seniors see the
+    // inverse: only projects still without a mentor (i.e. still hiring one).
+    if (query.hasSenior === "true") where.seniorId = { not: null };
+    else if (query.hasSenior === "false") where.seniorId = null;
     if (query.q) {
       where.OR = [
         { title: { contains: query.q, mode: "insensitive" } },

@@ -10,6 +10,7 @@ import { seniorApplicationController } from "../modules/seniorApplication/senior
 import { projectApplicationController } from "../modules/projectApplication/projectApplication.controller";
 import { projectMemberController } from "../modules/projectMember/projectMember.controller";
 import { projectLifecycleController } from "../modules/projectLifecycle/projectLifecycle.controller";
+import { workspaceSummaryController } from "../modules/workspace/workspaceSummary.controller";
 import { discussionController } from "../modules/discussion/discussion.controller";
 import { deliverableController } from "../modules/deliverable/deliverable.controller";
 import { contributionController } from "../modules/contribution/contribution.controller";
@@ -238,7 +239,7 @@ router.post(
   authMiddleware,
   roleMiddleware(["SENIOR"]),
   validateRequest({ params: projectIdParamSchema }),
-  projectLifecycleController.requestCompletion
+  projectLifecycleController.completeProject
 );
 router.post(
   "/:id/confirm-completion",
@@ -246,6 +247,14 @@ router.post(
   ...umkm,
   validateRequest({ params: projectIdParamSchema }),
   projectLifecycleController.confirmCompletion
+);
+
+// Workspace tab badges — role-aware "needs attention" counts.
+router.get(
+  "/:id/workspace-summary",
+  authMiddleware,
+  validateRequest({ params: projectIdParamSchema }),
+  workspaceSummaryController.summary
 );
 
 // Certificates for a project (senior "Sertifikat" tab / beginner view).

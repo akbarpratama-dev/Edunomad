@@ -40,7 +40,7 @@ export const reviewService = {
       type: NotificationType.REVIEW_RECEIVED,
       title: "Review baru",
       message: `Kamu menerima review di proyek "${project.title}".`,
-      actionUrl: "/reviews",
+      actionUrl: "/profile",
     });
     return result;
   },
@@ -71,7 +71,7 @@ export const reviewService = {
       type: NotificationType.REVIEW_RECEIVED,
       title: "Review baru",
       message: `Kamu menerima review di proyek "${project.title}".`,
-      actionUrl: "/reviews",
+      actionUrl: "/profile",
     });
     return result;
   },
