@@ -1,6 +1,21 @@
 # Decisions
 
 Date:
+2026-07-09/10 (Code review fixes + Diskusi UX + Deploy config Fly.io/Vercel)
+
+Decision (D-CR-1..3) — Perbaikan 3 finding /code-review high-effort teratas (branch main, belum commit):
+- D-CR-1 `PillTabs.tsx`: default variant dikembalikan "pill" (sebelumnya diubah "underline" saat menambah look underline utk workspace → regresi visual senyap di 8+ halaman yg tak pass prop). Workspace tetap opt-in `variant="underline"` eksplisit.
+- D-CR-2 `ConfirmDialog.tsx`: onConfirm jadi `() => void | Promise<void>`, tambah `busy` state, `await onConfirm()` lalu tutup dialog HANYA jika sukses; error → dialog tetap terbuka + tombol disabled "Memproses...". Sebelumnya sinkron lalu langsung tutup → error API hilang.
+- D-CR-3 `workspaceSummary.service.ts`: throw ForbiddenError bila user bukan lead/owner/beginner (sebelumnya balikin 200 all-zeros → info leak/enumerasi project ID).
+SISA 7 finding review DITUNDA (belum diperbaiki) — dicatat di next-tasks: partial-cert mid-loop tanpa txn (artifact.service.generateForCompletion), withdraw application hilang dari UI (Beginner+Senior dashboard read-only; page /applications, /applications/mentor, /reviews DIHAPUS di commit workflow-ux sebelumnya), completionBlockers requireArtifact default false (legacy gate longgar), DEMO_COMPLETE_BYPASS di core service, N+1 artifact query, re-fetch summary tiap ganti tab.
+
+Decision (D-DISKUSI-1) — Shortcut Diskusi pindah dari Header ke Sidebar (user req):
+Icon `<MessageButton />` di Header (pojok kanan atas) dihapus; komponennya (`MessageButton.tsx`) dihapus (yatim). Diganti item Sidebar "Diskusi Proyek" — me-resolve proyek live user (BEGINNER myMemberships / SENIOR mentoredProjects / UMKM myProjects, status ACTIVE|AWAITING_COMPLETION, fallback /my-projects), bisa diklik dari halaman mana pun (bukan cuma dalam workspace), hidden utk ADMIN. Posisi: tepat di bawah "Proyek Saya" (render inline dalam navItems.map pakai Fragment saat item.href==="/my-projects" → berlaku semua role yg punya /my-projects). Button "Buka Diskusi" di header workspace juga dihapus. CATATAN OPERASIONAL: dev server Next.js lama tidak selalu recompile (Fast Refresh gagal) → perubahan tak terlihat walau file benar; fix = kill port 3000 + rm -rf .next + restart.
+
+Decision (D-DEPLOY-1) — Hosting gratis Fly.io (backend) + Vercel (frontend) + Supabase (DB/Auth/Storage existing):
+User mau demo online gratis utk responden, pilih Fly.io (always-on, tanpa cold start; via AskUserQuestion di antara Render/Fly/Koyeb — Fly dipilih walau butuh verifikasi kartu). File deploy backend/: Dockerfile multi-stage (node:22-slim, prisma generate + tsc, openssl utk Prisma), fly.toml (always-on: min_machines_running=1, auto_stop_machines="off", region sin/Singapura, internal_port+PORT 8080), .dockerignore, tsconfig.build.json. KEPUTUSAN teknis: (a) production build HARUS exclude file seed (seed*.ts punya error TS pre-existing yg bikin `npm run build` exit≠0 → gagalkan Docker) → dibuat tsconfig.build.json + build script jadi `prisma generate && tsc -p tsconfig.build.json`; (b) Docker context = backend/ saja (bukan root monorepo) — backend/package.json self-contained, `npm install` standalone jalan, tak tarik dep frontend; (c) app.listen +host "0.0.0.0" (syarat Fly proxy); (d) CORS via env CORS_ORIGIN opsional (default terbuka → demo langsung jalan, kunci ke domain Vercel di prod); (e) DIRECT_URL tak perlu di Fly (DB sudah dimigrasi di Supabase, container tak migrasi). Context7 dipakai (Fly.io /superfly/docs) utk fly.toml http_service. Terbukti lokal: `npm run build` → `node dist/index.js` → /health 200. Panduan lengkap ditulis di README.md (bukan file terpisah, sesuai preferensi user). BELUM di-deploy (user jalankan fly auth login→create→secrets→deploy + Vercel).
+
+Date:
 2026-07-06d (AI Features — Gemini matching/recommendation/summary)
 
 Decision (D-AI-1) — Penggunaan AI (tugas dosen) via Google Gemini, 3 fitur, additive & gracefully-degrading:

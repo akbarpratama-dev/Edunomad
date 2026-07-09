@@ -1,4 +1,26 @@
 ============================================================
+⚡ ACTIVE HANDOFF (2026-07-10 #16) — CODE-REVIEW FIXES + DISKUSI UX + DEPLOY CONFIG FLY.IO/VERCEL (branch main, BELUM commit)
+============================================================
+Sesi ini di branch `main` (tak buat branch baru — perubahan langsung di working tree, BELUM commit). Semua tsc 0 + Playwright-verified.
+
+✅ SELESAI sesi ini (D-CR-1..3, D-DISKUSI-1, D-DEPLOY-1):
+1. /code-review high-effort → 10 findings; diperbaiki 3: PillTabs default "pill" (regresi), ConfirmDialog async+busy, workspaceSummary ForbiddenError non-member.
+2. Diskusi UX: MessageButton (Header pojok kanan atas) DIHAPUS + file komponennya dihapus + button "Buka Diskusi" workspace dihapus; Sidebar +"Diskusi Proyek" (resolve proyek live, di bawah "Proyek Saya", non-ADMIN). Playwright-verified.
+3. Deploy config Fly.io+Vercel: backend/{Dockerfile, fly.toml always-on, .dockerignore, tsconfig.build.json} + build script + listen 0.0.0.0 + CORS env CORS_ORIGIN + README "Deploy Gratis" section. Terbukti node dist/index.js → /health 200.
+
+➡️ QUICK ACTION (urut):
+1. **COMMIT semua perubahan sesi ini** (branch main, atau buat branch fix/review-diskusi-deploy). Conventional Commit + Co-Authored-By Claude Opus 4.8. File: PillTabs.tsx, ConfirmDialog.tsx, workspaceSummary.service.ts, Sidebar.tsx, Header.tsx, workspace/page.tsx (hapus MessageButton.tsx), backend deploy files, package.json, index.ts, setupMiddleware.ts, README.md, memory/*.
+2. **Deploy** (user): backend `cd backend && fly auth login && fly apps create <nama> && fly secrets set DATABASE_URL=.. SUPABASE_URL=.. SUPABASE_SERVICE_ROLE_KEY=.. && fly deploy`; frontend Vercel root=frontend + 3 NEXT_PUBLIC_* (NEXT_PUBLIC_API_URL=https://<app>.fly.dev/api/v1). Lalu `fly secrets set CORS_ORIGIN=https://<vercel>`.
+3. **(Opsional) Perbaiki 7 sisa finding review** (prioritas bila mau production-grade):
+   - HIGH: partial-cert mid-loop tanpa txn di `artifact.service.generateForCompletion` (pre-validate SEMUA beginner sebelum _issueArtifact, atau bungkus txn).
+   - HIGH-UX: withdraw application HILANG — Beginner+Senior dashboard cuma badge read-only; page /applications, /applications/mentor, /reviews DIHAPUS di commit workflow-ux (82b7510). Tambah tombol "Tarik Lamaran" (applicationApi.withdraw / seniorApplication withdraw belum ada di projectApi → cek backend endpoint).
+   - MED: completionBlockers requireArtifact default false → legacy requestCompletion (line 179) skip artifact gate; DEMO_COMPLETE_BYPASS di core service (env leak risk).
+   - EFISIENSI: N+1 artifact query di workspaceSummary + generateForCompletion (batch findByProject); re-fetch summary tiap ganti tab (fetch on mount + refreshKey).
+⚠️ Kalau edit tak terlihat di browser: dev server Next.js basi → kill port 3000 + `rm -rf frontend/.next` + restart. File di disk selalu benar (cek dgn grep/tsc).
+⚠️ Dev server frontend jalan di background (log /tmp/edunomad-frontend-dev.log). Test users p4-beginner/senior/umkm + p43-admin @test.edunomad.com pw TestPass123!; project ACTIVE a1a1a1a1-…0005.
+
+--- arsip handoff #15 ---
+============================================================
 ⚡ ACTIVE HANDOFF (2026-07-06 #15) — AI FEATURES (D-AI-1) ✅ SELESAI & HAPPY-PATH VERIFIED. NEXT = commit + merge
 ============================================================
 ✅ HAPPY-PATH VERIFIED (Gemini gemini-2.5-flash): ketiga fitur output nyata. Provider MULTI (`services/llm.service.ts`: Groq preferred bila GROQ_API_KEY else Gemini). Default model gemini-2.5-flash (2.0-flash kuota free 0; 2.5 thinking dimatikan + tokens 2048 + strip fence). Ranking demo: proyek …0005 kini punya 2 pelamar PENDING (Beginner Two 85% / Three 30%) + role Frontend …051 dikasih required skills JS/React/TS (data demo — cleanup bila mau DB bersih). NEXT = commit branch feature/ai-matching + merge. ⚠️ user pakai GEMINI_API_KEY (auth-key format AQ.*), key ada di backend/.env.
