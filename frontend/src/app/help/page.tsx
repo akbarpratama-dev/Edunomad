@@ -12,7 +12,7 @@ export default function HelpPage() {
 
       <LegalSection heading="Bagaimana cara bergabung ke proyek?">
         <p>
-          Mahasiswa menelusuri <strong>Jelajahi Proyek</strong>, lalu melamar peran yang tersedia. Setelah
+          Mahasiswa menelusuri <strong>Cari Proyek</strong>, lalu melamar peran yang tersedia. Setelah
           mentor menerima lamaranmu, proyek muncul di <strong>Proyek Saya</strong> dan kamu bisa masuk ke
           workspace serta diskusi tim.
         </p>

@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/common/UserAvatar";
 import { projectApi, type Category, type ProjectListItem, type ProjectStatus } from "@/services/projectApi";
 import { fetchSkills, type Skill } from "@/services/skillApi";
+import { useAuthStore } from "@/stores/authStore";
 
 const ALL = "ALL";
 const PAGE_SIZE = 9;
@@ -70,18 +71,21 @@ function techOf(p: ProjectListItem) {
   (p.projectRoles ?? []).forEach((r) => r.roleSkills.forEach((rs) => names.add(rs.skill.name)));
   return [...names];
 }
-function statusMeta(p: ProjectListItem): { label: string; className: string } {
+// Noticeable solid markers (shared ring/shadow). ACTIVE has no status marker —
+// its "Sedang Dikerjakan" membership badge covers it instead.
+const MARK = "border-transparent text-white shadow-md ring-2 ring-white/70";
+function statusMeta(p: ProjectListItem): { label: string; className: string } | null {
   if (p.status === "RECRUITING") {
     return daysLeft(p) <= 10
-      ? { label: "Segera Ditutup", className: "bg-amber-50 text-amber-700 border-amber-200" }
-      : { label: "Membuka Pendaftaran", className: "bg-[#eef7d6] text-[#3f7a2e] border-transparent" };
+      ? { label: "Segera Ditutup", className: `bg-amber-500 ${MARK}` }
+      : { label: "Membuka Pendaftaran", className: `bg-[#5f8c00] ${MARK}` };
   }
-  if (p.status === "ACTIVE") return { label: "Aktif", className: "bg-sky-50 text-sky-700 border-sky-200" };
-  if (p.status === "COMPLETED") return { label: "Selesai", className: "bg-muted text-muted-foreground border-border" };
-  return { label: p.status, className: "bg-muted text-muted-foreground border-border" };
+  if (p.status === "COMPLETED") return { label: "Proyek Sudah Selesai", className: `bg-emerald-600 ${MARK}` };
+  return null;
 }
 
 function Content() {
+  const role = useAuthStore((s) => s.appUser?.role);
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [category, setCategory] = useState(ALL);
@@ -95,11 +99,29 @@ function Content() {
   const [items, setItems] = useState<ProjectListItem[]>([]);
   const [meta, setMeta] = useState({ total: 0, lastPage: 1 });
   const [loading, setLoading] = useState(true);
+  // Projects the viewer already works on / finished — for the noticeable
+  // "Sedang Dikerjakan" / "Selesai" marker on browse cards.
+  const [mine, setMine] = useState<Record<string, "active" | "done">>({});
 
   useEffect(() => {
     projectApi.categories().then(setCategories).catch(() => {});
     fetchSkills().then(setSkills).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (role !== "BEGINNER") return;
+    projectApi
+      .myMemberships()
+      .then((ms) => {
+        const map: Record<string, "active" | "done"> = {};
+        ms.forEach((m) => {
+          if (m.project.status === "COMPLETED") map[m.project.id] = "done";
+          else if (m.project.status === "ACTIVE") map[m.project.id] = "active";
+        });
+        setMine(map);
+      })
+      .catch(() => {});
+  }, [role]);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q.trim()), 350);
@@ -114,6 +136,7 @@ function Content() {
         q: debouncedQ || undefined,
         category: category === ALL ? undefined : category,
         status: status === ALL ? undefined : (status as ProjectStatus),
+        hasSenior: role === "BEGINNER" ? true : role === "SENIOR" ? false : undefined,
         page,
         limit: PAGE_SIZE,
       })
@@ -123,7 +146,7 @@ function Content() {
       })
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
-  }, [debouncedQ, category, status, page]);
+  }, [debouncedQ, category, status, page, role]);
   useEffect(load, [load]);
 
   const filtersActive = debouncedQ || category !== ALL || status !== ALL || deadline !== ALL;
@@ -156,11 +179,11 @@ function Content() {
   const sortItems = { newest: "Terbaru", deadline: "Deadline Terdekat" };
 
   return (
-    <AppShell breadcrumbs={[{ label: "Jelajahi Proyek" }]}>
+    <AppShell breadcrumbs={[{ label: "Cari Proyek" }]}>
       <div className="flex flex-col gap-5">
         {/* Title — full width, aligned with the floating header controls */}
         <div className="app-reveal max-w-3xl pr-2">
-          <h1 className="text-h1 tracking-tight text-balance">Jelajahi Proyek</h1>
+          <h1 className="text-h1 tracking-tight text-balance">Cari Proyek</h1>
           <p className="mt-1.5 text-body-lg text-muted-foreground text-pretty">
             Temukan proyek nyata dari berbagai UMKM dan bergabung bersama mentor profesional untuk
             membangun pengalaman yang dapat dibuktikan.
@@ -227,7 +250,7 @@ function Content() {
 
               <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
                 {gridItems.map((p, i) => (
-                  <ProjectCard key={p.id} p={p} i={i} />
+                  <ProjectCard key={p.id} p={p} i={i} relation={mine[p.id]} />
                 ))}
               </div>
 
@@ -443,7 +466,7 @@ function Meta({ icon: Icon, label, value }: { icon: typeof Clock; label: string;
   );
 }
 
-function ProjectCard({ p, i }: { p: ProjectListItem; i: number }) {
+function ProjectCard({ p, i, relation }: { p: ProjectListItem; i: number; relation?: "active" | "done" }) {
   const meta = statusMeta(p);
   const tech = techOf(p);
   return (
@@ -454,7 +477,12 @@ function ProjectCard({ p, i }: { p: ProjectListItem; i: number }) {
     >
       <div className="relative">
         <Thumb i={i} imageUrl={p.imageUrl} title={p.title} className="h-32 w-full" />
-        <Badge className={cn("absolute left-3 top-3 border", meta.className)}>{meta.label}</Badge>
+        {meta && <Badge className={cn("absolute left-3 top-3 border", meta.className)}>{meta.label}</Badge>}
+        {relation === "active" && (
+          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-sky-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-md ring-2 ring-white/70">
+            <Clock className="size-3.5" /> Sedang Dikerjakan
+          </span>
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <h3 className="line-clamp-1 font-semibold tracking-tight">{p.title}</h3>

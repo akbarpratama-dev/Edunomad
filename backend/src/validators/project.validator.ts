@@ -28,6 +28,7 @@ export const listProjectsQuerySchema = z.object({
   q: z.string().optional(),
   category: z.string().uuid().optional(),
   status: z.enum(STATUS_VALUES).optional(),
+  hasSenior: z.enum(["true", "false"]).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
 });

@@ -11,7 +11,6 @@ import {
   ArrowRight,
   FolderKanban,
   FolderPlus,
-  FileSignature,
   Award,
   type LucideIcon,
 } from "lucide-react";
@@ -79,13 +78,11 @@ interface QuickAction {
 // dashboard page; improvised on-theme per CLAUDE.md UI guidance).
 const QUICK_ACTIONS: Record<Role, QuickAction[]> = {
   BEGINNER: [
-    { label: "Telusuri Proyek", desc: "Temukan proyek nyata dan lamar perannya.", href: "/projects", icon: FolderKanban },
-    { label: "Lamaran Saya", desc: "Pantau status lamaran proyekmu.", href: "/applications", icon: FileSignature },
+    { label: "Cari Proyek", desc: "Temukan proyek nyata dan lamar perannya.", href: "/projects", icon: FolderKanban },
     { label: "Sertifikat", desc: "Portofolio terverifikasi dari kontribusimu.", href: "/artifacts", icon: Award },
   ],
   SENIOR: [
-    { label: "Telusuri Proyek", desc: "Cari proyek yang butuh mentor.", href: "/projects", icon: FolderKanban },
-    { label: "Lamaran Mentor", desc: "Kelola lamaran mentoring kamu.", href: "/applications/mentor", icon: FileSignature },
+    { label: "Cari Proyek", desc: "Cari proyek yang butuh mentor.", href: "/projects", icon: FolderKanban },
     { label: "Sertifikat", desc: "Riwayat sertifikat yang kamu terbitkan.", href: "/artifacts", icon: Award },
   ],
   UMKM: [

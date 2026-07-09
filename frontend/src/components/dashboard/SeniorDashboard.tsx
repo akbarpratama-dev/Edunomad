@@ -89,7 +89,7 @@ export function SeniorDashboard() {
           icon={GraduationCap}
           tone="bg-[#eef7d6] text-[#5f8c00]"
           value={`${activeCount}/5`}
-          label="Proyek Mentoring"
+          label="Proyek Saya"
           trend={recruitingCount > 0 ? `${recruitingCount} dalam rekrutmen` : "Aktif"}
           trendTone="text-[#5f8c00]"
         />
@@ -120,9 +120,9 @@ export function SeniorDashboard() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[1.5fr_1.1fr_1fr]">
-        {/* Proyek Mentoring */}
+        {/* Proyek Saya */}
         <Panel className="app-reveal flex flex-col p-5">
-          <CardHead title="Proyek Mentoring" />
+          <CardHead title="Proyek Saya" />
           {projects === null ? (
             <div className="mt-4">
               <ListSkeleton rows={2} />
@@ -159,7 +159,7 @@ export function SeniorDashboard() {
         <div className="flex flex-col gap-4">
           {/* Lamaran Mentor Saya (real) */}
           <Panel className="app-reveal p-5">
-            <CardHead title="Lamaran Mentor Saya" href="/applications/mentor" />
+            <CardHead title="Lamaran Mentor Saya" />
             {apps.length === 0 ? (
               <p className="mt-4 text-sm text-muted-foreground">Belum ada lamaran mentor.</p>
             ) : (

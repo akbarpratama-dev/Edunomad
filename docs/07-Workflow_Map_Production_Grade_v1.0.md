@@ -627,6 +627,8 @@ become active milestones
 
 ## Workflow 11: Project Completion Request
 
+> **AMANDEMEN D-P14-1 (2026-07-08, user-approved).** Alur di bawah (Senior *Ajukan* → status AWAITING_COMPLETION → UMKM *Konfirmasi*) DIGANTI menjadi **penyelesaian 1-langkah oleh Senior**: Senior menekan **"Selesaikan Proyek"** sekali → proyek `ACTIVE → COMPLETED` langsung, **tanpa** state antara `AWAITING_COMPLETION` dan **tanpa** konfirmasi UMKM. Sertifikat setiap mahasiswa aktif **otomatis diterbitkan** sebagai bagian dari langkah ini (Workflow 13 dilipat ke sini; idempotent). **Gate kesiapan Workflow 15 TETAP** (deliverable APPROVED + kontribusi + review per-mahasiswa) sehingga sertifikat tetap "verified" — kecuali flag demo `DEMO_COMPLETE_BYPASS=true` yang melewati gate untuk keperluan expo. Diagram AWAITING_COMPLETION + langkah UMKM di bawah dipertahankan hanya sebagai referensi/back-compat untuk proyek yang terlanjur berstatus AWAITING_COMPLETION. Lihat D-P14-1.
+
 ### Senior Verifies Readiness
 
 ```
@@ -888,6 +890,8 @@ NEW VERSION CREATED
 ---
 
 ## Workflow 15: Project Completion
+
+> **AMANDEMEN D-P14-1 (2026-07-08).** Transisi final kini `ACTIVE → COMPLETED` dalam **satu aksi Senior** (`POST /projects/:id/complete`), bukan `AWAITING_COMPLETION → COMPLETED` oleh UMKM. Requirement di bawah tetap menjadi **gate** yang diperiksa saat Senior menyelesaikan (kecuali `DEMO_COMPLETE_BYPASS`). "Artifacts generated" bukan lagi prasyarat manual — sertifikat diterbitkan otomatis oleh langkah penyelesaian.
 
 ### Completion Requirements
 

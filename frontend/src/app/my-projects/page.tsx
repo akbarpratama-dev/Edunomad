@@ -139,7 +139,7 @@ function SeniorView() {
       <DashboardLayout
         header={
           <PageHeader
-            title="Proyek Mentoring"
+            title="Proyek Saya"
             subtitle="Kelola dan pantau proyek yang kamu bimbing sebagai mentor."
           />
         }
@@ -150,7 +150,7 @@ function SeniorView() {
           ) : visible.length === 0 ? (
             <EmptyState
               icon={FolderKanban}
-              heading="Belum Ada Proyek Mentoring"
+              heading="Belum Ada Proyek Saya"
               message="Lamar sebagai mentor pada proyek yang membutuhkan untuk mulai membimbing tim."
             />
           ) : (

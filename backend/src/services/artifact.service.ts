@@ -88,45 +88,134 @@ export const artifactService = {
         );
       }
 
-      const code = await artifactRepository.nextCode(new Date().getFullYear());
-      const verificationUrl = buildVerificationUrl(verificationBase, code);
-      const issuedAt = new Date();
-      const pdf = await generateArtifactPdf(
-        this.toPdfData({
-          code,
-          verificationUrl,
-          issuedAt,
-          projectTitle: project.title,
-          umkmName: project.umkm.name,
-          seniorName: project.senior?.name ?? "—",
-          beginnerName: member.user.name,
-          summary: contribution.contributionSummary,
-          technologies: contribution.contributionSkills.map((cs) => cs.skill.name),
-          feedback: seniorReview.comment ?? null,
-        })
-      );
-      const pdfPath = await artifactStorageService.uploadPdf(code, 1, pdf);
-      const artifact = await artifactRepository.create({
-        artifactCode: code,
-        projectId,
-        beginnerId,
+      const artifact = await this._issueArtifact({
+        project,
+        member,
         seniorId,
+        verificationBase,
+        summary: contribution.contributionSummary,
+        technologies: contribution.contributionSkills.map((cs) => cs.skill.name),
+        feedback: seniorReview.comment ?? null,
+      });
+      created.push(artifact);
+    }
+    return created;
+  },
+
+  // Shared issuance routine: builds the PDF, stores it, creates the artifact
+  // row, writes the audit log and notifies the beginner. Used by both the
+  // manual "generate" endpoint and the one-click completion flow so the two
+  // paths stay identical.
+  async _issueArtifact(args: {
+    project: {
+      id: string;
+      title: string;
+      umkm: { name: string };
+      senior: { name: string } | null;
+    };
+    member: { user: { id: string; name: string } };
+    seniorId: string;
+    verificationBase: string;
+    summary: string;
+    technologies: string[];
+    feedback: string | null;
+  }) {
+    const { project, member, seniorId, verificationBase } = args;
+    const beginnerId = member.user.id;
+    const code = await artifactRepository.nextCode(new Date().getFullYear());
+    const verificationUrl = buildVerificationUrl(verificationBase, code);
+    const issuedAt = new Date();
+    const pdf = await generateArtifactPdf(
+      this.toPdfData({
+        code,
         verificationUrl,
-        pdfPath,
         issuedAt,
-      });
-      await auditLogRepository.create({
-        userId: seniorId,
-        action: AuditAction.ARTIFACT_GENERATED,
-        entityType: EntityType.ARTIFACT,
-        entityId: artifact.id,
-      });
-      await notificationService.notify({
-        userId: beginnerId,
-        type: NotificationType.ARTIFACT_GENERATED,
-        title: "Sertifikat terbit",
-        message: `Sertifikat kontribusimu untuk "${project.title}" telah diterbitkan.`,
-        actionUrl: "/artifacts",
+        projectTitle: project.title,
+        umkmName: project.umkm.name,
+        seniorName: project.senior?.name ?? "—",
+        beginnerName: member.user.name,
+        summary: args.summary,
+        technologies: args.technologies,
+        feedback: args.feedback,
+      })
+    );
+    const pdfPath = await artifactStorageService.uploadPdf(code, 1, pdf);
+    const artifact = await artifactRepository.create({
+      artifactCode: code,
+      projectId: project.id,
+      beginnerId,
+      seniorId,
+      verificationUrl,
+      pdfPath,
+      issuedAt,
+    });
+    await auditLogRepository.create({
+      userId: seniorId,
+      action: AuditAction.ARTIFACT_GENERATED,
+      entityType: EntityType.ARTIFACT,
+      entityId: artifact.id,
+    });
+    await notificationService.notify({
+      userId: beginnerId,
+      type: NotificationType.ARTIFACT_GENERATED,
+      title: "Sertifikat terbit",
+      message: `Sertifikat kontribusimu untuk "${project.title}" telah diterbitkan.`,
+      actionUrl: "/artifacts",
+    });
+    return artifact;
+  },
+
+  // Auto-generate a certificate for every ACTIVE beginner who doesn't have one
+  // yet — used by the one-click "Selesaikan Proyek" flow (Workflow 13 folded
+  // into completion). `strict` = real completion (the lifecycle gate guarantees
+  // an APPROVED contribution + senior review already exist). `!strict` = DEMO
+  // bypass, where missing contribution/review are filled with placeholders so a
+  // demo project can complete instantly. Beginners that already have an artifact
+  // are skipped (idempotent).
+  async generateForCompletion(
+    seniorId: string,
+    projectId: string,
+    verificationBase: string,
+    opts: { strict: boolean }
+  ) {
+    const project = await projectRepository.findById(projectId);
+    if (!project) throw new NotFoundError("Proyek tidak ditemukan");
+    const [members, contributions, reviews] = await Promise.all([
+      projectMemberRepository.listByProject(projectId),
+      contributionRepository.listByProject(projectId),
+      reviewRepository.listByProject(projectId),
+    ]);
+    const activeBeginners = members.filter((m) => m.status === MemberStatus.ACTIVE);
+    const created = [];
+    for (const member of activeBeginners) {
+      const beginnerId = member.user.id;
+      if (await artifactRepository.findByProjectAndBeginner(projectId, beginnerId)) {
+        continue;
+      }
+      const contribution = contributions.find(
+        (c) => c.beginner.id === beginnerId && c.status === ContributionStatus.APPROVED
+      );
+      const seniorReview = reviews.find(
+        (r) => r.revieweeId === beginnerId && r.type === ReviewType.SENIOR_TO_BEGINNER
+      );
+      if (opts.strict && (!contribution || !seniorReview)) {
+        // The gate should guarantee these; stay safe if state drifted.
+        throw new BusinessRuleError(
+          `Prasyarat sertifikat untuk ${member.user.name} belum lengkap`
+        );
+      }
+      const summary =
+        contribution?.contributionSummary ??
+        `Berkontribusi pada proyek "${project.title}" bersama ${project.umkm.name}.`;
+      const technologies = contribution?.contributionSkills.map((cs) => cs.skill.name) ?? [];
+      const artifact = await this._issueArtifact({
+        project,
+        member,
+        seniorId,
+        verificationBase,
+        summary,
+        technologies,
+        feedback: seniorReview?.comment ?? null,
       });
       created.push(artifact);
     }

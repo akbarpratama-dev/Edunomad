@@ -80,6 +80,15 @@ export interface Milestone {
   status: string;
 }
 
+// Role-aware "needs attention" counts for the workspace tab badges.
+export interface WorkspaceSummary {
+  milestones: number;
+  deliverables: number;
+  contributions: number;
+  reviews: number;
+  artifacts: number;
+}
+
 export interface RoleSkill {
   id: string;
   skill: { id: string; name: string };
@@ -151,10 +160,16 @@ export const projectApi = {
     q?: string;
     category?: string;
     status?: ProjectStatus;
+    hasSenior?: boolean;
     page?: number;
     limit?: number;
   }): Promise<Paginated<ProjectListItem>> {
-    const res = await apiClient.get<Paginated<ProjectListItem>>("/projects", { params });
+    const res = await apiClient.get<Paginated<ProjectListItem>>("/projects", {
+      params: {
+        ...params,
+        hasSenior: params.hasSenior === undefined ? undefined : String(params.hasSenior),
+      },
+    });
     return res.data;
   },
 
@@ -273,13 +288,26 @@ export const projectApi = {
     return res.data.data;
   },
 
-  async requestCompletion(id: string): Promise<ProjectDetail> {
-    const res = await apiClient.post<Envelope<ProjectDetail>>(`/projects/${id}/complete`);
+  // One-click finalize (revised flow D-P14-1): senior completes the project and
+  // certificates for every active beginner are auto-issued. Sends the verify
+  // page base so the certificate QR/URL points at this origin.
+  async complete(id: string): Promise<ProjectDetail> {
+    const res = await apiClient.post<Envelope<ProjectDetail>>(`/projects/${id}/complete`, {
+      verification_url: `${window.location.origin}/verify`,
+    });
     return res.data.data;
   },
 
+  // Legacy two-step confirmation — kept for any project already awaiting it.
   async confirmCompletion(id: string): Promise<ProjectDetail> {
     const res = await apiClient.post<Envelope<ProjectDetail>>(`/projects/${id}/confirm-completion`);
+    return res.data.data;
+  },
+
+  async workspaceSummary(id: string): Promise<WorkspaceSummary> {
+    const res = await apiClient.get<Envelope<WorkspaceSummary>>(
+      `/projects/${id}/workspace-summary`
+    );
     return res.data.data;
   },
 
