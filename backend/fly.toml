@@ -1,0 +1,28 @@
+# EduNomad backend on Fly.io.
+# Rename `app` to your own unique name before first deploy (or let `fly launch`
+# set it). Region sin = Singapore (closest to Indonesia).
+app = "edunomad-api"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  # The port the app listens on inside the container. env.ts reads process.env.PORT.
+  PORT = "8080"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Always-on for a smooth demo: keep 1 machine running so responders never hit
+  # a cold start. Set auto_stop_machines = "stop" + min_machines_running = 0
+  # later if you want it to sleep to save resources.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

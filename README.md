@@ -200,6 +200,70 @@ git push origin feature/nama-fitur       # lalu buka PR di GitHub
 
 ---
 
+## Deploy Gratis (Fly.io + Vercel)
+
+Untuk demo online yang bisa diakses responden lewat 1 link, tanpa biaya. Arsitektur hosting:
+
+| Bagian | Host | Catatan |
+| --- | --- | --- |
+| Database + Auth + Storage | **Supabase** (sudah ada) | Free tier, tidak perlu setup ulang |
+| Backend (Express API) | **Fly.io** | Always-on (tanpa cold start), region Singapura |
+| Frontend (Next.js) | **Vercel** | Auto-deploy dari GitHub, URL publik |
+
+### A. Backend → Fly.io
+
+File deploy sudah disiapkan di `backend/`: `Dockerfile`, `fly.toml`, `.dockerignore`.
+
+```bash
+# 1. Install CLI & login (sekali saja)
+brew install flyctl        # atau: curl -L https://fly.io/install.sh | sh
+fly auth login             # butuh verifikasi kartu (tetap gratis dalam batas free allowance)
+
+cd backend
+
+# 2. Buat app (pakai nama unik; edit juga field `app` di fly.toml agar sama)
+fly apps create edunomad-api
+
+# 3. Set SECRET (env sensitif — JANGAN taruh di fly.toml). Ambil nilainya dari backend/.env
+fly secrets set \
+  DATABASE_URL="postgresql://...pooler.supabase.com:6543/postgres?pgbouncer=true" \
+  SUPABASE_URL="https://xxxx.supabase.co" \
+  SUPABASE_SERVICE_ROLE_KEY="eyJ..." \
+  --app edunomad-api
+
+# 4. (Opsional) fitur AI + kunci CORS ke domain Vercel
+fly secrets set GROQ_API_KEY="gsk_..." CORS_ORIGIN="https://edunomad.vercel.app" --app edunomad-api
+
+# 5. Deploy
+fly deploy
+
+# URL backend jadi: https://edunomad-api.fly.dev  → API base: https://edunomad-api.fly.dev/api/v1
+```
+
+Env non-sensitif (`PORT=8080`, `NODE_ENV=production`) sudah di `fly.toml`. Database sudah dimigrasi di Supabase, jadi container **tidak** menjalankan migrasi (`DIRECT_URL` tak diperlukan di Fly).
+
+### B. Frontend → Vercel
+
+1. Import repo di [vercel.com/new](https://vercel.com/new) → **Root Directory: `frontend`** (Vercel auto-detect Next.js).
+2. Set Environment Variables:
+   - `NEXT_PUBLIC_API_URL` = `https://edunomad-api.fly.dev/api/v1`
+   - `NEXT_PUBLIC_SUPABASE_URL` = URL Supabase
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` = publishable key Supabase
+3. Deploy → dapat URL publik (mis. `https://edunomad.vercel.app`).
+4. Kembali ke Fly, kunci CORS ke URL itu: `fly secrets set CORS_ORIGIN="https://edunomad.vercel.app" --app edunomad-api`.
+
+### C. Siapkan skenario demo untuk responden
+
+1. Seed data demo (sekali, dari lokal — DB-nya sama, di Supabase):
+   ```bash
+   cd backend && npx tsx src/prisma/seed.ts && npx tsx src/prisma/seed-kasir.ts
+   ```
+2. Bagikan ke responden: **1 link Vercel** + daftar akun demo (lihat bagian "Akun Demo") — password `TestPass123!`. Mereka tinggal login dan mencoba, tanpa registrasi.
+
+> Checklist secret backend (Fly): `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (wajib) · `GROQ_API_KEY`/`GEMINI_API_KEY`, `CORS_ORIGIN`, `DEMO_COMPLETE_BYPASS` (opsional).
+
+---
+
 ## Panduan Penggunaan Aplikasi (Alur Bisnis)
 
 Bagian ini menjelaskan cara memakai aplikasi **yang sudah dihosting** (cukup buka URL aplikasi di browser), mulai dari mendaftar sampai memperoleh sertifikat, untuk keempat peran.

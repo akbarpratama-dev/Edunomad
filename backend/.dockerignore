@@ -1,0 +1,13 @@
+node_modules
+dist
+src/generated
+.env
+.env.*
+*.log
+npm-debug.log*
+.DS_Store
+.git
+.gitignore
+Dockerfile
+.dockerignore
+fly.toml

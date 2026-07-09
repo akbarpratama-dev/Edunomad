@@ -7,7 +7,17 @@ import { env } from "../config/env";
 
 export const setupMiddleware = (app: Express) => {
   app.use(helmet());
-  app.use(cors());
+  // CORS: locked to a comma-separated allowlist when CORS_ORIGIN is set
+  // (e.g. "https://edunomad.vercel.app"), otherwise open so local/demo setups
+  // work out of the box. Set CORS_ORIGIN in production to restrict callers.
+  const corsOrigin = process.env.CORS_ORIGIN?.trim();
+  app.use(
+    cors(
+      corsOrigin
+        ? { origin: corsOrigin.split(",").map((o) => o.trim()) }
+        : undefined
+    )
+  );
   app.use(morgan(env.nodeEnv === "development" ? "dev" : "combined"));
   app.use(express.json());
 

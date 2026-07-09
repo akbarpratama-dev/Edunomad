@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "comment": "Production build config. Excludes dev-only seed scripts (run via tsx, not part of the app runtime) so `tsc` produces a clean dist for Docker/Fly.io.",
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/prisma/seed.ts",
+    "src/prisma/seed-expo.ts",
+    "src/prisma/seed-ai-demo.ts",
+    "src/prisma/seed-kasir.ts",
+    "src/prisma/reset-expo.ts"
+  ]
+}
