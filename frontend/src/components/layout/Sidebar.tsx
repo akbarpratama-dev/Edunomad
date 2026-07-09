@@ -1,13 +1,18 @@
 "use client";
 
-import { useMemo } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getNavItems, FOOTER_NAV_ITEMS } from "@/constants/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useNotificationStore } from "@/stores/notificationStore";
+import { projectApi } from "@/services/projectApi";
 import type { Role } from "@/types/user";
+
+// Statuses where a project's Diskusi is worth linking to first.
+const LIVE_PROJECT_STATUSES = ["ACTIVE", "AWAITING_COMPLETION"];
 
 const ROLE_LABEL: Record<Role, string> = {
   BEGINNER: "Mahasiswa",
@@ -29,15 +34,64 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const navItems = getNavItems(role);
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
+  // "Diskusi Proyek" — a direct sidebar shortcut to the user's project Diskusi,
+  // reachable from anywhere (not only inside a workspace). ADMIN has no member
+  // projects, so it is hidden for them. Resolution order:
+  //  1. If already inside a workspace, use that project's id from the URL.
+  //  2. Otherwise resolve the user's current live project (like the old topbar
+  //     MessageButton did), falling back to the projects hub while it loads.
+  const showDiskusi = !!role && role !== "ADMIN";
+  const workspaceMatch = pathname?.match(
+    /^\/(projects|my-projects)\/([^/]+)\/workspace/
+  );
+  const [resolvedDiskusiHref, setResolvedDiskusiHref] = useState("/my-projects");
+
+  useEffect(() => {
+    if (!showDiskusi) return;
+    let active = true;
+    (async () => {
+      try {
+        let projectId: string | undefined;
+        if (role === "BEGINNER") {
+          const m = await projectApi.myMemberships();
+          projectId = (m.find((x) => LIVE_PROJECT_STATUSES.includes(x.project.status)) ?? m[0])
+            ?.project.id;
+        } else if (role === "SENIOR") {
+          const p = await projectApi.mentoredProjects();
+          projectId = (p.find((x) => LIVE_PROJECT_STATUSES.includes(x.status)) ?? p[0])?.id;
+        } else {
+          const r = await projectApi.myProjects({ limit: 100 });
+          projectId = (r.data.find((x) => LIVE_PROJECT_STATUSES.includes(x.status)) ?? r.data[0])?.id;
+        }
+        if (active && projectId) {
+          setResolvedDiskusiHref(`/my-projects/${projectId}/workspace/diskusi`);
+        }
+      } catch {
+        // keep the /my-projects fallback
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [role, showDiskusi]);
+
+  const diskusiHref = showDiskusi
+    ? workspaceMatch
+      ? `/${workspaceMatch[1]}/${workspaceMatch[2]}/workspace/diskusi`
+      : resolvedDiskusiHref
+    : null;
+
   // Highlight a single item: the one whose href is the longest prefix of the
   // current path (so /projects/create wins over /projects, and nested admin
   // pages match their own entry rather than nothing).
   const activeHref = useMemo(() => {
     if (!pathname) return undefined;
-    return navItems
-      .filter((i) => pathname === i.href || pathname.startsWith(i.href + "/"))
-      .sort((a, b) => b.href.length - a.href.length)[0]?.href;
-  }, [navItems, pathname]);
+    const allHrefs = [...navItems.map((i) => i.href), ...(diskusiHref ? [diskusiHref] : [])];
+    return allHrefs
+      .filter((href) => pathname === href || pathname.startsWith(href + "/"))
+      .sort((a, b) => b.length - a.length)[0];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navItems, pathname, diskusiHref]);
 
   return (
     <div className="app-dark flex h-full w-64 flex-col bg-[#201f31] text-[#e8e8ec]">
@@ -66,31 +120,51 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           const Icon = item.icon;
           const isNotif = item.href === "/notifications";
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onNavigate}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition-colors duration-200",
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-[#b6b6c0] hover:bg-white/5 hover:text-white"
-              )}
-            >
-              <Icon className="size-[18px] shrink-0" />
-              <span className="flex-1">{item.label}</span>
-              {isNotif && unreadCount > 0 && (
-                <span
+            <Fragment key={item.href}>
+              <Link
+                href={item.href}
+                onClick={onNavigate}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition-colors duration-200",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-[#b6b6c0] hover:bg-white/5 hover:text-white"
+                )}
+              >
+                <Icon className="size-[18px] shrink-0" />
+                <span className="flex-1">{item.label}</span>
+                {isNotif && unreadCount > 0 && (
+                  <span
+                    className={cn(
+                      "grid h-5 min-w-5 place-items-center rounded-full px-1 text-[11px] font-bold",
+                      isActive ? "bg-primary-foreground text-primary" : "bg-[#e5484d] text-white"
+                    )}
+                  >
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Diskusi Proyek — placed right below "Proyek Saya". Direct
+                  shortcut to the user's project Diskusi from anywhere. */}
+              {diskusiHref && item.href === "/my-projects" && (
+                <Link
+                  href={diskusiHref}
+                  onClick={onNavigate}
+                  aria-current={diskusiHref === activeHref ? "page" : undefined}
                   className={cn(
-                    "grid h-5 min-w-5 place-items-center rounded-full px-1 text-[11px] font-bold",
-                    isActive ? "bg-primary-foreground text-primary" : "bg-[#e5484d] text-white"
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition-colors duration-200",
+                    diskusiHref === activeHref
+                      ? "bg-primary text-primary-foreground"
+                      : "text-[#b6b6c0] hover:bg-white/5 hover:text-white"
                   )}
                 >
-                  {unreadCount}
-                </span>
+                  <MessageSquare className="size-[18px] shrink-0" />
+                  <span className="flex-1">Diskusi Proyek</span>
+                </Link>
               )}
-            </Link>
+            </Fragment>
           );
         })}
       </nav>
