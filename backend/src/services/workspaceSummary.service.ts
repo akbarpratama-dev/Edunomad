@@ -5,7 +5,7 @@ import { contributionRepository } from "../repositories/contribution.repository"
 import { reviewRepository } from "../repositories/review.repository";
 import { artifactRepository } from "../repositories/artifact.repository";
 import { milestoneRepository } from "../repositories/milestone.repository";
-import { NotFoundError } from "../utils/errors";
+import { NotFoundError, ForbiddenError } from "../utils/errors";
 import { MemberStatus } from "../constants/applicationStatus";
 import { DeliverableStatus, ContributionStatus } from "../constants/deliverableStatus";
 import { ReviewType } from "../constants/reviewType";
@@ -39,6 +39,10 @@ export const workspaceSummaryService = {
     const isLead = project.seniorId === userId;
     const isOwner = project.umkmId === userId;
     const isBeginner = activeBeginners.some((m) => m.user.id === userId);
+
+    if (!isLead && !isOwner && !isBeginner) {
+      throw new ForbiddenError("Anda bukan anggota proyek ini");
+    }
 
     const summary: WorkspaceSummary = {
       milestones: 0,

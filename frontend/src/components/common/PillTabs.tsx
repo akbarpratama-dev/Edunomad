@@ -23,7 +23,7 @@ export function PillTabs<T extends string>({
   onChange,
   className,
   ariaLabel,
-  variant = "underline",
+  variant = "pill",
 }: {
   tabs: PillTab<T>[];
   value: T;
