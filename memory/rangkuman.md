@@ -3,6 +3,19 @@
 Append-only. Setiap entry: tanggal (format sama seperti decisions.md), prompt user (ringkas), hasil.
 
 ---
+2026-07-09/10:
+- "mau pakai fitur GSD, semua phase selesai" → jelaskan /gsd-workspace butuh flag; petakan GSD skills relevan (ship/audit/review/new-milestone).
+- "/gsd-review" → tak bisa jalan (butuh .planning/ yg belum ada); arahkan ke /code-review utk review kode jadi. CLI tersedia: gemini/codex/antigravity, opencode missing.
+- "/code-review" (high effort) → 8 finder + verifier atas diff HEAD~1 (38 file) → 10 findings (partial-cert, auth gate, withdraw hilang, PillTabs regresi, dll).
+- "oke sesuai rekomendasi" → fix 3 tercepat: PillTabs default pill, ConfirmDialog async, workspaceSummary auth gate. tsc 0.
+- "hapus button icon diskusi pojok kanan atas, ganti sidebar nama diskusi proyek" (2x, diperjelas: flow langsung dari sidebar) → hapus MessageButton dari Header + button Buka Diskusi workspace; tambah Sidebar "Diskusi Proyek" resolve proyek live.
+- "cek pakai playwright, masih ada iconnya" → root cause dev server Next.js basi; kill+rm .next+restart; Playwright-verified icon hilang + sidebar item muncul + flow jalan.
+- "posisi diskusi proyek taruh ketiga dari bawah (di bawah proyek saya)" → render inline via Fragment setelah item /my-projects; verified order benar.
+- "rencana hosting gratis + demo responden mudah" → jelaskan Supabase sudah host DB/Auth/Storage; frontend Vercel, backend Fly/Render/Koyeb; AskUserQuestion → pilih Fly.io + siapkan semua config.
+- "coba fly.io dulu" → buat Dockerfile/fly.toml(always-on)/.dockerignore/tsconfig.build.json + build script + listen 0.0.0.0 + CORS env + README deploy section; terbukti build+run /health 200.
+- "sudah update memory agar aman?" → update 5 memory files + regenerate MEMORY-CLAUDE.md (sesi ini).
+
+---
 
 Date:
 2026-07-06d (AI Features — tugas dosen)

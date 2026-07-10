@@ -19,7 +19,9 @@ app.use("/api/v1", apiRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const server = app.listen(env.port, () => {
+// Bind to 0.0.0.0 so the Fly.io proxy (and any container host) can reach the
+// app — Fly warns "app not listening on expected address" otherwise.
+const server = app.listen(Number(env.port), "0.0.0.0", () => {
   console.log(`EduNomad backend running on port ${env.port}`);
 });
 

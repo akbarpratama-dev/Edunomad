@@ -195,9 +195,6 @@ function WorkspaceInner() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" render={<Link href={`${wsBase}/${id}/workspace/diskusi`} />}>
-            <MessageSquare className="size-4" /> Buka Diskusi
-          </Button>
           <Button variant="outline" render={<Link href={`${wsBase}/${id}`} />}>
             <ClipboardList className="size-4" /> Detail Proyek
           </Button>

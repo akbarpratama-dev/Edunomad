@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
-import { MessageButton } from "@/components/layout/MessageButton";
 import { UserAvatar } from "@/components/common/UserAvatar";
 import {
   DropdownMenu,
@@ -67,9 +66,7 @@ export function Header({ backHref, scrolled }: { backHref?: string; scrolled?: b
       </div>
 
       <div className="pointer-events-auto flex items-center gap-2">
-        {/* Diskusi shortcut → the user's current project Diskusi page. */}
-        <MessageButton />
-
+        {/* Diskusi shortcut lives in the sidebar now ("Diskusi Proyek"). */}
         <NotificationBell />
 
         <DropdownMenu>

@@ -1,6 +1,8 @@
 # MEMORY-CLAUDE.md â EduNomad Session Handoff
 
 > Read this + CLAUDE.MD + all `memory/*.md` before doing anything. Never assume state from code alone.
+> **Last updated: 2026-07-10 (D-CR-1..3, D-DISKUSI-1, D-DEPLOY-1). WORKING BRANCH = main (belum commit).** Sesi terakhir: (1) /code-review high-effort → perbaiki 3 finding (PillTabs default pill, ConfirmDialog async, workspaceSummary auth gate) — 7 sisa ditunda; (2) Diskusi UX — hapus MessageButton/Header + button workspace, tambah Sidebar "Diskusi Proyek" (di bawah Proyek Saya); (3) Deploy config Fly.io+Vercel (Dockerfile/fly.toml/tsconfig.build.json + README). **NEXT = commit + deploy (Fly secrets → fly deploy; Vercel root=frontend). Lihat "NEXT-SESSION INIT PROMPT" di bawah + next-tasks #16.** Semua tsc 0 + Playwright-verified. ⚠️ Kalau edit tak muncul di browser: dev server Next.js basi → kill 3000 + rm -rf frontend/.next + restart.
+> --- (arsip status AI D-AI-1 di bawah) ---
 > Last updated: 2026-07-06 (D-AI-1). WORKING BRANCH = **feature/ai-matching** (dari commit portofolio ece0e95). Portofolio D-P13-1/2/3 SUDAH di-commit (ece0e95) di branch feature/portfolio-profile-connectivity; branch ai-matching stack di atasnya. Belum merge ke main (df2b5e8).
 > **AI FEATURES (D-AI-1) ✅ SELESAI & HAPPY-PATH VERIFIED (Gemini gemini-2.5-flash).** Provider multi (`services/llm.service.ts`: Groq preferred else Gemini). Ketiga fitur output nyata: ai-summary, portfolio-recommendation, ranking (Beginner Two 85% vs Three 30% Explainable). Cache OK. Playwright applicants page OK. Catatan: 2.0-flash kuota-0 → default 2.5-flash + thinking-off + tokens 2048. NEXT = commit + merge. (arsip di bawah "menunggu key" sudah tak berlaku.)
 > **AI FEATURES (D-AI-1) — arsip build note:** Tugas dosen "Penggunaan AI" → 3 fitur Google Gemini (gemini-2.0-flash, LLM structured-JSON Explainable, cache tabel `ai_insights`, gracefully-degrading): (1) Candidate Ranking `GET /projects/:id/applicants/ranking` senior; (2) Portfolio Recommendation `GET /projects/:id/portfolio-recommendation` beginner; (3) Professional Summary `GET /users/{me,:id}/ai-summary`. Backend: gemini.service (fetch+AiUnavailableError) + aiInsight.service (cachedInsight+zod) + aiInsight.repository + modules/ai + validator + routes + env SOFT key; migration ai_insights LIVE + _prisma_migrations synced + prisma generate. Frontend: aiApi + ai/{AiUnavailable,MatchScoreBadge,AiSummaryCard,PortfolioRecPanel} + wiring applicants/apply-dialog/ProfileView. tsc 0. curl fallback available:false + RBAC 403 OK; Playwright /profile fallback mulus. RULES: no embeddings/pgvector/queue/bg-job; key manual di backend/.env; AI mati → 200 available:false, inti utuh. ➡️ NEXT: user isi `GEMINI_API_KEY` di backend/.env (aistudio.google.com/apikey, gratis) → happy-path (butuh 1 pelamar PENDING utk demo ranking di proyek …0005) → commit + merge. Servers :3001/:3000 nyala.
@@ -86,38 +88,43 @@ DRAFT â PENDING_REVIEW â RECRUITING (approve) / REJECTED â ACTIVE
 ## 📌 NEXT-SESSION INIT PROMPT
 
 ```
-Lanjutkan EduNomad: SELESAIKAN happy-path AI Features (D-AI-1), lalu commit + merge.
-Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md + next-tasks.md blok "ACTIVE HANDOFF 2026-07-06 #15"
-+ decisions.md D-AI-1 + plan /Users/muhammadakbarpratama/.claude/plans/encapsulated-juggling-dijkstra.md.
+Lanjutkan EduNomad: COMMIT perubahan sesi 2026-07-10 (code-review fixes + Diskusi UX + deploy config),
+lalu bantu user DEPLOY ke Fly.io + Vercel. Baca CLAUDE.MD + MEMORY-CLAUDE.md + semua memory/*.md +
+next-tasks.md blok "ACTIVE HANDOFF 2026-07-10 #16" + decisions.md (D-CR-1..3, D-DISKUSI-1, D-DEPLOY-1).
 
-WORKING BRANCH = feature/ai-matching (dari commit portofolio ece0e95). AI Features SUDAH dibangun & fallback-
-verified (tsc 0, curl available:false + RBAC 403, Playwright /profile fallback mulus) TAPI happy-path menunggu
-GEMINI_API_KEY. Portofolio D-P13 sudah di-commit (ece0e95).
+WORKING BRANCH = main (perubahan sesi ini di working tree, BELUM commit). Semua tsc 0 + Playwright-verified.
+Sesi lalu (2026-07-10) menyelesaikan 3 hal:
+(1) /code-review high-effort → 10 findings, diperbaiki 3: PillTabs default "pill", ConfirmDialog async+busy,
+    workspaceSummary ForbiddenError non-member. 7 sisa DITUNDA (lihat next-tasks #16 poin 3).
+(2) Diskusi UX: hapus MessageButton (Header) + button "Buka Diskusi" workspace + file MessageButton.tsx;
+    tambah Sidebar "Diskusi Proyek" (resolve proyek live, di bawah "Proyek Saya", non-ADMIN).
+(3) Deploy config Fly.io+Vercel: backend/{Dockerfile, fly.toml always-on, .dockerignore, tsconfig.build.json}
+    + build script (prisma generate && tsc -p tsconfig.build.json) + index.ts listen 0.0.0.0 + CORS env
+    CORS_ORIGIN + README section "Deploy Gratis". Terbukti node dist/index.js → /health 200.
 
 QUICK ACTION (urut):
-(1) Pastikan user sudah menaruh `GEMINI_API_KEY=...` di backend/.env (aistudio.google.com/apikey, gratis).
-    Restart backend (:3001) bila perlu. Cek: GET /api/v1/users/me/ai-summary (beginner token) → available:true.
-(2) Demo ranking butuh ≥1 pelamar PENDING di proyek …0005 (skrg 0 — sudah di-accept). Buat 1 lamaran PENDING:
-    login beginner lain (p43-b2/p43-b3) → apply ke role proyek …0005, ATAU insert via API. Lalu senior
-    (p4-senior) GET /projects/…0005/applicants/ranking → rankings[] terisi (skor/matched/missing/reason).
-(3) Happy-path test 3 fitur (curl + Playwright): applicants page (badge skor + toggle "Urutkan kecocokan AI" +
-    blok Analisis AI), apply dialog beginner (PortfolioRecPanel), /profile (AiSummaryCard). Cek cache: 2x call
-    → cached:true; ?regenerate=true → cached:false; row di tabel ai_insights.
-(4) tsc 0 + console 0. Commit (Conventional + Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>).
-    File AI: backend {config/env, services/{gemini,aiInsight}.service, repositories/aiInsight.repository,
-    constants/aiInsightKind, modules/ai/ai.controller, validators/ai.validator, routes/{project,user}.routes,
-    prisma/schema + migration 20260706160000_ai_insights}; frontend {services/aiApi, components/ai/*, wiring
-    projects/[id]/{page,applicants/page}, components/profile/ProfileView}. Lalu pertimbangkan merge portofolio+AI → main.
+(1) COMMIT semua (Conventional + Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>). File utama:
+    frontend {components/common/{PillTabs,ConfirmDialog}.tsx, components/layout/{Sidebar,Header}.tsx,
+    app/projects/[id]/workspace/page.tsx, HAPUS components/layout/MessageButton.tsx};
+    backend {services/workspaceSummary.service.ts, middleware/setupMiddleware.ts, index.ts, package.json,
+    Dockerfile, fly.toml, .dockerignore, tsconfig.build.json}; README.md; memory/*.
+(2) DEPLOY (user jalankan): backend `cd backend && fly auth login && fly apps create <nama-unik>` (samakan
+    field `app` di fly.toml) `&& fly secrets set DATABASE_URL=.. SUPABASE_URL=.. SUPABASE_SERVICE_ROLE_KEY=..`
+    (nilai dari backend/.env) `&& fly deploy`. Frontend: Vercel root=frontend + env NEXT_PUBLIC_API_URL=
+    https://<app>.fly.dev/api/v1 + NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY. Lalu
+    `fly secrets set CORS_ORIGIN=https://<vercel-url>`. Seed demo (DB Supabase): npx tsx src/prisma/seed.ts +
+    seed-kasir.ts. Bagi responden: 1 link Vercel + akun demo pw TestPass123!.
+(3) (Opsional, production-grade) perbaiki 7 sisa finding review — detail di next-tasks #16 poin 3
+    (partial-cert txn, withdraw application UI, artifact gate, DEMO_COMPLETE_BYPASS, N+1, re-fetch summary).
 
-CATATAN: AI additive & gracefully-degrading — kalau key salah/AI down → available:false (bukan 5xx), inti utuh.
-RULES D-AI-1: no embeddings/pgvector/queue/bg-job (modular monolith). Context7 sebelum ubah kode Gemini.
-
-Dev: backend :3001 + frontend :3000 MASIH NYALA (background) dari sesi lalu — cek/pakai ulang atau restart.
-tsc TS2882 CSS-ambient transient saat .next/types regen → re-run. Test users p4-beginner/senior/umkm +
-p43-admin @test.edunomad.com pw TestPass123!; project ACTIVE a1a1a1a1-…0005. Portofolio-in-profil siap-tes:
-login p4-beginner → /profile tab "Sertifikat" → kartu → "Preview" (artifact EDN-2026-000001). URL lama
-/portfolio/:id sekarang 404 (dihapus, D-P13-2). Context7 MCP sebelum kode library. .env* sandboxed.
-Verify per fitur + tsc 0 + console 0.
+CATATAN OPERASIONAL:
+- Kalau edit frontend TAK terlihat di browser: dev server Next.js basi → kill port 3000 + `rm -rf frontend/.next`
+  + restart. File di disk selalu benar (cek grep/tsc). Ini menjebak sesi lalu ("user lihat tak ada perubahan").
+- `npm run build` backend HARUS pakai tsconfig.build.json (exclude seed*.ts yg punya error TS pre-existing).
+- DIRECT_URL tak perlu di Fly (DB sudah dimigrasi di Supabase). CORS default terbuka (demo jalan) → kunci di prod.
+- Dev server frontend :3000 mungkin MASIH NYALA background (log /tmp/edunomad-frontend-dev.log).
+- Context7 MCP sebelum kode library/cloud. .env* sandboxed (kasih tahu user, jangan edit). tsc TS2882 CSS-ambient
+  transient → re-run. Test users p4-beginner/senior/umkm + p43-admin @test.edunomad.com; project ACTIVE …0005.
 
 === arsip init prompt #13 (Phase 10, SELESAI) ===
 Lanjutkan EduNomad: PHASE 10 — Dashboards, Profiles & Polish. [SELESAI 2026-07-05, main df2b5e8:
