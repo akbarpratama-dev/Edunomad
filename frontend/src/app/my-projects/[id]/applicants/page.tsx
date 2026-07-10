@@ -1,3 +1,10 @@
-// Beginner-applicants management under /my-projects. Reuses /projects/:id/applicants;
+"use client";
+
+// Beginner-applicants management under /my-projects. Renders /projects/:id/applicants;
 // base path derived from usePathname keeps back/links inside /my-projects.
-export { default } from "../../../projects/[id]/applicants/page";
+// Explicit client wrapper instead of a cross-route re-export (see D-DEPLOY-2).
+import ApplicantsPage from "@/app/projects/[id]/applicants/page";
+
+export default function MyProjectApplicantsPage() {
+  return <ApplicantsPage />;
+}
