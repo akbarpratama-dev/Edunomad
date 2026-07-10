@@ -1,6 +1,14 @@
 # Decisions
 
 Date:
+2026-07-11b (Tab underline default + badge staleness refresh)
+
+Decision (D-UI-TABS-1) — Style tab underline jadi DEFAULT `PillTabs` (user-approved, "seragamkan button tab seperti workspace, semua halaman"):
+`components/common/PillTabs.tsx` default variant `"pill"` → `"underline"`. Ini MEMBALIK D-CR-1 (yg dulu kembalikan default ke "pill" karena dianggap regresi senyap) — sekarang underline memang diinginkan di semua tab (sertifikat `/artifacts` + `/artifacts/:id`, pelamar, admin, my-projects, notifikasi otomatis ikut). Workspace tetap punya `variant="underline"` eksplisit (redundan tapi harmless). Yang mau chip pill tinggal opt-in `variant="pill"`. frontend build 0.
+
+Decision (D-UI-BADGE-1) — Badge "needs attention" di tab workspace: pertahankan semantik SEKARANG (user via AskUserQuestion memilih "hilang hanya jika pekerjaan selesai", BUKAN clear-on-open, BUKAN hapus). Badge = jumlah pekerjaan pending dari `workspaceSummary.service` (mis. milestone belum COMPLETED, deliverable SUBMITTED menunggu review, dst) — membuka tab TIDAK menghilangkannya (by design). Perbaikan anti-basi: `workspace/page.tsx` refactor fetch summary jadi `loadSummary` useCallback, dipanggil saat ganti tab (existing) + saat window/tab regain focus (`focus` + `visibilitychange`), supaya badge ter-update segera setelah pekerjaan beres tanpa reload penuh. Tidak threading callback ke tiap tab (terlalu invasif, banyak dialog bersarang). frontend build 0.
+
+Date:
 2026-07-11 (Lowongan: UMKM/mentor link ke profil + "Kamu sudah apply" + UMKM dikeluarkan dari Diskusi)
 
 Decision (D-VACANCY-1) — Perbaikan halaman lowongan (detail proyek), user-req:

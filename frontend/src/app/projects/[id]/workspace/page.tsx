@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import {
@@ -124,20 +124,34 @@ function WorkspaceInner() {
     };
   }, [id]);
 
-  // Tab badge counts ("needs attention" per role). Re-fetched when the active
-  // tab changes so the badges settle after an action (approve, submit, review).
-  useEffect(() => {
-    let active = true;
+  // Tab badge counts ("needs attention" per role): the number of pending items
+  // per tab (deliverables to review, milestones still open, etc.). A badge only
+  // clears once the underlying work is actually done — not merely by opening the
+  // tab. To keep it from going stale after an action, the summary is re-fetched
+  // (a) whenever the active tab changes, and (b) whenever the window/tab regains
+  // focus (e.g. after completing work elsewhere and returning).
+  const loadSummary = useCallback(() => {
     projectApi
       .workspaceSummary(id)
-      .then((s) => active && setSummary(s))
+      .then(setSummary)
       .catch(() => {
         /* badges are best-effort — never block the workspace */
       });
-    return () => {
-      active = false;
+  }, [id]);
+  useEffect(() => {
+    loadSummary();
+  }, [loadSummary, tab]);
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === "visible") loadSummary();
     };
-  }, [id, tab]);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [loadSummary]);
 
   if (error) return <ErrorState message={error} />;
   if (!project) return <ListSkeleton />;
