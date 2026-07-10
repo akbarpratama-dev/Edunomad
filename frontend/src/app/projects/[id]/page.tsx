@@ -93,7 +93,7 @@ function LifecycleAction({
 }
 
 // Senior apply-as-mentor dialog (Workflow 3).
-function SeniorApplyDialog({ project }: { project: ProjectDetail }) {
+function SeniorApplyDialog({ project, onApplied }: { project: ProjectDetail; onApplied: () => void }) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -105,6 +105,7 @@ function SeniorApplyDialog({ project }: { project: ProjectDetail }) {
       toast.success("Lamaran mentor terkirim");
       setOpen(false);
       setMessage("");
+      onApplied();
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Gagal mengirim lamaran");
     } finally {
@@ -145,7 +146,7 @@ function SeniorApplyDialog({ project }: { project: ProjectDetail }) {
 }
 
 // Beginner apply-to-role dialog (Workflow 4).
-function BeginnerApplyDialog({ project }: { project: ProjectDetail }) {
+function BeginnerApplyDialog({ project, onApplied }: { project: ProjectDetail; onApplied: () => void }) {
   const [open, setOpen] = useState(false);
   const [roleId, setRoleId] = useState("");
   const [motivation, setMotivation] = useState("");
@@ -167,6 +168,7 @@ function BeginnerApplyDialog({ project }: { project: ProjectDetail }) {
       setOpen(false);
       setRoleId("");
       setMotivation("");
+      onApplied();
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Gagal mengirim lamaran");
     } finally {
@@ -237,6 +239,34 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
   const recruiting = project.status === "RECRUITING";
   const hasSenior = !!project.senior;
 
+  // Whether the SENIOR/BEGINNER viewer already has a PENDING application for this
+  // project — flips the apply CTA to a disabled "Kamu sudah apply".
+  const [appliedPending, setAppliedPending] = useState(false);
+  useEffect(() => {
+    // Owners and the lead mentor never "apply", so skip the lookup for them.
+    const canApply =
+      appUser.role === "BEGINNER" || (appUser.role === "SENIOR" && !isLeadSenior);
+    if (!canApply) return;
+    let active = true;
+    (async () => {
+      try {
+        const apps =
+          appUser.role === "BEGINNER"
+            ? await applicationApi.myApplications()
+            : await applicationApi.mySeniorApplications();
+        if (active)
+          setAppliedPending(
+            apps.some((a) => a.project.id === project.id && a.status === "PENDING")
+          );
+      } catch {
+        /* non-blocking: fall back to the normal apply button */
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [appUser.role, isLeadSenior, project.id]);
+
   if (isOwner) {
     return (
       <Card className="app-reveal">
@@ -297,8 +327,10 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
     return (
       <Card className="app-reveal">
         <CardContent className="flex flex-col gap-2">
-          {recruiting && !hasSenior ? (
-            <SeniorApplyDialog project={project} />
+          {appliedPending ? (
+            <AlreadyApplied kind="mentor" />
+          ) : recruiting && !hasSenior ? (
+            <SeniorApplyDialog project={project} onApplied={() => setAppliedPending(true)} />
           ) : (
             <>
               <Button disabled>Apply sebagai Mentor</Button>
@@ -320,17 +352,37 @@ function ActionPanel({ project, reload }: { project: ProjectDetail; reload: () =
     const full = totalCapacity > 0 && memberCount >= totalCapacity;
     // Apply hanya saat masih rekrutmen, sudah ada mentor, dan slot belum penuh.
     // Kalau proyek sudah mulai / tim penuh → tombol apply hilang.
-    if (!recruiting || !hasSenior || full) return null;
+    // Already-applied beginners still see their status even if slots later fill.
+    if (!recruiting || !hasSenior || (full && !appliedPending)) return null;
     return (
       <Card className="app-reveal">
         <CardContent className="flex flex-col gap-2">
-          <BeginnerApplyDialog project={project} />
+          {appliedPending ? (
+            <AlreadyApplied kind="role" />
+          ) : (
+            <BeginnerApplyDialog project={project} onApplied={() => setAppliedPending(true)} />
+          )}
         </CardContent>
       </Card>
     );
   }
 
   return null;
+}
+
+// Disabled CTA shown when the viewer already has a PENDING application (Workflow
+// 3/4) — they applied but have not been accepted yet.
+function AlreadyApplied({ kind }: { kind: "mentor" | "role" }) {
+  return (
+    <>
+      <Button disabled>Kamu sudah apply</Button>
+      <p className="text-sm text-muted-foreground">
+        {kind === "mentor"
+          ? "Lamaran mentor kamu sedang ditinjau UMKM."
+          : "Lamaran kamu sedang ditinjau. Kamu akan diberi tahu jika diterima."}
+      </p>
+    </>
+  );
 }
 
 function Content() {
