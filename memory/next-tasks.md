@@ -1,4 +1,17 @@
 ============================================================
+⚡ ACTIVE HANDOFF (2026-07-10 #17) — DEPLOY PRODUKSI KOMPLET (Vercel 500 fix + AI aktif) — branch main, pushed
+============================================================
+Deploy produksi SUDAH LIVE & terverifikasi end-to-end: backend Fly (edunomad-sedulur-papat.fly.dev) ✓, frontend Vercel (edunomad-woad.vercel.app) ✓, diskusi/chat antar-role ✓, AI Gemini ✓.
+Sesi ini (D-DEPLOY-3): perbaiki Vercel 500 SEMUA route dinamis — `outputFileTracingRoot` di `frontend/next.config.ts` di-root-kan ke monorepo base (`path.join(__dirname, "..")`) supaya dep hoisted (next/dist/compiled/source-map) ikut ke-bundle. Commit 0f1296b→merge e448763→push→redeploy READY, diskusi 200. + fly.toml app name commit 8d08ff2. + user set Fly secret GEMINI_API_KEY → AI aktif di /profile.
+
+➡️ QUICK ACTION (sisa OPSIONAL, tidak memblokir demo):
+1. **(Opsional) Kunci CORS** produksi: `fly secrets set CORS_ORIGIN=https://edunomad-woad.vercel.app -a edunomad-sedulur-papat` (sekarang CORS masih terbuka — aman untuk demo, kunci bila mau production-grade).
+2. **Seed data demo expo** ke Supabase PRODUKSI (expo ~13 Jul): pastikan akun demo (password TestPass123!) ada agar responden bisa login. Cek apakah seed sudah dijalankan ke DB produksi.
+3. **(Keamanan) Rotate GEMINI_API_KEY** — key sempat ke-paste plaintext di chat sesi ini; ganti di Google AI Studio lalu `fly secrets set` ulang bila transkrip dibagikan.
+4. Verifikasi fitur AI lain di produksi bila mau: ranking pelamar (Applicants, butuh pelamar PENDING), rekomendasi portofolio (apply dialog Beginner).
+
+--- (handoff sebelumnya) ---
+============================================================
 ⚡ ACTIVE HANDOFF (2026-07-10 #16) — CODE-REVIEW FIXES + DISKUSI UX + DEPLOY CONFIG FLY.IO/VERCEL (branch main, BELUM commit)
 ============================================================
 Sesi ini di branch `main` (tak buat branch baru — perubahan langsung di working tree, BELUM commit). Semua tsc 0 + Playwright-verified.
