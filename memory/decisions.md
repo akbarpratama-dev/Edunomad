@@ -1,6 +1,13 @@
 # Decisions
 
 Date:
+2026-07-11c (Rename Deliverable→Hasil Kerja + fix sidebar Diskusi highlight)
+
+Decision (D-UI-LABEL-1) — Rename label "Deliverable/Deliverables" → **"Hasil Kerja"** (user via AskUserQuestion; alasan: istilah lebih dipahami & relate dgn isi "kirim hasil kerja, lampirkan bukti"). HANYA label tampilan — kode/API/`deliverableApi`/`expectedDeliverables`/TabKey `"deliverables"`/id form TETAP. Diubah: `DeliverablesTab.tsx` (heading, tombol Buat/Edit, toast, empty/loading), `workspace/page.tsx` (tab label, StatTile, QuickCard, "Ekspektasi Hasil Kerja", teks konfirmasi selesai), `BeginnerProjectBoard.tsx` (StatTile, "Hasil Kerja Terbaru", sample activity), `artifacts/[projectId]/page.tsx` (heading), `my-projects/page.tsx` (tips), landing `portfolio.tsx` + `faq.tsx` (copy). Subtitle "Kirim hasil kerja, lampirkan bukti, dan dapatkan review mentor" sudah ada sblmnya. frontend tsc+build 0.
+
+Decision (D-BUG-SIDEBAR-1) — Fix item "Diskusi Proyek" ikut ter-highlight saat di `/my-projects` (commit a00bc5e). Sebab: href fallback Diskusi = `/my-projects` (sama dgn item "Proyek Saya") → longest-prefix activeHref cocok utk keduanya → dua-duanya aktif. Fix `Sidebar.tsx`: `diskusiActive = pathname.includes("/workspace/diskusi")` (bukan lewat activeHref); activeHref exclude diskusiHref + return undefined saat diskusiActive. 
+
+Date:
 2026-07-11b (Tab underline default + badge staleness refresh)
 
 Decision (D-UI-TABS-1) — Style tab underline jadi DEFAULT `PillTabs` (user-approved, "seragamkan button tab seperti workspace, semua halaman"):

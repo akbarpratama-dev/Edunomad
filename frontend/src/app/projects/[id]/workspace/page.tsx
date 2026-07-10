@@ -84,7 +84,7 @@ type TabKey =
 const TABS: { key: TabKey; label: string }[] = [
   { key: "overview", label: "Ringkasan" },
   { key: "milestones", label: "Milestone" },
-  { key: "deliverables", label: "Deliverables" },
+  { key: "deliverables", label: "Hasil Kerja" },
   { key: "contributions", label: "Kontribusi" },
   { key: "reviews", label: "Review" },
   { key: "artifacts", label: "Sertifikat" },
@@ -224,7 +224,7 @@ function WorkspaceInner() {
         open={completeOpen}
         onOpenChange={setCompleteOpen}
         title="Selesaikan proyek ini?"
-        description="Proyek langsung ditandai SELESAI dan sertifikat setiap mahasiswa aktif otomatis diterbitkan. Pastikan deliverable, kontribusi, dan review sudah beres."
+        description="Proyek langsung ditandai SELESAI dan sertifikat setiap mahasiswa aktif otomatis diterbitkan. Pastikan hasil kerja, kontribusi, dan review sudah beres."
         confirmLabel="Ya, Selesaikan"
         cancelLabel="Batal"
         onConfirm={completeProject}
@@ -358,7 +358,7 @@ function OverviewTab({
       {/* Stat grid */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile icon={TrendingUp} tone="bg-[#eef7d6] text-[#5f8c00]" value={`${pct}%`} label="Progres Proyek" sub={`${doneM}/${ms.length} milestone`} />
-        <StatTile icon={ClipboardList} tone="bg-sky-100 text-sky-700" value={String(deliverables.length)} label="Deliverable" sub={`${approvedD} disetujui`} />
+        <StatTile icon={ClipboardList} tone="bg-sky-100 text-sky-700" value={String(deliverables.length)} label="Hasil Kerja" sub={`${approvedD} disetujui`} />
         <StatTile icon={Users} tone="bg-violet-100 text-violet-700" value={String(team.length)} label="Anggota Tim" sub="Aktif" />
         <StatTile icon={CalendarDays} tone="bg-rose-100 text-rose-700" value={String(daysLeft)} label="Hari Tersisa" sub="Sebelum deadline" />
       </div>
@@ -382,7 +382,7 @@ function OverviewTab({
         <h2 className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Akses Cepat</h2>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <QuickCard icon={Flag} label="Milestone" desc="Pantau tahapan proyek" tone="bg-[#eef7d6] text-[#5f8c00]" onClick={() => onTab("milestones")} />
-          <QuickCard icon={FileText} label="Deliverables" desc="Kiriman & bukti kerja" tone="bg-sky-100 text-sky-700" onClick={() => onTab("deliverables")} />
+          <QuickCard icon={FileText} label="Hasil Kerja" desc="Kiriman & bukti kerja" tone="bg-sky-100 text-sky-700" onClick={() => onTab("deliverables")} />
           <QuickCard icon={CheckCircle2} label="Kontribusi" desc="Laporan kontribusi tim" tone="bg-emerald-100 text-emerald-700" onClick={() => onTab("contributions")} />
           {/* Diskusi = mentor + mahasiswa only; hidden for UMKM (rule D-DISKUSI-2). */}
           {role !== "UMKM" && (
@@ -402,7 +402,7 @@ function OverviewTab({
               <p className="mt-1.5 whitespace-pre-wrap text-sm text-foreground/90">{project.description}</p>
             </div>
             <div>
-              <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Ekspektasi Deliverable</h2>
+              <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Ekspektasi Hasil Kerja</h2>
               <p className="mt-1.5 whitespace-pre-wrap text-sm text-foreground/90">{project.expectedDeliverables}</p>
             </div>
           </CardContent>

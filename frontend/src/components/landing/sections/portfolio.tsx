@@ -4,7 +4,7 @@ import { Reveal, Stagger, StaggerItem } from "@/components/landing/motion";
 
 const POINTS = [
   { t: "Kontribusi nyata", d: "Setiap kontribusi dicatat dan diukur secara nyata dalam sebuah sertifikat." },
-  { t: "Feedback mentor", d: "Mentor memberikan ulasan dan pengarahan atas setiap deliverable proyek." },
+  { t: "Feedback mentor", d: "Mentor memberikan ulasan dan pengarahan atas setiap hasil kerja proyek." },
   { t: "Validasi UMKM", d: "Bisnis yang kamu bantu mengkonfirmasi dampak nyata dari pekerjaanmu." },
   { t: "QR Verification", d: "Siapa pun bisa memindai QR untuk memverifikasi keaslian sertifikat secara instan." },
   { t: "Siap ditampilkan di CV", d: "Bagikan URL sertifikat di LinkedIn, CV, atau portofolio online kamu." },

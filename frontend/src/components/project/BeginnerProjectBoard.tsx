@@ -305,7 +305,7 @@ export function BeginnerProjectBoard() {
           icon={ClipboardList}
           tone="bg-sky-100 text-sky-700"
           value={String(deliverables.length)}
-          label="Deliverable"
+          label="Hasil Kerja"
           sub={`${derived.approved} disetujui`}
         />
         <StatCard
@@ -490,9 +490,9 @@ export function BeginnerProjectBoard() {
         </Panel>
 
         <Panel className="p-5">
-          <SectionHead title="Deliverable Terbaru" href={workspace} />
+          <SectionHead title="Hasil Kerja Terbaru" href={workspace} />
           {deliverables.length === 0 ? (
-            <p className="mt-4 text-sm text-muted-foreground">Belum ada deliverable.</p>
+            <p className="mt-4 text-sm text-muted-foreground">Belum ada hasil kerja.</p>
           ) : (
             <ul className="mt-4 space-y-3">
               {deliverables.slice(0, 4).map((d) => {
@@ -680,7 +680,7 @@ const SAMPLE_TASKS = [
 ];
 
 const SAMPLE_ACTIVITY = [
-  { who: "Rizky Pratama", text: "Rizky mengunggah Deliverable v2", time: "10 mnt lalu" },
+  { who: "Rizky Pratama", text: "Rizky mengunggah Hasil Kerja v2", time: "10 mnt lalu" },
   { who: "Budi Santoso", text: "Mentor memberikan feedback", time: "1 jam lalu" },
   { who: "Wira Tama", text: "UMKM menyetujui milestone", time: "3 jam lalu" },
   { who: "Alya Lestari", text: "Alya mengunggah UI Design", time: "5 jam lalu" },
