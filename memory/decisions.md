@@ -1,6 +1,19 @@
 # Decisions
 
 Date:
+2026-07-10c (Vercel 500 root cause — outputFileTracingRoot monorepo fix)
+
+Decision (D-DEPLOY-3) — Akar masalah Vercel 500 di `/my-projects/[id]/workspace/diskusi` (+ SEMUA route dinamis `ƒ`) BUKAN re-export (itu D-DEPLOY-2, sudah diperbaiki) tapi **file tracing salah root**:
+- Diagnosa via Vercel MCP `get_runtime_logs`: tiap GET route diskusi → HTTP 500 `Cannot find module 'next/dist/compiled/source-map'`, require stack `/var/task/frontend/___next_launcher.cjs` + `/var/task/node_modules/next/...`. Artinya paket `next` ada di node_modules HOISTED ke root monorepo (`/var/task/node_modules`), tapi submodul yg di-require lazy (`source-map`) TAK ikut ter-bundle ke serverless function.
+- Sebab: `frontend/next.config.ts` set `outputFileTracingRoot: path.join(__dirname)` = folder `frontend/` saja. Di monorepo npm-workspaces, dependency hoist ke ROOT, jadi tracer yg di-root-kan ke `frontend/` MELEWATKAN `../node_modules` (di luar root tracing) → file lazy seperti `next/dist/compiled/source-map` di-drop dari bundle → 500 saat render.
+- Fix (Context7 /vercel/next.js — docs `output` monorepo caveats): `outputFileTracingRoot: path.join(__dirname, "..")` (root monorepo, `frontend/` satu level di bawahnya). VERIFIED: `npm run build` 0 error; `.next/server/app/my-projects/[id]/workspace/diskusi/page.js.nft.json` + `next-server.js.nft.json` sekarang trace `../../node_modules/...` dan `source-map` ref = true (sebelumnya di luar tracing root, ter-drop diam-diam).
+- STATUS: fix lokal + build terverifikasi; belum push/redeploy — perlu deploy Vercel baru agar aktif di produksi.
+
+Decision (D-DEPLOY-2) — Perbaikan 2 kegagalan saat deploy nyata (backend a7f1d8c, frontend e302225, pushed main):
+- (a) **Fly.io Docker build gagal TS2345** di SEMUA controller (`req.params.id` = `string|string[]`). Sebab: Docker context=backend/ → `npm install` standalone tak dapat override root. Fix: tambah `overrides."@types/express-serve-static-core"="5.0.7"` ke `backend/package.json` (mirror root). Verified standalone install resolve 5.0.7. Lalu `fly deploy --local-only` (hindari Depot remote builder yg timeout 782s) → build 28s, app LIVE https://edunomad-sedulur-papat.fly.dev, /health 200. Warning "not listening on 0.0.0.0" saat boot = TRANSIENT.
+- (b) **Vercel 500 FUNCTION_INVOCATION_FAILED** di `/my-projects/[id]/workspace/diskusi` (+4 route my-projects lain). Sebab: file route `/my-projects/[id]/*` pakai `export { default } from "../../projects/[id]/..."` — server route re-export default CLIENT page dari route lain via path relatif menembus `[id]` → crash bundler serverless Vercel (lokal `next start` 200, TAK bisa reproduksi lokal). Fix: ganti KELIMA (page/workspace/workspace-diskusi/applicants/manage) jadi `"use client"` wrapper `import X from "@/app/projects/[id]/.../page"` lalu `return <X/>`. Build lokal 0 error. DEPLOY STATUS: backend Fly LIVE; frontend Vercel https://edunomad-woad.vercel.app (login+dashboard OK; diskusi fix menunggu redeploy + verifikasi user). SISA deploy: kunci CORS (`fly secrets set CORS_ORIGIN=https://edunomad-woad.vercel.app`) + seed demo (seed.ts + seed-kasir.ts).
+
+Date:
 2026-07-09/10 (Code review fixes + Diskusi UX + Deploy config Fly.io/Vercel)
 
 Decision (D-CR-1..3) — Perbaikan 3 finding /code-review high-effort teratas (branch main, belum commit):
