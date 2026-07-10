@@ -82,18 +82,22 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       ? `/${workspaceMatch[1]}/${workspaceMatch[2]}/workspace/diskusi`
       : resolvedDiskusiHref
     : null;
+  // The Diskusi shortcut is "active" only on an actual diskusi route — never via
+  // its /my-projects fallback href, which would otherwise collide with the
+  // "Proyek Saya" item and light both up at once.
+  const diskusiActive = pathname?.includes("/workspace/diskusi") ?? false;
 
   // Highlight a single item: the one whose href is the longest prefix of the
   // current path (so /projects/create wins over /projects, and nested admin
-  // pages match their own entry rather than nothing).
+  // pages match their own entry rather than nothing). On a diskusi route no nav
+  // item is highlighted — the Diskusi shortcut owns the active state instead.
   const activeHref = useMemo(() => {
-    if (!pathname) return undefined;
-    const allHrefs = [...navItems.map((i) => i.href), ...(diskusiHref ? [diskusiHref] : [])];
-    return allHrefs
+    if (!pathname || diskusiActive) return undefined;
+    return navItems
+      .map((i) => i.href)
       .filter((href) => pathname === href || pathname.startsWith(href + "/"))
       .sort((a, b) => b.length - a.length)[0];
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navItems, pathname, diskusiHref]);
+  }, [navItems, pathname, diskusiActive]);
 
   return (
     <div className="app-dark flex h-full w-64 flex-col bg-[#201f31] text-[#e8e8ec]">
@@ -154,10 +158,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 <Link
                   href={diskusiHref}
                   onClick={onNavigate}
-                  aria-current={diskusiHref === activeHref ? "page" : undefined}
+                  aria-current={diskusiActive ? "page" : undefined}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition-colors duration-200",
-                    diskusiHref === activeHref
+                    diskusiActive
                       ? "bg-primary text-primary-foreground"
                       : "text-[#b6b6c0] hover:bg-white/5 hover:text-white"
                   )}
