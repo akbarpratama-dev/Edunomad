@@ -9,8 +9,8 @@ Sesi ini di branch `main` (tak buat branch baru — perubahan langsung di workin
 3. Deploy config Fly.io+Vercel: backend/{Dockerfile, fly.toml always-on, .dockerignore, tsconfig.build.json} + build script + listen 0.0.0.0 + CORS env CORS_ORIGIN + README "Deploy Gratis" section. Terbukti node dist/index.js → /health 200.
 
 ➡️ QUICK ACTION (urut):
-1. ✅ SUDAH COMMIT (2026-07-10) di branch **fix/review-diskusi-deploy** (4 commit: 5d70aa7 diskusi UX, 28ced8b review fixes, 2a09c10 deploy config, 23f4493 memory). BELUM push. NEXT = push origin + buka PR / merge → main (tanya user dulu — outward-facing).
-2. **Deploy** (user): backend `cd backend && fly auth login && fly apps create <nama> && fly secrets set DATABASE_URL=.. SUPABASE_URL=.. SUPABASE_SERVICE_ROLE_KEY=.. && fly deploy`; frontend Vercel root=frontend + 3 NEXT_PUBLIC_* (NEXT_PUBLIC_API_URL=https://<app>.fly.dev/api/v1). Lalu `fly secrets set CORS_ORIGIN=https://<vercel>`.
+1. ✅ SUDAH MERGED → main (2026-07-10, PR #1, main = e233405, branch fix/review-diskusi-deploy dihapus). Semua perubahan sesi ini sudah di main + pushed origin.
+2. **Deploy** (user — belum dijalankan): backend `cd backend && fly auth login && fly apps create <nama> && fly secrets set DATABASE_URL=.. SUPABASE_URL=.. SUPABASE_SERVICE_ROLE_KEY=.. && fly deploy`; frontend Vercel root=frontend + 3 NEXT_PUBLIC_* (NEXT_PUBLIC_API_URL=https://<app>.fly.dev/api/v1). Lalu `fly secrets set CORS_ORIGIN=https://<vercel>`.
 3. **(Opsional) Perbaiki 7 sisa finding review** (prioritas bila mau production-grade):
    - HIGH: partial-cert mid-loop tanpa txn di `artifact.service.generateForCompletion` (pre-validate SEMUA beginner sebelum _issueArtifact, atau bungkus txn).
    - HIGH-UX: withdraw application HILANG — Beginner+Senior dashboard cuma badge read-only; page /applications, /applications/mentor, /reviews DIHAPUS di commit workflow-ux (82b7510). Tambah tombol "Tarik Lamaran" (applicationApi.withdraw / seniorApplication withdraw belum ada di projectApi → cek backend endpoint).
