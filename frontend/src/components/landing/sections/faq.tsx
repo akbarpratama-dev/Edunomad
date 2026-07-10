@@ -34,7 +34,7 @@ const FAQS = [
   },
   {
     q: "Bagaimana cara kerja pendampingan mentor?",
-    a: "Setiap proyek memiliki satu mentor yang membimbing tim, meninjau deliverable, memberi umpan balik, dan memverifikasi kontribusi sebelum proyek dinyatakan selesai.",
+    a: "Setiap proyek memiliki satu mentor yang membimbing tim, meninjau hasil kerja, memberi umpan balik, dan memverifikasi kontribusi sebelum proyek dinyatakan selesai.",
   },
 ];
 

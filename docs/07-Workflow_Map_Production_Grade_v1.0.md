@@ -363,7 +363,7 @@ Project Flow:
 
 | Feature | Access | Notes |
 |---------|--------|-------|
-| **Discussions** | All members | Group conversations |
+| **Discussions** | Senior + members (NOT UMKM) | Group conversations — UMKM excluded (D-DISKUSI-2) |
 | **Direct Messages** | Beginner ↔ Senior | Mentoring/feedback |
 | **Deliverables** | Beginners submit, Senior reviews | Multiple submissions allowed |
 | **Contributions** | Beginners submit, Senior approves | One per beginner |
@@ -392,7 +392,7 @@ Participants:
 └─ All BEGINNERs
 
 Flow:
-├─ Any ACTIVE participant opens discussion (UMKM owner, SENIOR, or a member incl. BEGINNER — rule D-P12-8)
+├─ Any ACTIVE participant opens discussion (SENIOR or a member incl. BEGINNER — UMKM owner excluded, rule D-DISKUSI-2 supersedes D-P12-8)
 ├─ Invite members
 ├─ Discussion created
 └─ Members join
@@ -1240,7 +1240,7 @@ Implementation
 | 4 | Beginner Recruitment | Senior (accepts/rejects) |
 | 5 | Team Formation | Senior (starts project) |
 | 6 | Active Project | All members |
-| 7 | Discussion | All participants |
+| 7 | Discussion | Senior + members (NOT UMKM — D-DISKUSI-2) |
 | 8 | Deliverable | Senior (reviews/approves) |
 | 9 | Contribution | Senior (approves) |
 | 10 | Milestone Revision | UMKM (approves revision) |

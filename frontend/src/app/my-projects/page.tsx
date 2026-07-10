@@ -349,7 +349,7 @@ function UmkmView() {
               icon={Lightbulb}
               title="Tips Proyek Sukses"
               tips={[
-                "Tulis deskripsi & deliverable yang jelas",
+                "Tulis deskripsi & hasil kerja yang jelas",
                 "Pecah pekerjaan menjadi milestone terukur",
                 "Beri feedback cepat pada setiap submission",
                 "Jaga komunikasi rutin dengan mentor & tim",

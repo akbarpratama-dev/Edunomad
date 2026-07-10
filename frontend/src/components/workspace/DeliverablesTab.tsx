@@ -44,7 +44,7 @@ export function DeliverablesTab({ project }: { project: ProjectDetail }) {
           members.some((m) => m.user.id === appUser.id && m.status === "ACTIVE")
       );
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Gagal memuat deliverable");
+      toast.error(err instanceof ApiError ? err.message : "Gagal memuat hasil kerja");
       setItems([]);
     }
   }, [project.id, appUser]);
@@ -53,20 +53,20 @@ export function DeliverablesTab({ project }: { project: ProjectDetail }) {
     load();
   }, [load]);
 
-  if (items === null) return <p className="text-sm text-muted-foreground">Memuat deliverable…</p>;
+  if (items === null) return <p className="text-sm text-muted-foreground">Memuat hasil kerja…</p>;
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Deliverables</h2>
+          <h2 className="text-xl font-bold tracking-tight">Hasil Kerja</h2>
           <p className="text-sm text-muted-foreground">
             Kirim hasil kerja, lampirkan bukti, dan dapatkan review mentor.
           </p>
         </div>
         {isMember && (
           <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="mr-1.5 size-4" /> Buat Deliverable
+            <Plus className="mr-1.5 size-4" /> Buat Hasil Kerja
           </Button>
         )}
       </div>
@@ -74,7 +74,7 @@ export function DeliverablesTab({ project }: { project: ProjectDetail }) {
       {items.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-14 text-center">
           <FileText className="size-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Belum ada deliverable.</p>
+          <p className="text-sm text-muted-foreground">Belum ada hasil kerja.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -94,10 +94,10 @@ export function DeliverablesTab({ project }: { project: ProjectDetail }) {
       <DeliverableFormDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Buat Deliverable"
+        title="Buat Hasil Kerja"
         onSubmit={async (data) => {
           await deliverableApi.create(project.id, data);
-          toast.success("Deliverable dibuat");
+          toast.success("Hasil kerja dibuat");
           load();
         }}
       />
@@ -207,7 +207,7 @@ function DeliverableCard({
               <Button
                 size="sm"
                 disabled={busy}
-                onClick={() => run(() => deliverableApi.approve(d.id), "Deliverable disetujui")}
+                onClick={() => run(() => deliverableApi.approve(d.id), "Hasil kerja disetujui")}
               >
                 Setujui
               </Button>
@@ -222,11 +222,11 @@ function DeliverableCard({
       <DeliverableFormDialog
         open={editOpen}
         onOpenChange={setEditOpen}
-        title="Edit Deliverable"
+        title="Edit Hasil Kerja"
         initial={{ title: d.title, description: d.description ?? "" }}
         onSubmit={async (data) => {
           await deliverableApi.update(d.id, data);
-          toast.success("Deliverable diperbarui");
+          toast.success("Hasil kerja diperbarui");
           onChanged();
         }}
       />
@@ -238,7 +238,7 @@ function DeliverableCard({
             d.id,
             urls.map((url) => ({ type: "LINK" as const, url }))
           );
-          toast.success("Deliverable dikirim");
+          toast.success("Hasil kerja dikirim");
           onChanged();
         }}
       />

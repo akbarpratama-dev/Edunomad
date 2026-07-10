@@ -1,6 +1,35 @@
 # Decisions
 
 Date:
+2026-07-11c (Rename Deliverable→Hasil Kerja + fix sidebar Diskusi highlight)
+
+Decision (D-UI-LABEL-1) — Rename label "Deliverable/Deliverables" → **"Hasil Kerja"** (user via AskUserQuestion; alasan: istilah lebih dipahami & relate dgn isi "kirim hasil kerja, lampirkan bukti"). HANYA label tampilan — kode/API/`deliverableApi`/`expectedDeliverables`/TabKey `"deliverables"`/id form TETAP. Diubah: `DeliverablesTab.tsx` (heading, tombol Buat/Edit, toast, empty/loading), `workspace/page.tsx` (tab label, StatTile, QuickCard, "Ekspektasi Hasil Kerja", teks konfirmasi selesai), `BeginnerProjectBoard.tsx` (StatTile, "Hasil Kerja Terbaru", sample activity), `artifacts/[projectId]/page.tsx` (heading), `my-projects/page.tsx` (tips), landing `portfolio.tsx` + `faq.tsx` (copy). Subtitle "Kirim hasil kerja, lampirkan bukti, dan dapatkan review mentor" sudah ada sblmnya. frontend tsc+build 0.
+
+Decision (D-BUG-SIDEBAR-1) — Fix item "Diskusi Proyek" ikut ter-highlight saat di `/my-projects` (commit a00bc5e). Sebab: href fallback Diskusi = `/my-projects` (sama dgn item "Proyek Saya") → longest-prefix activeHref cocok utk keduanya → dua-duanya aktif. Fix `Sidebar.tsx`: `diskusiActive = pathname.includes("/workspace/diskusi")` (bukan lewat activeHref); activeHref exclude diskusiHref + return undefined saat diskusiActive. 
+
+Date:
+2026-07-11b (Tab underline default + badge staleness refresh)
+
+Decision (D-UI-TABS-1) — Style tab underline jadi DEFAULT `PillTabs` (user-approved, "seragamkan button tab seperti workspace, semua halaman"):
+`components/common/PillTabs.tsx` default variant `"pill"` → `"underline"`. Ini MEMBALIK D-CR-1 (yg dulu kembalikan default ke "pill" karena dianggap regresi senyap) — sekarang underline memang diinginkan di semua tab (sertifikat `/artifacts` + `/artifacts/:id`, pelamar, admin, my-projects, notifikasi otomatis ikut). Workspace tetap punya `variant="underline"` eksplisit (redundan tapi harmless). Yang mau chip pill tinggal opt-in `variant="pill"`. frontend build 0.
+
+Decision (D-UI-BADGE-1) — Badge "needs attention" di tab workspace: pertahankan semantik SEKARANG (user via AskUserQuestion memilih "hilang hanya jika pekerjaan selesai", BUKAN clear-on-open, BUKAN hapus). Badge = jumlah pekerjaan pending dari `workspaceSummary.service` (mis. milestone belum COMPLETED, deliverable SUBMITTED menunggu review, dst) — membuka tab TIDAK menghilangkannya (by design). Perbaikan anti-basi: `workspace/page.tsx` refactor fetch summary jadi `loadSummary` useCallback, dipanggil saat ganti tab (existing) + saat window/tab regain focus (`focus` + `visibilitychange`), supaya badge ter-update segera setelah pekerjaan beres tanpa reload penuh. Tidak threading callback ke tiap tab (terlalu invasif, banyak dialog bersarang). frontend build 0.
+
+Date:
+2026-07-11 (Lowongan: UMKM/mentor link ke profil + "Kamu sudah apply" + UMKM dikeluarkan dari Diskusi)
+
+Decision (D-VACANCY-1) — Perbaikan halaman lowongan (detail proyek), user-req:
+- Nama **UMKM & Mentor** di `ProjectDetailView` kini `ProfileLink` → `/users/:id` (bisa diklik ke profil). `MetaRow.value` diubah `string`→`React.ReactNode`.
+- Tombol eksplisit **"Lihat Profil UMKM"** (outline, ikon Building2) di aside `projects/[id]/page.tsx` untuk viewer SENIOR & BEGINNER → `/users/:umkmId`.
+- **"Kamu sudah apply"**: `ActionPanel` fetch `applicationApi.myApplications()` (BEGINNER) / `mySeniorApplications()` (SENIOR); kalau ada lamaran status **PENDING** utk proyek itu → tombol apply diganti tombol disabled "Kamu sudah apply" + keterangan sedang ditinjau (komponen `AlreadyApplied`). REJECTED/WITHDRAWN → tombol apply normal (boleh apply lagi). Dialog apply panggil `onApplied()` → set state langsung. Di kartu browse `/projects` nama UMKM SENGAJA tidak dijadikan link (kartu sudah `<Link>`, nested-anchor invalid). tsc+build 0.
+
+Decision (D-DISKUSI-2) — UMKM DIKELUARKAN dari fitur Diskusi sepenuhnya (user-approved 2026-07-11, **supersede D-P12-8**):
+User: "hapus aja, karna pas saya cek tidak ada sambungan dengan semua role". D-P12-8 dulu menjadikan UMKM owner peserta diskusi (create + pin). Sekarang diskusi = **mentor (senior) + ACTIVE members (beginner) saja**. Perubahan:
+- Backend `services/discussion.service.ts`: `assertParticipant` buang cek `umkmId` (UMKM → ForbiddenError saat list); `createGroupDiscussion` buang `participantIds.add(project.umkmId)` (UMKM tak bisa create); `pinDiscussion` hanya `seniorId` (UMKM tak bisa pin). UMKM juga bukan discussion_member mana pun → `assertDiscussionMember` blokir dari messages.
+- Frontend: `Sidebar.tsx` `showDiskusi = BEGINNER|SENIOR` (UMKM+ADMIN hidden); workspace Overview "Akses Cepat" QuickCard Diskusi disembunyikan utk UMKM; `DiscussionTab.tsx` `canManage` buang UMKM + guard `isUmkm` → skip load + tampil state "Diskusi Tidak Tersedia". UmkmView `/my-projects` memang tak pernah punya tombol Diskusi (aman).
+- Docs diupdate (CLAUDE.md priority): `06-RBAC` §Discussion (591-593) + `07-Workflow` (tabel Active Project Rules, flow diagram, tabel workflow 7). tsc backend 0 (kecuali seed*.ts pre-existing yg di-exclude di build), backend build 0, frontend build 0. BELUM di-browser-test + BELUM commit.
+
+Date:
 2026-07-10c (Vercel 500 root cause — outputFileTracingRoot monorepo fix)
 
 Decision (D-DEPLOY-3) — Akar masalah Vercel 500 di `/my-projects/[id]/workspace/diskusi` (+ SEMUA route dinamis `ƒ`) BUKAN re-export (itu D-DEPLOY-2, sudah diperbaiki) tapi **file tracing salah root**:

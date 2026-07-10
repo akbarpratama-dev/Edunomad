@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ProjectThumb } from "@/components/artifact/shared";
+import { ProfileLink } from "@/components/common/ProfileLink";
 import {
   PROJECT_STATUS_META,
   type ProjectDetail,
@@ -41,7 +42,7 @@ function MetaRow({
 }: {
   icon: typeof Building2;
   label: string;
-  value: string;
+  value: React.ReactNode;
 }) {
   return (
     <div className="flex items-center gap-3">
@@ -95,11 +96,27 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
 
       <Card className="app-reveal">
         <CardContent className="grid gap-3 sm:grid-cols-2">
-          <MetaRow icon={Building2} label="UMKM" value={project.umkm.name} />
+          <MetaRow
+            icon={Building2}
+            label="UMKM"
+            value={
+              <ProfileLink userId={project.umkm.id} title="Lihat profil UMKM">
+                {project.umkm.name}
+              </ProfileLink>
+            }
+          />
           <MetaRow
             icon={GraduationCap}
             label="Mentor (Senior)"
-            value={project.senior?.name ?? "Belum ada mentor"}
+            value={
+              project.senior ? (
+                <ProfileLink userId={project.senior.id} title="Lihat profil mentor">
+                  {project.senior.name}
+                </ProfileLink>
+              ) : (
+                "Belum ada mentor"
+              )
+            }
           />
         </CardContent>
       </Card>

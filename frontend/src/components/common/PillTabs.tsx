@@ -12,18 +12,17 @@ export interface PillTab<T extends string> {
 }
 
 // Shared premium tabs. Two looks:
-// - "pill" (default): navy-fill chip, for status/segment switching (keeps every
-//   existing page unchanged).
-// - "underline": classic tab bar with a bottom active indicator — reads
-//   unmistakably as *tabs*, not functional buttons (used in the workspace where
-//   the pill chips were mistaken for action buttons).
+// - "underline" (default): classic tab bar with a bottom active indicator —
+//   reads unmistakably as *tabs*, not functional buttons. App-wide default so
+//   every tab bar matches the workspace (user-approved 2026-07-11, D-UI-TABS-1).
+// - "pill": navy-fill chip, opt-in for the rare spot that still wants a chip.
 export function PillTabs<T extends string>({
   tabs,
   value,
   onChange,
   className,
   ariaLabel,
-  variant = "pill",
+  variant = "underline",
 }: {
   tabs: PillTab<T>[];
   value: T;

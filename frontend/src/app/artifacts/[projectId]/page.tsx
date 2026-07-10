@@ -141,9 +141,9 @@ function Content() {
                 </section>
 
                 <section className="rounded-[20px] border border-border bg-card p-5">
-                  <h2 className="font-bold tracking-tight">Deliverables</h2>
+                  <h2 className="font-bold tracking-tight">Hasil Kerja</h2>
                   {d.deliverables.length === 0 ? (
-                    <p className="mt-3 text-sm text-muted-foreground">Belum ada deliverable.</p>
+                    <p className="mt-3 text-sm text-muted-foreground">Belum ada hasil kerja.</p>
                   ) : (
                     <ul className="mt-3 flex flex-col gap-2.5">
                       {d.deliverables.map((dl) => {
