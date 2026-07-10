@@ -319,6 +319,7 @@ function OverviewTab({
   onTab: (t: TabKey) => void;
   base: string;
 }) {
+  const role = useAuthStore((s) => s.appUser?.role);
   const [members, setMembers] = useState<ProjectMember[] | null>(null);
   const [deliverables, setDeliverables] = useState<Deliverable[]>([]);
   useEffect(() => {
@@ -369,7 +370,10 @@ function OverviewTab({
           <QuickCard icon={Flag} label="Milestone" desc="Pantau tahapan proyek" tone="bg-[#eef7d6] text-[#5f8c00]" onClick={() => onTab("milestones")} />
           <QuickCard icon={FileText} label="Deliverables" desc="Kiriman & bukti kerja" tone="bg-sky-100 text-sky-700" onClick={() => onTab("deliverables")} />
           <QuickCard icon={CheckCircle2} label="Kontribusi" desc="Laporan kontribusi tim" tone="bg-emerald-100 text-emerald-700" onClick={() => onTab("contributions")} />
-          <QuickCard icon={MessageSquare} label="Diskusi" desc="Ruang diskusi & tanya jawab" tone="bg-violet-100 text-violet-700" href={diskusiHref} />
+          {/* Diskusi = mentor + mahasiswa only; hidden for UMKM (rule D-DISKUSI-2). */}
+          {role !== "UMKM" && (
+            <QuickCard icon={MessageSquare} label="Diskusi" desc="Ruang diskusi & tanya jawab" tone="bg-violet-100 text-violet-700" href={diskusiHref} />
+          )}
           <QuickCard icon={Star} label="Review" desc="Penilaian & feedback" tone="bg-amber-100 text-amber-700" onClick={() => onTab("reviews")} />
           <QuickCard icon={ShieldCheck} label="Sertifikat" desc="Artefak terverifikasi" tone="bg-teal-100 text-teal-700" onClick={() => onTab("artifacts")} />
         </div>

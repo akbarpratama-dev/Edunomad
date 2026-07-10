@@ -588,8 +588,9 @@ SUBMITTED
 - ✅ Accepted beginners included
 
 **Phase 12 (Discussion Forum Upgrade — user-approved) additions:**
-- ✅ Create a discussion topic (title + category): **any ACTIVE project participant — UMKM owner, assigned senior, or an ACTIVE member (including beginners)** (rule change **D-P12-8**, user-approved 2026-07-07; superseded the earlier "senior lead / UMKM owner only, beginners join-only" rule)
-- ✅ Pin / unpin a topic: **senior lead or UMKM owner only** (`POST /discussions/:id/pin`) — pin stays a lead/owner moderation action, unchanged by D-P12-8
+- ✅ Access discussion (read/list topics & messages): **the assigned senior and ACTIVE members (accepted beginners) only**. The **UMKM owner is NOT a discussion participant** (rule **D-DISKUSI-2**, user-approved 2026-07-11 — supersedes D-P12-8, which had included the UMKM owner). UMKM oversees the project through the other workspace tabs, not discussion.
+- ✅ Create a discussion topic (title + category): **any ACTIVE project participant — the assigned senior or an ACTIVE member (including beginners)** (D-DISKUSI-2; D-P12-8 had also allowed the UMKM owner — no longer)
+- ✅ Pin / unpin a topic: **senior lead only** (`POST /discussions/:id/pin`) — moderation action (D-DISKUSI-2 removed the UMKM owner, who under D-P12-8 could also pin)
 - ✅ Reply to a message (12.2), react to a message (12.3), attach file/image/link (12.4): **any discussion member**
 - ✅ Topic categories: `ANNOUNCEMENT|QUESTION|IDEA|BLOCKER|MENTOR_REVIEW|UPDATE`
 

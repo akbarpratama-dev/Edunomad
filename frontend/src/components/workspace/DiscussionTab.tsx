@@ -96,10 +96,11 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
   const [pinningId, setPinningId] = useState<string | null>(null);
   const [shown, setShown] = useState(6); // "Muat lebih banyak" page size
 
-  // Lead/owner can moderate (pin); any ACTIVE participant can start a discussion.
-  const canManage =
-    (appUser?.role === "SENIOR" && project.senior?.id === appUser.id) ||
-    (appUser?.role === "UMKM" && project.umkm.id === appUser.id);
+  // UMKM is not a discussion participant (rule D-DISKUSI-2, supersedes D-P12-8):
+  // the whole tab is blocked for them below.
+  const isUmkm = appUser?.role === "UMKM";
+  // Lead senior can moderate (pin); any ACTIVE participant can start a discussion.
+  const canManage = appUser?.role === "SENIOR" && project.senior?.id === appUser.id;
   // Rule D-P12-8 (user-approved): beginners were "join only"; ACTIVE members
   // (including beginners) can now create discussions too.
   const isActiveMember = members.some(
@@ -123,8 +124,9 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
   }, [project.id]);
 
   useEffect(() => {
+    if (isUmkm) return; // UMKM has no discussion access (D-DISKUSI-2)
     load();
-  }, [load]);
+  }, [load, isUmkm]);
 
   const create = async (title: string, category: DiscussionCategory) => {
     const activeIds = members.filter((m) => m.status === "ACTIVE").map((m) => m.user.id);
@@ -184,6 +186,24 @@ export function DiscussionTab({ project }: { project: ProjectDetail }) {
     if (!activeId) return;
     discussionApi.recordView(activeId).then(() => load());
   }, [activeId, load]);
+
+  // UMKM is not a discussion participant (rule D-DISKUSI-2, supersedes D-P12-8).
+  if (isUmkm) {
+    return (
+      <div className="app-reveal flex flex-col items-center gap-3 rounded-[24px] border border-dashed border-border py-16 text-center">
+        <span className="grid size-14 place-items-center rounded-2xl bg-muted text-muted-foreground" aria-hidden="true">
+          <MessagesSquare className="size-7" />
+        </span>
+        <div>
+          <h3 className="text-base font-semibold text-foreground">Diskusi Tidak Tersedia</h3>
+          <p className="mx-auto mt-0.5 max-w-sm text-sm text-muted-foreground">
+            Ruang diskusi hanya untuk mentor dan mahasiswa proyek. Sebagai UMKM, Anda tetap
+            dapat memantau progres lewat tab lain di workspace.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-5">

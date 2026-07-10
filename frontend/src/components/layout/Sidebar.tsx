@@ -35,12 +35,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   // "Diskusi Proyek" — a direct sidebar shortcut to the user's project Diskusi,
-  // reachable from anywhere (not only inside a workspace). ADMIN has no member
-  // projects, so it is hidden for them. Resolution order:
+  // reachable from anywhere (not only inside a workspace). Only the mentor and
+  // mahasiswa collaborate in discussion, so it is shown for SENIOR/BEGINNER only
+  // — hidden for ADMIN and UMKM (rule D-DISKUSI-2, supersedes D-P12-8).
+  // Resolution order:
   //  1. If already inside a workspace, use that project's id from the URL.
   //  2. Otherwise resolve the user's current live project (like the old topbar
   //     MessageButton did), falling back to the projects hub while it loads.
-  const showDiskusi = !!role && role !== "ADMIN";
+  const showDiskusi = role === "BEGINNER" || role === "SENIOR";
   const workspaceMatch = pathname?.match(
     /^\/(projects|my-projects)\/([^/]+)\/workspace/
   );

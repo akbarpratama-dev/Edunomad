@@ -20,7 +20,9 @@ async function signAttachments(items: WithAttachments[]) {
 }
 
 // The set of users allowed in a project's communication (docs/06 Discussion Rules):
-// the assigned senior, the UMKM owner, and ACTIVE members (accepted beginners).
+// the assigned senior and ACTIVE members (accepted beginners). The UMKM owner is
+// NOT a discussion participant (rule D-DISKUSI-2, user-approved 2026-07-11 —
+// supersedes D-P12-8, which had included the UMKM owner).
 async function getProjectParticipantIds(projectId: string) {
   const members = await projectMemberRepository.listByProject(projectId);
   const ids = new Set<string>();
@@ -40,9 +42,8 @@ export const discussionService = {
   },
 
   // POST /projects/:id/discussions — any project participant may create a group
-  // discussion: the UMKM owner, the assigned senior, OR an ACTIVE member
-  // (including beginners). Rule change D-P12-8 (user-approved): beginners were
-  // previously "join only"; they can now start discussions too.
+  // discussion: the assigned senior OR an ACTIVE member (including beginners).
+  // The UMKM owner is NOT a participant (rule D-DISKUSI-2, supersedes D-P12-8).
   // Phase 12: persists title + category. Membership = creator + senior + members.
   async createGroupDiscussion(
     userId: string,
@@ -55,9 +56,8 @@ export const discussionService = {
 
     const participantIds = await getProjectParticipantIds(projectId);
     if (project.seniorId) participantIds.add(project.seniorId);
-    participantIds.add(project.umkmId);
 
-    // Creator must be a participant of this project (owner, senior, or ACTIVE member).
+    // Creator must be a participant of this project (senior or ACTIVE member).
     if (!participantIds.has(userId)) {
       throw new ForbiddenError("Only a participant of this project can create a discussion");
     }
@@ -76,7 +76,8 @@ export const discussionService = {
     return discussionRepository.createGroup(projectId, [...memberSet], meta);
   },
 
-  // POST /discussions/:id/pin — only the project's senior lead or UMKM owner.
+  // POST /discussions/:id/pin — only the project's senior lead (rule D-DISKUSI-2:
+  // the UMKM owner is no longer a discussion participant; supersedes D-P12-8).
   async pinDiscussion(userId: string, discussionId: string, pinned: boolean) {
     const discussion = await discussionRepository.findById(discussionId);
     if (!discussion || discussion.type !== DiscussionType.GROUP || !discussion.projectId) {
@@ -84,8 +85,8 @@ export const discussionService = {
     }
     const project = await projectRepository.findRawById(discussion.projectId);
     if (!project) throw new NotFoundError("Project not found");
-    if (project.seniorId !== userId && project.umkmId !== userId) {
-      throw new ForbiddenError("Only the project's senior or UMKM owner can pin a discussion");
+    if (project.seniorId !== userId) {
+      throw new ForbiddenError("Only the project's senior can pin a discussion");
     }
     return discussionRepository.updatePin(discussionId, pinned);
   },
@@ -158,7 +159,9 @@ async function assertParticipant(
   project: { id: string; seniorId: string | null; umkmId: string },
   userId: string
 ) {
-  if (project.seniorId === userId || project.umkmId === userId) return;
+  // The UMKM owner is intentionally excluded — discussion is mentor + members
+  // only (rule D-DISKUSI-2, supersedes D-P12-8).
+  if (project.seniorId === userId) return;
   const isMember = await discussionRepository.isActiveProjectMember(project.id, userId);
   if (!isMember) throw new ForbiddenError("Not a participant of this project");
 }
