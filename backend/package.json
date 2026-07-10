@@ -36,5 +36,9 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
+  },
+  "comment_overrides": "Pins @types/express-serve-static-core so req.params.id types as string (not string|string[]). Mirrors the root package.json override — needed here too because the Docker build (context = backend/) runs a standalone npm install without the workspace root.",
+  "overrides": {
+    "@types/express-serve-static-core": "5.0.7"
   }
 }
