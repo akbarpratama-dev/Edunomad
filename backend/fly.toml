@@ -1,7 +1,7 @@
 # EduNomad backend on Fly.io.
 # Rename `app` to your own unique name before first deploy (or let `fly launch`
 # set it). Region sin = Singapore (closest to Indonesia).
-app = "edunomad-api"
+app = "edunomad-sedulur-papat"
 primary_region = "sin"
 
 [build]
