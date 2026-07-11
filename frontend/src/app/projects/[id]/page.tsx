@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
-import { Building2 } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
@@ -433,16 +432,6 @@ function Content() {
                 pinned to the cleared content top while scrolling. */}
             <aside className="flex flex-col gap-4 lg:sticky lg:top-0 lg:self-start">
               <ActionPanel project={project} reload={load} />
-              {/* Senior/junior viewing a vacancy can open the UMKM's profile. */}
-              {(role === "SENIOR" || role === "BEGINNER") && (
-                <Button
-                  variant="outline"
-                  className="app-reveal w-full"
-                  render={<Link href={`/users/${project.umkm.id}`} />}
-                >
-                  <Building2 className="size-4" /> Lihat Profil UMKM
-                </Button>
-              )}
               {(project.status === "ACTIVE" || project.status === "AWAITING_COMPLETION") && (
                 <Button
                   className="app-reveal w-full"

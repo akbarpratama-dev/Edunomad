@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Award, CheckCircle2, XCircle, Search } from "lucide-react";
+import { Award, CheckCircle2, XCircle, Search, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { artifactApi, type VerifyResult } from "@/services/artifactApi";
@@ -40,6 +40,16 @@ export function VerifyView({ initialCode }: { initialCode?: string }) {
   return (
     <div className="min-h-screen bg-muted/40 px-4 py-12">
       <div className="mx-auto w-full max-w-lg">
+        {/* Reached via QR/link too, so a fresh tab may have no history — fall
+            back to the homepage when there's nothing to go back to. */}
+        <button
+          type="button"
+          onClick={() => (window.history.length > 1 ? router.back() : router.push("/"))}
+          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" /> Kembali
+        </button>
+
         <Link href="/" className="mb-8 flex items-center justify-center gap-2">
           <span className="grid size-9 place-items-center rounded-xl bg-[#201f31] text-[#d8f277]">
             <Award className="size-5" />
