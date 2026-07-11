@@ -1,6 +1,14 @@
 # Decisions
 
 Date:
+2026-07-11h (Bersihkan data test + seed showcase proyek selesai — DB produksi)
+
+Decision (D-DATA-1) — Bersihkan akun & proyek TEST + buat proyek showcase real (user-req: "hapus proyek test, mulai dari proyek real yg sudah jalan ada hasil, list user"). DIJALANKAN ke DB produksi (classifier izinkan krn user eksplisit):
+- **cleanup-test-data.ts**: hapus 6 akun `@test.edunomad.com` (p4-umkm/senior/beginner, p43-b2/b3/admin) + 4 proyek test (Phase5/Phase4/Phase43/"wejlklj") → cascade. Sisa 22 proyek real, semua akun real. (Termasuk membersihkan sisa lamaran p4-senior yg dulu nyangkut.)
+- **seed-showcase.ts**: pakai SERVICE asli (deliverable/contribution/review/projectLifecycle.completeProject) supaya sertifikat genuine. Toko Maju Bersama "Aplikasi Kasir Digital" → COMPLETED, 2 sertifikat real **EDN-2026-000001** (Akbar Pratama) + **EDN-2026-000002** (Dimas Prasetyo). Bengkel Motor Jaya "Aplikasi Absensi" → +hasil kerja+review, tetap ACTIVE (contoh "jalan+hasil"). (Kontribusi/review sudah ada dari seed-kasir → di-skip; completion strict lolos.)
+- STATE PRODUKSI SEKARANG: 1 COMPLETED, 1 ACTIVE, 20 RECRUITING. 12 UMKM, 10 SENIOR, 18 BEGINNER, 1 ADMIN (semua real, pw TestPass123!). Akun uji sertifikat: akbar.pratama@ / dimas.prasetyo@.
+
+Date:
 2026-07-11g (Demo reset tooling + UMKM auto-accept — BUILT, belum di-run/deploy)
 
 Decision (D-DEMO-1) — Tooling demo "reset saat mulai" + otomasi peran UMKM (user-approved via AskUserQuestion: scope = HANYA proyek UMKM-demo; tombol = halaman `/demo-reset` + token, bukan admin). Tujuan: responden cukup main 2 peran (Senior + Beginner), state di-reset antar-responden.
