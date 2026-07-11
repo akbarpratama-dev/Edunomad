@@ -98,82 +98,88 @@ function Content() {
 
   return (
     <AppShell backHref="/profile">
-      <form onSubmit={handleSubmit(onSubmit)} className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
         <PageHeader title="Edit Profil" subtitle="Perbarui informasi profil dan tautan sosialmu." />
 
-        <Card>
-          <CardContent className="flex flex-col gap-5 p-6">
-            {loading ? (
-              <div className="h-72 animate-pulse rounded-xl bg-muted" />
-            ) : (
-              <>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="name">Nama Lengkap</Label>
-                  <Input id="name" {...register("name")} />
-                  {errors.name && <p className="text-sm text-error">{errors.name.message}</p>}
-                </div>
+        {/* Core-profile form. The submit/cancel buttons live at the very bottom of
+            the page (after the sub-resource managers) and are wired back to this
+            form via the `form` attribute, so the save action always sits last. */}
+        <form id="profile-core-form" onSubmit={handleSubmit(onSubmit)}>
+          <Card>
+            <CardContent className="flex flex-col gap-5 p-6">
+              {loading ? (
+                <div className="h-72 animate-pulse rounded-xl bg-muted" />
+              ) : (
+                <>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="name">Nama Lengkap</Label>
+                    <Input id="name" {...register("name")} />
+                    {errors.name && <p className="text-sm text-error">{errors.name.message}</p>}
+                  </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="headline">Headline</Label>
-                  <Input id="headline" placeholder="Frontend Developer" {...register("headline")} />
-                  {errors.headline && <p className="text-sm text-error">{errors.headline.message}</p>}
-                </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="headline">Headline</Label>
+                    <Input id="headline" placeholder="Frontend Developer" {...register("headline")} />
+                    {errors.headline && <p className="text-sm text-error">{errors.headline.message}</p>}
+                  </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea id="bio" rows={4} placeholder="Ceritakan tentang dirimu..." {...register("bio")} />
-                  {errors.bio && <p className="text-sm text-error">{errors.bio.message}</p>}
-                </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="bio">Bio</Label>
+                    <Textarea id="bio" rows={4} placeholder="Ceritakan tentang dirimu..." {...register("bio")} />
+                    {errors.bio && <p className="text-sm text-error">{errors.bio.message}</p>}
+                  </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="phone">Telepon</Label>
-                  <Input id="phone" placeholder="08xxxxxxxxxx" {...register("phone")} />
-                  {errors.phone && <p className="text-sm text-error">{errors.phone.message}</p>}
-                </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="phone">Telepon</Label>
+                    <Input id="phone" placeholder="08xxxxxxxxxx" {...register("phone")} />
+                    {errors.phone && <p className="text-sm text-error">{errors.phone.message}</p>}
+                  </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="photo">URL Foto Profil</Label>
-                  <Input id="photo" placeholder="https://..." {...register("photo")} />
-                  {errors.photo && <p className="text-sm text-error">{errors.photo.message}</p>}
-                  {photoUrl && !errors.photo && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={photoUrl}
-                      alt="Pratinjau"
-                      className="mt-1 size-16 rounded-full object-cover ring-1 ring-border"
-                    />
-                  )}
-                </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="photo">URL Foto Profil</Label>
+                    <Input id="photo" placeholder="https://..." {...register("photo")} />
+                    {errors.photo && <p className="text-sm text-error">{errors.photo.message}</p>}
+                    {photoUrl && !errors.photo && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={photoUrl}
+                        alt="Pratinjau"
+                        className="mt-1 size-16 rounded-full object-cover ring-1 ring-border"
+                      />
+                    )}
+                  </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="linkedin_url">URL LinkedIn</Label>
-                  <Input id="linkedin_url" placeholder="https://linkedin.com/in/..." {...register("linkedin_url")} />
-                  {errors.linkedin_url && <p className="text-sm text-error">{errors.linkedin_url.message}</p>}
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="linkedin_url">URL LinkedIn</Label>
+                    <Input id="linkedin_url" placeholder="https://linkedin.com/in/..." {...register("linkedin_url")} />
+                    {errors.linkedin_url && <p className="text-sm text-error">{errors.linkedin_url.message}</p>}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </form>
 
+        {/* Sub-resource managers persist immediately (own API calls), so they live
+            outside the core-profile form. */}
+        {overview && (
+          <>
+            {professional && <SkillsManager initial={overview.skills} />}
+            {professional && <ExperiencesManager initial={overview.experiences} />}
+            <LinksManager initial={overview.portfolioLinks} />
+          </>
+        )}
+
+        {/* Save / cancel — always the last thing on the page. */}
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={() => router.push("/profile")}>
             Batal
           </Button>
-          <Button type="submit" disabled={isSubmitting || loading}>
+          <Button type="submit" form="profile-core-form" disabled={isSubmitting || loading}>
             {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
           </Button>
         </div>
-      </form>
-
-      {/* Sub-resource managers persist immediately (own API calls), so they live
-          outside the core-profile form. */}
-      {overview && (
-        <div className="mx-auto mt-6 flex w-full max-w-2xl flex-col gap-6">
-          {professional && <SkillsManager initial={overview.skills} />}
-          {professional && <ExperiencesManager initial={overview.experiences} />}
-          <LinksManager initial={overview.portfolioLinks} />
-        </div>
-      )}
+      </div>
     </AppShell>
   );
 }
