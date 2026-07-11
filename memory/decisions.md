@@ -1,6 +1,15 @@
 # Decisions
 
 Date:
+2026-07-11g (Demo reset tooling + UMKM auto-accept — BUILT, belum di-run/deploy)
+
+Decision (D-DEMO-1) — Tooling demo "reset saat mulai" + otomasi peran UMKM (user-approved via AskUserQuestion: scope = HANYA proyek UMKM-demo; tombol = halaman `/demo-reset` + token, bukan admin). Tujuan: responden cukup main 2 peran (Senior + Beginner), state di-reset antar-responden.
+- **Auto-accept UMKM**: env `DEMO_MODE=true` → `seniorApplication.service.applyAsMentor` langsung `accept()` lamaran (senior jadi lead, +notif) tanpa UMKM. Try/catch: gagal → tetap PENDING.
+- **Reset**: `services/demo/demoDataset.ts` (canonical: 5 UMKM demo + 10 proyek RECRUITING, sama dgn seed-lowongan) + `demo.service.ts` `seedDemo()`/`resetDemo()`. resetDemo = `project.deleteMany({umkmId in demo UMKM})` → CASCADE hapus roles/lamaran/anggota/hasil kerja/kontribusi/review/diskusi/**Artifact(sertifikat)**/ai_insight proyek; + hapus notification & aiInsight subject demo users; lalu seedDemo() (users persist, tak dihapus). Pakai prisma `config/database` (pooler) + supabaseAdmin → jalan di runtime API & CLI.
+- **Endpoint**: `POST /demo/reset` token-gated (`modules/demo/demo.controller` + `routes/demo.routes`, didaftarkan di routes/index). Cek `env.demoMode` (else 404) + header `x-demo-token`/body vs `env.demoResetToken`. Frontend `app/demo-reset/page.tsx` (publik, input token, prefil `?token=`, tombol Reset).
+- STATUS: backend+frontend build 0. **BELUM di-run** (classifier blokir wipe prod — benar, cuma dibangun). BELUM deploy. UNTUK AKTIF: Fly `fly secrets set DEMO_MODE=true DEMO_RESET_TOKEN=<rahasia>` + `fly deploy`; Vercel auto-deploy /demo-reset. Duplikasi data seed-lowongan.ts vs demoDataset.ts dibiarkan (sama isinya; demoDataset canonical utk reset).
+
+Date:
 2026-07-11f (Back button /verify + hapus tombol Lihat Profil UMKM — DEPLOYED)
 
 Decision (D-VERIFY-1) — `/verify/:code` (VerifyView, publik tanpa auth) TAMBAH tombol "Kembali" (kiri atas): `router.back()` dgn fallback `router.push("/")` bila `window.history.length <= 1` (dibuka fresh via QR/link). +import ArrowLeft.
