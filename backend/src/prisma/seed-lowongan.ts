@@ -14,7 +14,12 @@ import { PrismaClient } from "../generated/prisma/client";
 // Run: npx tsx src/prisma/seed-lowongan.ts
 // -----------------------------------------------------------------------------
 
-const adapter = new PrismaPg({ connectionString: process.env["DIRECT_URL"] });
+// Prefer the pooled DATABASE_URL (reachable everywhere the app runs); fall back
+// to the direct DIRECT_URL. The seed only does simple creates, so the pooler's
+// transaction mode is fine.
+const adapter = new PrismaPg({
+  connectionString: process.env["DATABASE_URL"] ?? process.env["DIRECT_URL"],
+});
 const prisma = new PrismaClient({ adapter });
 
 const SUPABASE_URL = process.env["SUPABASE_URL"];
