@@ -36,4 +36,12 @@ export const env = {
   get demoCompleteBypass(): boolean {
     return (process.env.DEMO_COMPLETE_BYPASS ?? "").toLowerCase() === "true";
   },
+  // DEMO ONLY — when true, a senior's mentor application is auto-accepted so the
+  // respondent doesn't need a UMKM account (UMKM's role is automated). Also gates
+  // the "Reset Demo" endpoint. Leave unset/false in real use.
+  get demoMode(): boolean {
+    return (process.env.DEMO_MODE ?? "").toLowerCase() === "true";
+  },
+  // Shared secret protecting POST /demo/reset (no login). Set in backend env.
+  demoResetToken: process.env.DEMO_RESET_TOKEN ?? "",
 };

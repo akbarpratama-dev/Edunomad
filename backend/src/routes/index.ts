@@ -25,6 +25,7 @@ import reviewRoutes from "./review.routes";
 import artifactRoutes from "./artifact.routes";
 import verifyRoutes from "./verify.routes";
 import notificationRoutes from "./notification.routes";
+import demoRoutes from "./demo.routes";
 import { artifactController } from "../modules/artifact/artifact.controller";
 
 // Aggregates all feature routes under the /api/v1 base path (API spec).
@@ -48,6 +49,7 @@ router.use("/reviews", reviewRoutes);
 router.use("/artifacts", artifactRoutes);
 router.use("/verify", verifyRoutes);
 router.use("/notifications", notificationRoutes);
+router.use("/demo", demoRoutes);
 router.use("/admin", adminRoutes);
 
 // Absolute-path routes

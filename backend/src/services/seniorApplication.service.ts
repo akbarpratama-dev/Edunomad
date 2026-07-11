@@ -5,6 +5,7 @@ import { ProjectStatus } from "../constants/projectStatus";
 import { ApplicationStatus } from "../constants/applicationStatus";
 import { notificationService } from "./notification.service";
 import { NotificationType } from "../constants/notificationType";
+import { env } from "../config/env";
 
 const SENIOR_MAX_ACTIVE = 5;
 
@@ -35,11 +36,31 @@ export const seniorApplicationService = {
       );
     }
 
-    return seniorApplicationRepository.create({
+    const created = await seniorApplicationRepository.create({
       projectId,
       seniorId,
       message: message ?? null,
     });
+
+    // DEMO ONLY — automate the UMKM's role: instantly accept the mentor so the
+    // respondent (playing only senior + beginner) becomes lead without a UMKM.
+    if (env.demoMode) {
+      try {
+        await seniorApplicationRepository.accept(created.id, projectId, seniorId);
+        await notificationService.notify({
+          userId: seniorId,
+          type: NotificationType.APPLICATION_ACCEPTED,
+          title: "Lamaran mentor diterima",
+          message: `Kamu jadi mentor proyek "${project.title}".`,
+          actionUrl: "/my-projects",
+        });
+      } catch (err) {
+        // Keep the flow working: if auto-accept fails, the application stays PENDING.
+        console.warn("[DEMO] mentor auto-accept failed:", err);
+      }
+    }
+
+    return created;
   },
 
   // DELETE /senior-applications/:id (SENIOR applicant) — PENDING → WITHDRAWN.
