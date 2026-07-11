@@ -1,6 +1,13 @@
 # Decisions
 
 Date:
+2026-07-11d (Fix form /profile/edit + seed 10 lowongan baru — DEPLOYED)
+
+Decision (D-UI-PROFILEFORM-1) — Tombol Simpan/Batal `/profile/edit` pindah ke paling bawah (user: "button simpan/batal harusnya paling bawah, bukan di tengah antara card form"). Sebab: tombol menutup `<form>` core-profile, sedangkan manager Skills/Pengalaman/Tautan render DI LUAR form setelahnya → tombol nyangkut di tengah (antara card profil & card manager). Fix: bungkus semua di satu `<div>` kolom; `<form id="profile-core-form">` cuma bungkus Card core; managers setelahnya; tombol Simpan/Batal paling bawah, submit via atribut `form="profile-core-form"` (base-ui Button forward `...props` → native button, atribut form jalan). VERIFIED PRODUKSI (Playwright): saveTop 1742 > semua manager (Skills 821/Pengalaman 1047/Tautan 1549), form attr = profile-core-form.
+
+Decision (D-SEED-1) — Seed 10 proyek RECRUITING BARU (`backend/src/prisma/seed-lowongan.ts`) di atas 10 punya seed-expo (total jadi 20 recruiting di DB produksi). User minta "10 proyek lowongan seperti real via UMKM agar bisa diaccept & digunakan". 5 UMKM BARU (kedaikopisenja/laundrykilatbersih/tokobangunansejahtera/saloncantikayu/tokorotimanis @edunomad.com, pw TestPass123!), 2 proyek each. 4 proyek punya mentor (reuse senior06/07/08) + pelamar PENDING (reuse junior01-12) → senior bisa accept; 6 proyek TERBUKA → senior bisa lamar mentor. Idempotent (skip by title/email). CATATAN TEKNIS: adapter pakai `DATABASE_URL` (pooler, reachable) fallback `DIRECT_URL` — DIRECT_URL (5432) tak reachable dari shell sandbox (SocketTimeout P1008), pooler jalan. Dijalankan → 10 projects created, verified via count (20 recruiting). Skema field mirror seed-expo persis.
+
+Date:
 2026-07-11c (Rename Deliverable→Hasil Kerja + fix sidebar Diskusi highlight)
 
 Decision (D-UI-LABEL-1) — Rename label "Deliverable/Deliverables" → **"Hasil Kerja"** (user via AskUserQuestion; alasan: istilah lebih dipahami & relate dgn isi "kirim hasil kerja, lampirkan bukti"). HANYA label tampilan — kode/API/`deliverableApi`/`expectedDeliverables`/TabKey `"deliverables"`/id form TETAP. Diubah: `DeliverablesTab.tsx` (heading, tombol Buat/Edit, toast, empty/loading), `workspace/page.tsx` (tab label, StatTile, QuickCard, "Ekspektasi Hasil Kerja", teks konfirmasi selesai), `BeginnerProjectBoard.tsx` (StatTile, "Hasil Kerja Terbaru", sample activity), `artifacts/[projectId]/page.tsx` (heading), `my-projects/page.tsx` (tips), landing `portfolio.tsx` + `faq.tsx` (copy). Subtitle "Kirim hasil kerja, lampirkan bukti, dan dapatkan review mentor" sudah ada sblmnya. frontend tsc+build 0.
