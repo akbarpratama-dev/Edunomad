@@ -52,6 +52,11 @@ const THUMB_TONES = [
 ];
 
 // ── helpers ──────────────────────────────────────────────────────────────────
+// The flagship demo scenario project is titled "[DEMO] …" — always pin it as the
+// featured "Proyek Pilihan" card so a live demo/test starts there without hunting.
+function isFeaturedDemo(p: ProjectListItem) {
+  return p.title.trim().startsWith("[DEMO]");
+}
 function initials(name: string) {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 }
@@ -169,9 +174,12 @@ function Content() {
     return list;
   }, [items, deadline, sort]);
 
+  // Always surface the flagship demo project ("[DEMO] …") as the featured card so
+  // testers land straight on the scenario project; otherwise feature the newest.
   const showFeatured = page === 1 && !filtersActive && view.length > 0;
-  const featured = showFeatured ? view[0] : null;
-  const gridItems = showFeatured ? view.slice(1) : view;
+  const flagshipIdx = view.findIndex(isFeaturedDemo);
+  const featured = showFeatured ? view[flagshipIdx >= 0 ? flagshipIdx : 0] : null;
+  const gridItems = showFeatured && featured ? view.filter((p) => p.id !== featured.id) : view;
 
   const categoryItems = { [ALL]: "Semua Kategori", ...Object.fromEntries(categories.map((c) => [c.id, c.name])) };
   const statusItems = { [ALL]: "Semua Status", RECRUITING: "Membuka Pendaftaran", ACTIVE: "Berjalan", COMPLETED: "Selesai" };
@@ -237,7 +245,7 @@ function Content() {
             </div>
           ) : (
             <>
-              {featured && <FeaturedCard p={featured} />}
+              {featured && <FeaturedCard p={featured} demo={isFeaturedDemo(featured)} />}
 
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-bold tracking-tight">
@@ -398,13 +406,13 @@ function Thumb({
   );
 }
 
-function FeaturedCard({ p }: { p: ProjectListItem }) {
+function FeaturedCard({ p, demo }: { p: ProjectListItem; demo?: boolean }) {
   const tech = techOf(p);
   return (
     <div className="app-reveal grid gap-5 overflow-hidden rounded-[24px] border border-[#d8e8b8] bg-gradient-to-br from-[#f4f9e8] to-[#eef7d6] p-6 lg:grid-cols-[1.4fr_1fr]">
       <div className="flex flex-col">
         <Badge className="w-fit border-transparent bg-white text-[#3f7a2e]">
-          <Flame className="mr-1 size-3 text-[#5f8c00]" /> Proyek Pilihan
+          <Flame className="mr-1 size-3 text-[#5f8c00]" /> {demo ? "Proyek Pilihan · Mulai di sini" : "Proyek Pilihan"}
         </Badge>
         <h3 className="mt-3 text-xl font-bold tracking-tight">{p.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm text-foreground/80">{p.description}</p>
