@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RotateCcw, Star, CheckCircle2, XCircle, ShieldQuestion } from "lucide-react";
+import Link from "next/link";
+import { RotateCcw, Star, CheckCircle2, XCircle, ShieldQuestion, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,6 +53,13 @@ export default function DemoResetPage() {
   return (
     <div className="min-h-screen bg-muted/40 px-4 py-16">
       <div className="mx-auto w-full max-w-md">
+        <Link
+          href="/"
+          className="mb-5 inline-flex items-center gap-1.5 rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <ArrowLeft className="size-4" /> Kembali ke beranda
+        </Link>
+
         <div className="mb-6 flex items-center justify-center gap-2">
           <span className="grid size-9 place-items-center rounded-xl bg-[#201f31] text-[#d8f277]">
             <RotateCcw className="size-5" />
