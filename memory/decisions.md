@@ -1,6 +1,11 @@
 # Decisions
 
 Date:
+2026-07-11e (Kartu info UMKM & Mentor di halaman lowongan — DEPLOYED)
+
+Decision (D-VACANCY-2) — Di halaman detail lowongan (`ProjectDetailView`), baris kecil nama UMKM/Mentor (ProfileLink) diganti kartu info jelas "Kenali UMKM & Mentor" (user: "mentor & umkm dikasih profil juga, agar junior paham ada card info nama mentor & umkm"). Komponen baru `PersonCard` di ProjectDetailView: avatar (UserAvatar initials) + label peran (UMKM / Penyelenggara · Mentor (Senior)) + nama + tombol "Lihat Profil →", seluruh kartu link ke `/users/:id` via `profileHref` + next/link (bukan ProfileLink, hindari hover:underline bawaan). Tanpa mentor → placeholder non-clickable "Belum ada mentor". Import: +UserAvatar, +ArrowRight, +Link, +cn, ProfileLink→profileHref. tsc+build 0. VERIFIED PRODUKSI (Playwright, commit d61e9f7): kartu UMKM "Bimbel Cerdas Ceria" + Mentor "Eko Prasetyo" tampil dgn avatar+peran+nama+Lihat Profil, link ke /users/:id benar.
+
+Date:
 2026-07-11d (Fix form /profile/edit + seed 10 lowongan baru — DEPLOYED)
 
 Decision (D-UI-PROFILEFORM-1) — Tombol Simpan/Batal `/profile/edit` pindah ke paling bawah (user: "button simpan/batal harusnya paling bawah, bukan di tengah antara card form"). Sebab: tombol menutup `<form>` core-profile, sedangkan manager Skills/Pengalaman/Tautan render DI LUAR form setelahnya → tombol nyangkut di tengah (antara card profil & card manager). Fix: bungkus semua di satu `<div>` kolom; `<form id="profile-core-form">` cuma bungkus Card core; managers setelahnya; tombol Simpan/Batal paling bawah, submit via atribut `form="profile-core-form"` (base-ui Button forward `...props` → native button, atribut form jalan). VERIFIED PRODUKSI (Playwright): saveTop 1742 > semua manager (Skills 821/Pengalaman 1047/Tautan 1549), form attr = profile-core-form.
