@@ -1,6 +1,13 @@
 # Decisions
 
 Date:
+2026-07-11f (Back button /verify + hapus tombol Lihat Profil UMKM — DEPLOYED)
+
+Decision (D-VERIFY-1) — `/verify/:code` (VerifyView, publik tanpa auth) TAMBAH tombol "Kembali" (kiri atas): `router.back()` dgn fallback `router.push("/")` bila `window.history.length <= 1` (dibuka fresh via QR/link). +import ArrowLeft.
+
+Decision (D-VACANCY-3, REVISI D-VACANCY-1) — Tombol "Lihat Profil UMKM" di ActionPanel aside `projects/[id]/page.tsx` DIHAPUS (user: redundant). Nama UMKM di kartu "Kenali UMKM & Mentor" sudah klik-able ke profil (D-VACANCY-2), jadi tombol tak perlu. Import Building2 dibuang. `role` masih dipakai di backHref. tsc+build 0. VERIFIED PRODUKSI (Playwright, commit adb8315): /verify tombol Kembali ada; halaman lowongan tanpa tombol Lihat Profil UMKM, nama UMKM tetap klik-able.
+
+Date:
 2026-07-11e (Kartu info UMKM & Mentor di halaman lowongan — DEPLOYED)
 
 Decision (D-VACANCY-2) — Di halaman detail lowongan (`ProjectDetailView`), baris kecil nama UMKM/Mentor diganti SATU kartu "Kenali UMKM & Mentor" berisi 2 entri sederhana (komponen `PersonRow`): label pendek ("UMKM" / "Mentor") di atas, lalu avatar (UserAvatar initials) + NAMA sebagai teks klik-able (`ProfileLink` → `/users/:id`). REVISI dari versi pertama (dulu `PersonCard` pakai card bersarang + label "UMKM / Penyelenggara" + tombol "Lihat Profil →") — user minta disederhanakan: "cukup label UMKM/Mentor + foto + nama klik-able, tanpa card bersarang, tanpa Penyelenggara, tanpa tombol Lihat Profil". Tanpa mentor → placeholder muted "Belum ada mentor" (avatar Building2, non-clickable). Import final: UserAvatar + ProfileLink (buang ArrowRight/Link/cn/profileHref). Tombol terpisah "Lihat Profil UMKM" di ActionPanel (D-VACANCY-1) TETAP ada. tsc+build 0. VERIFIED PRODUKSI (Playwright, commit c33a301): "Penyelenggara" hilang, 0 tombol "Lihat Profil" di kartu, nama "Bimbel Cerdas Ceria" + "Eko Prasetyo" klik-able ke /users/:id.
