@@ -1,18 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RotateCcw, CheckCircle2, XCircle, ShieldQuestion } from "lucide-react";
+import { RotateCcw, Star, CheckCircle2, XCircle, ShieldQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { apiClient, ApiError } from "@/lib/apiClient";
+
+type BusyKind = "scenario" | "full" | null;
 
 // Facilitator-only page to restore the demo baseline between respondents.
 // Protected by a shared token (backend env DEMO_RESET_TOKEN). Not linked in the
 // app nav — reach it directly at /demo-reset (optionally /demo-reset?token=...).
 export default function DemoResetPage() {
   const [token, setToken] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<BusyKind>(null);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   // Allow prefilling the token from the URL for a one-click bookmark.
@@ -21,16 +23,17 @@ export default function DemoResetPage() {
     if (t) setToken(t);
   }, []);
 
-  const reset = async () => {
+  const run = async (kind: Exclude<BusyKind, null>) => {
     if (!token.trim()) {
       setResult({ ok: false, message: "Masukkan token reset terlebih dahulu." });
       return;
     }
-    setBusy(true);
+    const path = kind === "scenario" ? "/demo/reset-scenario" : "/demo/reset";
+    setBusy(kind);
     setResult(null);
     try {
       const res = await apiClient.post(
-        "/demo/reset",
+        path,
         { token: token.trim() },
         { headers: { "x-demo-token": token.trim() } }
       );
@@ -40,9 +43,11 @@ export default function DemoResetPage() {
         err instanceof ApiError ? err.message : "Gagal mereset demo. Cek token / server.";
       setResult({ ok: false, message: msg });
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
+
+  const anyBusy = busy !== null;
 
   return (
     <div className="min-h-screen bg-muted/40 px-4 py-16">
@@ -57,10 +62,7 @@ export default function DemoResetPage() {
         <div className="rounded-[24px] border border-border bg-card p-6 shadow-sm sm:p-8">
           <h1 className="text-center text-xl font-bold tracking-tight">Reset Data Demo</h1>
           <p className="mt-1 text-center text-sm text-muted-foreground">
-            Kembalikan lingkungan demo ke kondisi awal. Semua yang dilakukan responden
-            (lamaran, hasil kerja, review, <strong>sertifikat</strong>) dihapus dan proyek
-            lowongan disiapkan ulang. <br />
-            <span className="text-xs">Jalankan sebelum setiap responden mulai.</span>
+            Kembalikan lingkungan demo ke kondisi awal sebelum responden mulai.
           </p>
 
           <div className="mt-6 flex flex-col gap-1.5">
@@ -71,13 +73,34 @@ export default function DemoResetPage() {
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="Masukkan token demo"
-              onKeyDown={(e) => e.key === "Enter" && !busy && reset()}
+              onKeyDown={(e) => e.key === "Enter" && !anyBusy && run("scenario")}
             />
           </div>
 
-          <Button className="mt-4 w-full" onClick={reset} disabled={busy}>
-            <RotateCcw className="size-4" /> {busy ? "Mereset…" : "Reset Demo Sekarang"}
+          {/* Primary: reset ONLY the flagship scenario project — fast, use between runs. */}
+          <Button className="mt-4 w-full" onClick={() => run("scenario")} disabled={anyBusy}>
+            <Star className="size-4" />
+            {busy === "scenario" ? "Mereset skenario…" : "Reset Proyek Skenario"}
           </Button>
+          <p className="mt-1.5 text-center text-xs text-muted-foreground">
+            Kembalikan proyek <strong>[DEMO] Kopi Nusantara</strong> ke kondisi awal:
+            RECRUITING, tanpa mentor & tanpa anggota. Akun demo tetap.
+          </p>
+
+          {/* Secondary: full reset of every demo UMKM project. */}
+          <Button
+            variant="outline"
+            className="mt-4 w-full"
+            onClick={() => run("full")}
+            disabled={anyBusy}
+          >
+            <RotateCcw className="size-4" />
+            {busy === "full" ? "Mereset semua…" : "Reset Semua Data Demo"}
+          </Button>
+          <p className="mt-1.5 text-center text-xs text-muted-foreground">
+            Hapus semua yang dilakukan responden (lamaran, hasil kerja, review,{" "}
+            <strong>sertifikat</strong>) di seluruh proyek demo dan siapkan ulang.
+          </p>
 
           {result && (
             <div

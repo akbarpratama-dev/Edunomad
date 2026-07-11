@@ -8,6 +8,12 @@
     "src/prisma/seed-expo.ts",
     "src/prisma/seed-ai-demo.ts",
     "src/prisma/seed-kasir.ts",
-    "src/prisma/reset-expo.ts"
+    "src/prisma/reset-expo.ts",
+    "src/prisma/seed-lowongan.ts",
+    "src/prisma/seed-showcase.ts",
+    "src/prisma/cleanup-test-data.ts",
+    "src/prisma/seed-demo-scenario.ts",
+    "src/prisma/reset-demo-scenario.ts",
+    "src/prisma/cleanup-juniors.ts"
   ]
 }

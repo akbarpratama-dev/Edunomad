@@ -1,3 +1,11 @@
+SESI 2026-07-11b — DEMO PREP: cleanup junior + akun/proyek skenario demo + reset scoped (D-DEMO-2) — ✅ SELESAI, tsc 0, CLI reset verified via Supabase. Ringkas:
+- **Hapus 12 filler junior01–12@edunomad.com** (`cleanup-juniors.ts`, Prisma+Auth, cascade lamaran) → 8 lowongan RECRUITING bermentor balik 0 pelamar. Junior nama-asli tetap.
+- **Proyek flagship** `[DEMO] Website Pemesanan & Kasir — Kopi Nusantara` (RECRUITING, no mentor/member, 1 role FE) + **3 akun demo** umkm.demo/senior.demo/junior.demo@edunomad.com (pw TestPass123!). Semua demo diarahkan ke 1 proyek ini.
+- **Fitur reset**: `demoDataset.ts` jadi source of truth → `POST /demo/reset-scenario` (scoped) + tombol "Reset Proyek Skenario" (primary) di `/demo-reset` + CLI `reset-demo-scenario.ts` + seed `seed-demo-scenario.ts`. Endpoint token+DEMO_MODE gated (404 di prod).
+- **CATATAN DEPLOY**: DEMO_MODE + DEMO_RESET_TOKEN harus diset di env server (Fly) agar endpoint reset & auto-accept mentor aktif — .env sandboxed, user isi manual. Commit chore langsung ke main (belum push saat catatan ini kecuali dinyatakan).
+- File: cleanup-juniors.ts, seed-demo-scenario.ts, reset-demo-scenario.ts, demoDataset.ts, demo.service.ts, demo.controller.ts, demo.routes.ts, demo-reset/page.tsx, tsconfig.build.json.
+
+--- (sesi sebelumnya) ---
 SESI 2026-07-11 — VACANCY UX + UMKM KELUAR DISKUSI + TAB UNDERLINE + RENAME "HASIL KERJA" + FIX SIDEBAR — ✅ SELESAI, Playwright-verified lokal, DEPLOYED ke produksi (main = merge 246b277). 6 perubahan:
 1. **Vacancy** (`projects/[id]/page.tsx` + `ProjectDetailView.tsx`): nama UMKM & Mentor jadi ProfileLink→/users/:id; tombol "Lihat Profil UMKM" (senior+junior); "Kamu sudah apply" (disabled) bila ada lamaran PENDING (fetch myApplications/mySeniorApplications). D-VACANCY-1.
 2. **UMKM keluar Diskusi sepenuhnya** (D-DISKUSI-2, supersede D-P12-8): backend `discussion.service` (assertParticipant/create/pin buang umkmId → 403); frontend Sidebar showDiskusi=BEGINNER|SENIOR, workspace quick-card hidden utk UMKM, DiscussionTab guard "Diskusi Tidak Tersedia". Docs 06+07 diupdate.

@@ -4,8 +4,22 @@
 
 export const DEMO_PASSWORD = "TestPass123!";
 
-// The 5 demo UMKM whose projects are wiped + re-seeded on reset.
+// -----------------------------------------------------------------------------
+// FLAGSHIP DEMO SCENARIO — one dedicated project + three dedicated accounts so a
+// live demo always runs the full lifecycle (awal → akhir) in the SAME project,
+// with no "which vacancy do I pick?" confusion. The project starts RECRUITING
+// with NO mentor and NO members: the senior applies as mentor, then the junior
+// applies to the role. Reset (button or CLI) restores exactly this baseline.
+// -----------------------------------------------------------------------------
+export const DEMO_SCENARIO_UMKM_EMAIL = "umkm.demo@edunomad.com";
+export const DEMO_SCENARIO_SENIOR_EMAIL = "senior.demo@edunomad.com";
+export const DEMO_SCENARIO_JUNIOR_EMAIL = "junior.demo@edunomad.com";
+export const DEMO_SCENARIO_PROJECT_TITLE = "[DEMO] Website Pemesanan & Kasir — Kopi Nusantara";
+
+// The demo UMKM whose projects are wiped + re-seeded on reset. The scenario UMKM
+// (Kopi Nusantara Demo) is first so it also participates in the full reset.
 export const DEMO_UMKMS: { email: string; name: string; headline: string }[] = [
+  { email: DEMO_SCENARIO_UMKM_EMAIL, name: "Kopi Nusantara (Demo)", headline: "Coffee shop kekinian — akun demo skenario EduNomad" },
   { email: "kedaikopisenja@edunomad.com", name: "Kedai Kopi Senja", headline: "Coffee shop & roastery — Jakarta" },
   { email: "laundrykilatbersih@edunomad.com", name: "Laundry Kilat Bersih", headline: "Jasa laundry kiloan & satuan — Surabaya" },
   { email: "tokobangunansejahtera@edunomad.com", name: "Toko Bangunan Sejahtera", headline: "Toko material & bangunan — Medan" },
@@ -16,16 +30,18 @@ export const DEMO_UMKMS: { email: string; name: string; headline: string }[] = [
 export const DEMO_UMKM_EMAILS = DEMO_UMKMS.map((u) => u.email);
 
 // Senior leads + junior applicants referenced below (created by seed-expo; looked
-// up by email at seed time and skipped gracefully if absent).
+// up by email at seed time and skipped gracefully if absent). The dedicated
+// scenario senior/junior are included so a reset also clears their notifications.
 export const DEMO_SENIOR_EMAILS = [
+  DEMO_SCENARIO_SENIOR_EMAIL,
   "senior06@edunomad.com",
   "senior07@edunomad.com",
   "senior08@edunomad.com",
 ];
-export const DEMO_JUNIOR_EMAILS = Array.from(
-  { length: 12 },
-  (_, i) => `junior${String(i + 1).padStart(2, "0")}@edunomad.com`
-);
+export const DEMO_JUNIOR_EMAILS = [
+  DEMO_SCENARIO_JUNIOR_EMAIL,
+  ...Array.from({ length: 12 }, (_, i) => `junior${String(i + 1).padStart(2, "0")}@edunomad.com`),
+];
 
 const FE = ["React", "JavaScript", "TypeScript"];
 const BE = ["Node.js", "Express.js", "PostgreSQL"];
@@ -49,6 +65,21 @@ export const DEMO_MOTIVATIONS = [
 ];
 
 export const DEMO_PROJECTS: DemoProjectSpec[] = [
+  // FLAGSHIP scenario project — RECRUITING, NO mentor, NO applicants. This is the
+  // single project every live demo is directed to.
+  {
+    umkm: DEMO_SCENARIO_UMKM_EMAIL,
+    title: DEMO_SCENARIO_PROJECT_TITLE,
+    category: "Web Development",
+    description:
+      "Proyek demo unggulan Kopi Nusantara: membangun website pemesanan kopi online plus kasir sederhana. " +
+      "Proyek ini sengaja dibuka tanpa mentor & tanpa anggota agar bisa dipakai untuk demo alur lengkap — " +
+      "senior melamar sebagai mentor, lalu junior melamar sebagai anggota.",
+    deliverables:
+      "Website pemesanan (katalog menu, keranjang, checkout) + halaman kasir sederhana + API + dokumentasi.",
+    roles: [{ name: "Frontend Developer", skills: FE }],
+    // no `lead`, no `applicants` → starts with no mentor and no members.
+  },
   {
     umkm: "kedaikopisenja@edunomad.com",
     title: "Website Pemesanan Kopi & Program Loyalitas",
