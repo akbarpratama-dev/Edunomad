@@ -14,6 +14,7 @@
     "src/prisma/cleanup-test-data.ts",
     "src/prisma/seed-demo-scenario.ts",
     "src/prisma/reset-demo-scenario.ts",
-    "src/prisma/cleanup-juniors.ts"
+    "src/prisma/cleanup-juniors.ts",
+    "src/prisma/seed-profiles.ts"
   ]
 }
