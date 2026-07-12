@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { LogoMark } from "@/components/common/Logo";
 
 // Centered card shell for all auth/registration pages. Matches Figma node
 // 11-3463/11-3478: warm page bg, white card with a warm hairline border, soft
@@ -32,6 +33,10 @@ export function AuthCard({
           </Link>
         )}
         <div className="rounded-[20px] border border-[#e7e3d8] bg-card p-8 shadow-[0_4px_3px_rgba(0,0,0,0.05),0_10px_20px_rgba(0,0,0,0.08)]">
+          <Link href="/" aria-label="EduNomad beranda" className="mb-6 inline-flex items-center gap-2">
+            <LogoMark tone="navy" className="size-8 rounded-[10px]" />
+            <span className="text-lg font-extrabold tracking-[-0.03em] text-foreground">EduNomad</span>
+          </Link>
           <h1 className="text-[2rem] font-bold leading-[1.2] tracking-[-0.01em] text-foreground">
             {title}
           </h1>

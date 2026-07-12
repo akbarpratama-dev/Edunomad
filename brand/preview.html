@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EduNomad — Brand Mark Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root { --lime:#d8f277; --navy:#201f31; --bg:#faf8f3; --ink:#0b0b0b; --muted:#6b6b6b; --tint:#eef7d6; --border:#e7e3d8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:Manrope,system-ui,sans-serif; background:var(--bg); color:var(--ink); padding:40px; }
+  h1 { font-weight:800; letter-spacing:-.03em; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 32px; }
+  .grid { display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+  .card { border:1px solid var(--border); border-radius:20px; padding:28px; background:#fff; display:flex; flex-direction:column; align-items:center; gap:16px; }
+  .card.dark { background:var(--navy); border-color:transparent; }
+  .card.lime { background:var(--lime); border-color:transparent; }
+  .label { font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  .card.dark .label { color:#b7b7c4; }
+  .card.lime .label { color:#4a5a10; }
+  .sizes { display:flex; align-items:flex-end; gap:20px; }
+  .wordmark { font-weight:800; letter-spacing:-.03em; font-size:34px; }
+  .swatches { display:flex; flex-wrap:wrap; gap:10px; margin-top:28px; }
+  .sw { display:flex; align-items:center; gap:8px; font-size:13px; }
+  .chip { width:26px; height:26px; border-radius:8px; border:1px solid rgba(0,0,0,.08); }
+  /* the icon as reusable inline template */
+  .icon { display:block; }
+</style>
+</head>
+<body>
+  <h1>EduNomad — Brand Mark</h1>
+  <p class="sub">Icon vektor (huruf E sebagai tangga naik = growth / learning journey). Palet: lime #d8f277 · navy #201f31.</p>
+
+  <div class="grid">
+    <div class="card">
+      <span class="label">Icon · light</span>
+      <svg class="icon" width="120" height="120" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="6" width="116" height="116" rx="32" fill="#201f31"/>
+        <g fill="#d8f277"><rect x="40" y="34" width="14" height="60" rx="7"/><rect x="40" y="34" width="30" height="14" rx="7"/><rect x="40" y="57" width="40" height="14" rx="7"/><rect x="40" y="80" width="50" height="14" rx="7"/></g>
+      </svg>
+    </div>
+
+    <div class="card lime">
+      <span class="label">Icon · on lime</span>
+      <svg class="icon" width="120" height="120" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="6" width="116" height="116" rx="32" fill="#201f31"/>
+        <g fill="#d8f277"><rect x="40" y="34" width="14" height="60" rx="7"/><rect x="40" y="34" width="30" height="14" rx="7"/><rect x="40" y="57" width="40" height="14" rx="7"/><rect x="40" y="80" width="50" height="14" rx="7"/></g>
+      </svg>
+    </div>
+
+    <div class="card dark">
+      <span class="label">Icon (reversed) · on navy</span>
+      <svg class="icon" width="120" height="120" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="6" width="116" height="116" rx="32" fill="#d8f277"/>
+        <g fill="#201f31"><rect x="40" y="34" width="14" height="60" rx="7"/><rect x="40" y="34" width="30" height="14" rx="7"/><rect x="40" y="57" width="40" height="14" rx="7"/><rect x="40" y="80" width="50" height="14" rx="7"/></g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:20px">
+    <div class="card" style="align-items:flex-start">
+      <span class="label">Lockup · light</span>
+      <div style="display:flex; align-items:center; gap:14px">
+        <svg width="60" height="60" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="6" width="116" height="116" rx="32" fill="#201f31"/>
+          <g fill="#d8f277"><rect x="40" y="34" width="14" height="60" rx="7"/><rect x="40" y="34" width="30" height="14" rx="7"/><rect x="40" y="57" width="40" height="14" rx="7"/><rect x="40" y="80" width="50" height="14" rx="7"/></g>
+        </svg>
+        <span class="wordmark" style="color:#201f31">EduNomad</span>
+      </div>
+    </div>
+
+    <div class="card dark" style="align-items:flex-start">
+      <span class="label">Lockup · dark</span>
+      <div style="display:flex; align-items:center; gap:14px">
+        <svg width="60" height="60" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="6" width="116" height="116" rx="32" fill="#d8f277"/>
+          <g fill="#201f31"><rect x="40" y="34" width="14" height="60" rx="7"/><rect x="40" y="34" width="30" height="14" rx="7"/><rect x="40" y="57" width="40" height="14" rx="7"/><rect x="40" y="80" width="50" height="14" rx="7"/></g>
+        </svg>
+        <span class="wordmark" style="color:#faf8f3">EduNomad</span>
+      </div>
+    </div>
+
+    <div class="card" style="align-items:flex-start">
+      <span class="label">Ukuran kecil (favicon)</span>
+      <div class="sizes">
+        <svg width="48" height="48" viewBox="0 0 128 128"><rect x="6" y="6" width="116" height="116" rx="32" fill="#201f31"/><g fill="#d8f277"><rect x="40" y="34" width="14" height="60" rx="7"/><rect x="40" y="34" width="30" height="14" rx="7"/><rect x="40" y="57" width="40" height="14" rx="7"/><rect x="40" y="80" width="50" height="14" rx="7"/></g></svg>
+        <svg width="32" height="32" viewBox="0 0 128 128"><rect x="6" y="6" width="116" height="116" rx="32" fill="#201f31"/><g fill="#d8f277"><rect x="40" y="34" width="14" height="60" rx="7"/><rect x="40" y="34" width="30" height="14" rx="7"/><rect x="40" y="57" width="40" height="14" rx="7"/><rect x="40" y="80" width="50" height="14" rx="7"/></g></svg>
+        <svg width="16" height="16" viewBox="0 0 128 128"><rect x="6" y="6" width="116" height="116" rx="32" fill="#201f31"/><g fill="#d8f277"><rect x="40" y="34" width="14" height="60" rx="7"/><rect x="40" y="34" width="30" height="14" rx="7"/><rect x="40" y="57" width="40" height="14" rx="7"/><rect x="40" y="80" width="50" height="14" rx="7"/></g></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="swatches">
+    <span class="sw"><span class="chip" style="background:#d8f277"></span> Lime #d8f277</span>
+    <span class="sw"><span class="chip" style="background:#201f31"></span> Navy #201f31</span>
+    <span class="sw"><span class="chip" style="background:#faf8f3"></span> BG #faf8f3</span>
+    <span class="sw"><span class="chip" style="background:#0b0b0b"></span> Ink #0b0b0b</span>
+    <span class="sw"><span class="chip" style="background:#eef7d6"></span> Tint #eef7d6</span>
+  </div>
+</body>
+</html>

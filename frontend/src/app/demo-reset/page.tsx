@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { RotateCcw, Star, CheckCircle2, XCircle, ShieldQuestion, ArrowLeft } from "lucide-react";
+import { LogoMark } from "@/components/common/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,9 +62,7 @@ export default function DemoResetPage() {
         </Link>
 
         <div className="mb-6 flex items-center justify-center gap-2">
-          <span className="grid size-9 place-items-center rounded-xl bg-[#201f31] text-[#d8f277]">
-            <RotateCcw className="size-5" />
-          </span>
+          <LogoMark tone="navy" className="size-9 rounded-xl" />
           <span className="text-lg font-bold tracking-tight">EduNomad — Reset Demo</span>
         </div>
 

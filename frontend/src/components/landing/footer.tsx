@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/landing/primitives";
+import { LogoMark } from "@/components/common/Logo";
 
 // Only links that resolve to a real destination (landing anchors, existing
 // routes, or the auth flow). Placeholder marketing/legal pages were removed
@@ -33,7 +34,7 @@ export function LandingFooter() {
         <div className="grid gap-10 lg:grid-cols-[1.6fr_repeat(2,1fr)]">
           <div className="max-w-xs">
             <span className="flex items-center gap-2">
-              <span className="grid size-7 place-items-center rounded-[9px] bg-ln-accent text-[15px] font-black text-ln-ink">E</span>
+              <LogoMark tone="lime" className="size-7 rounded-[9px]" />
               <span className="text-[18px] font-extrabold tracking-[-0.03em] text-white">EduNomad</span>
             </span>
             <p className="mt-4 text-[0.875rem] leading-relaxed text-white/60">

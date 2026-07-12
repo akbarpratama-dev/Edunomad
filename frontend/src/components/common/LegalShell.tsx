@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { LogoMark } from "@/components/common/Logo";
 
 // Minimal standalone chrome for static/legal pages (help, privacy, terms). Works
 // signed in or out — no auth context, no sidebar. Logo links home, back to app.
@@ -17,9 +18,7 @@ export function LegalShell({
       <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
           <Link href="/" className="flex items-center gap-2">
-            <span className="grid size-7 place-items-center rounded-lg bg-[#d8f277] text-sm font-black text-[#0b0b0b]">
-              E
-            </span>
+            <LogoMark tone="navy" className="size-7 rounded-lg" />
             <span className="text-lg font-bold tracking-tight text-foreground">EduNomad</span>
           </Link>
           <Link

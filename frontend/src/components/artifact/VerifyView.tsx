@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Award, CheckCircle2, XCircle, Search, ArrowLeft } from "lucide-react";
+import { LogoMark } from "@/components/common/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { artifactApi, type VerifyResult } from "@/services/artifactApi";
@@ -51,9 +52,7 @@ export function VerifyView({ initialCode }: { initialCode?: string }) {
         </button>
 
         <Link href="/" className="mb-8 flex items-center justify-center gap-2">
-          <span className="grid size-9 place-items-center rounded-xl bg-[#201f31] text-[#d8f277]">
-            <Award className="size-5" />
-          </span>
+          <LogoMark tone="navy" className="size-9 rounded-xl" />
           <span className="text-lg font-bold tracking-tight">EduNomad</span>
         </Link>
 

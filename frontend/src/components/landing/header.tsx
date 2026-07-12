@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LogoMark } from "@/components/common/Logo";
 import { useAuthStore } from "@/stores/authStore";
 
 const NAV = [
@@ -17,9 +18,7 @@ const NAV = [
 function Wordmark() {
   return (
     <Link href="/" className="flex items-center gap-2" aria-label="EduNomad beranda">
-      <span className="grid size-7 place-items-center rounded-[9px] bg-ln-ink text-ln-accent">
-        <span className="text-[15px] font-black leading-none">E</span>
-      </span>
+      <LogoMark tone="navy" className="size-7 rounded-[9px]" />
       <span className="text-[18px] font-extrabold tracking-[-0.03em] text-ln-ink">EduNomad</span>
     </Link>
   );

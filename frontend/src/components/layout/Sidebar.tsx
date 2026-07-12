@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LogoMark } from "@/components/common/Logo";
 import { getNavItems, FOOTER_NAV_ITEMS } from "@/constants/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useNotificationStore } from "@/stores/notificationStore";
@@ -107,9 +108,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         onClick={onNavigate}
         className="flex items-center gap-3 px-5 py-5"
       >
-        <span className="grid size-9 place-items-center rounded-xl bg-primary text-[15px] font-black text-primary-foreground">
-          E
-        </span>
+        <LogoMark tone="lime" className="size-9 rounded-xl" />
         <span className="flex flex-col leading-tight">
           <span className="text-[15px] font-bold tracking-tight text-white">EduNomad</span>
           {role && <span className="text-[11px] text-[#8a8a96]">{ROLE_LABEL[role]}</span>}
