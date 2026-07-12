@@ -16,7 +16,7 @@ const PROJECTS = [
     tags: ["React", "Node.js", "PostgreSQL"],
     dur: "4 minggu",
     rating: "4.9",
-    grad: "linear-gradient(135deg,#34d399,#0ea5e9)",
+    img: "/projects/kasir.jpg",
   },
   {
     status: "Aktif",
@@ -27,7 +27,7 @@ const PROJECTS = [
     tags: ["Figma", "Illustrator", "Branding"],
     dur: "3 minggu",
     rating: "5.0",
-    grad: "linear-gradient(135deg,#f59e0b,#ef4444)",
+    img: "/projects/kopi.jpg",
   },
   {
     status: "Hiring",
@@ -38,7 +38,7 @@ const PROJECTS = [
     tags: ["Flutter", "Firebase", "UX"],
     dur: "6 minggu",
     rating: "4.8",
-    grad: "linear-gradient(135deg,#6366f1,#a855f7)",
+    img: "/projects/warung.jpg",
   },
 ];
 
@@ -81,7 +81,10 @@ export function ProjectShowcase() {
           {PROJECTS.map((p) => (
             <StaggerItem key={p.title} className="h-full">
               <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-[transform,border-color] duration-300 hover:-translate-y-1 hover:border-white/20">
-                <div className="relative h-36 overflow-hidden" style={{ background: p.grad }}>
+                <div
+                  className="relative h-36 overflow-hidden bg-cover bg-center"
+                  style={{ backgroundImage: `url(${p.img})` }}
+                >
                   <div className="absolute inset-0 bg-ln-ink/20" />
                   <span className={cn("absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold", p.tone)}>
                     {p.status}

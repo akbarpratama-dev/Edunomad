@@ -1,4 +1,5 @@
 import { Check, BadgeCheck } from "lucide-react";
+import { LogoMark } from "@/components/common/Logo";
 import { Container, SectionLabel } from "@/components/landing/primitives";
 import { Reveal, Stagger, StaggerItem } from "@/components/landing/motion";
 
@@ -19,7 +20,7 @@ export function Portfolio() {
           <div className="w-full max-w-sm rotate-[-1.5deg] rounded-[26px] border border-ln-line bg-ln-card p-6 shadow-[0_30px_60px_rgba(15,17,21,0.1)]">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-[13px] font-extrabold tracking-[-0.02em] text-ln-ink">
-                <span className="grid size-5 place-items-center rounded-md bg-ln-ink text-[10px] font-black text-ln-accent">E</span>
+                <LogoMark tone="navy" className="size-5 rounded-md" />
                 EduNomad
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-ln-accent-soft px-2 py-1 text-[10px] font-bold text-ln-accent-ink">
@@ -39,7 +40,7 @@ export function Portfolio() {
               </div>
             </div>
 
-            <div className="mt-4 h-28 rounded-xl" style={{ background: "linear-gradient(120deg,#fde68a,#fca5a5,#c4b5fd)" }} />
+            <div className="mt-4 h-28 rounded-xl bg-cover bg-center" style={{ backgroundImage: "url(/projects/distro.jpg)" }} />
 
             <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.12em] text-ln-faint">Kontribusi</p>
             <div className="mt-2 flex flex-col gap-1.5">
