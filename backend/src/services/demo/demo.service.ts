@@ -119,6 +119,17 @@ async function buildSeedContext() {
 
 type SeedContext = Awaited<ReturnType<typeof buildSeedContext>>;
 
+// On-theme cover image per demo UMKM (served from frontend/public/projects) so a
+// reset re-applies the real photo instead of the gradient placeholder.
+const DEMO_PROJECT_IMAGE: Record<string, string> = {
+  "umkm.demo@edunomad.com": "/projects/kopi.jpg",
+  "kedaikopisenja@edunomad.com": "/projects/kopi.jpg",
+  "laundrykilatbersih@edunomad.com": "/projects/laundry.jpg",
+  "tokobangunansejahtera@edunomad.com": "/projects/bangunan.jpg",
+  "saloncantikayu@edunomad.com": "/projects/salon.jpg",
+  "tokorotimanis@edunomad.com": "/projects/roti.jpg",
+};
+
 // Create ONE demo project from its spec (idempotent — skips if title exists).
 // Returns true if it created the project, false if it was skipped.
 async function createDemoProject(p: DemoProjectSpec, ctx: SeedContext): Promise<boolean> {
@@ -133,6 +144,7 @@ async function createDemoProject(p: DemoProjectSpec, ctx: SeedContext): Promise<
       title: p.title,
       description: p.description,
       expectedDeliverables: p.deliverables,
+      imageUrl: DEMO_PROJECT_IMAGE[p.umkm] ?? null,
       startDate: new Date("2026-07-25"),
       deadline: new Date("2026-11-30"),
       status: "RECRUITING",

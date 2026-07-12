@@ -124,6 +124,7 @@ async function main() {
         "senior melamar sebagai mentor, lalu junior melamar sebagai anggota.",
       expectedDeliverables:
         "Website pemesanan (katalog menu, keranjang, checkout) + halaman kasir sederhana + API + dokumentasi.",
+      imageUrl: "/projects/kopi.jpg",
       startDate: new Date("2026-07-25"),
       deadline: new Date("2026-11-30"),
       status: "RECRUITING",
