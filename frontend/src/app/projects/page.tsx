@@ -113,7 +113,7 @@ function Content() {
     fetchSkills().then(setSkills).catch(() => {});
   }, []);
 
-  useEffect(() => {
+  const loadMine = useCallback(() => {
     if (role !== "BEGINNER") return;
     projectApi
       .myMemberships()
@@ -127,6 +127,7 @@ function Content() {
       })
       .catch(() => {});
   }, [role]);
+  useEffect(loadMine, [loadMine]);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q.trim()), 350);
@@ -153,6 +154,23 @@ function Content() {
       .finally(() => setLoading(false));
   }, [debouncedQ, category, status, page, role]);
   useEffect(load, [load]);
+
+  // Re-pull when the tab regains focus — a beginner's membership/application can
+  // change on the mentor's screen (accept) with no realtime here, so the browse
+  // markers and apply state stay in sync when the beginner comes back.
+  useEffect(() => {
+    const onFocus = () => {
+      if (document.visibilityState !== "visible") return;
+      load();
+      loadMine();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, [load, loadMine]);
 
   const filtersActive = debouncedQ || category !== ALL || status !== ALL || deadline !== ALL;
   const resetFilters = () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ClipboardList,
@@ -97,51 +97,72 @@ interface BoardData {
 export function BeginnerProjectBoard() {
   const appUser = useAuthStore((s) => s.appUser);
   const [data, setData] = useState<BoardData | null>(null);
+  // Accepted into a project the mentor hasn't started yet (still RECRUITING) — so
+  // the beginner sees "kamu sudah diterima" right after acceptance, before the
+  // full workspace board (which only applies once the project is ACTIVE).
+  const [awaiting, setAwaiting] = useState<{ id: string; title: string; role: string | null } | null>(null);
   const [state, setState] = useState<"loading" | "empty" | "ready">("loading");
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const memberships = await projectApi.myMemberships();
-        // The beginner's current project = their ACTIVE (or awaiting-completion) membership.
-        const current =
-          memberships.find(
-            (m) => m.status === "ACTIVE" && m.project.status === "ACTIVE"
-          ) ??
-          memberships.find(
-            (m) => m.project.status === "ACTIVE" || m.project.status === "AWAITING_COMPLETION"
-          );
-        if (!current) {
-          if (active) setState("empty");
-          return;
-        }
-        const pid = current.project.id;
-        const [project, members, deliverables, contributions, reviews] = await Promise.all([
-          projectApi.detail(pid),
-          projectApi.members(pid).catch(() => [] as ProjectMember[]),
-          deliverableApi.listForProject(pid).catch(() => [] as Deliverable[]),
-          contributionApi.listForProject(pid).catch(() => [] as Contribution[]),
-          reviewApi.listForProject(pid).catch(() => [] as ProjectReview[]),
-        ]);
-        if (!active) return;
-        setData({
-          project,
-          roleName: current.projectRole?.roleName ?? null,
-          members,
-          deliverables,
-          contributions,
-          reviews,
-        });
-        setState("ready");
-      } catch {
-        if (active) setState("empty");
+  const load = useCallback(async () => {
+    try {
+      const memberships = await projectApi.myMemberships();
+      // The beginner's current project = their ACTIVE (or awaiting-completion) membership.
+      const current =
+        memberships.find((m) => m.status === "ACTIVE" && m.project.status === "ACTIVE") ??
+        memberships.find(
+          (m) => m.project.status === "ACTIVE" || m.project.status === "AWAITING_COMPLETION"
+        );
+      if (!current) {
+        const accepted = memberships.find(
+          (m) => m.status === "ACTIVE" && m.project.status === "RECRUITING"
+        );
+        setAwaiting(
+          accepted
+            ? { id: accepted.project.id, title: accepted.project.title, role: accepted.projectRole?.roleName ?? null }
+            : null
+        );
+        setData(null);
+        setState("empty");
+        return;
       }
-    })();
-    return () => {
-      active = false;
-    };
+      const pid = current.project.id;
+      const [project, members, deliverables, contributions, reviews] = await Promise.all([
+        projectApi.detail(pid),
+        projectApi.members(pid).catch(() => [] as ProjectMember[]),
+        deliverableApi.listForProject(pid).catch(() => [] as Deliverable[]),
+        contributionApi.listForProject(pid).catch(() => [] as Contribution[]),
+        reviewApi.listForProject(pid).catch(() => [] as ProjectReview[]),
+      ]);
+      setAwaiting(null);
+      setData({
+        project,
+        roleName: current.projectRole?.roleName ?? null,
+        members,
+        deliverables,
+        contributions,
+        reviews,
+      });
+      setState("ready");
+    } catch {
+      setState("empty");
+    }
   }, []);
+
+  // Fetch on mount + whenever the tab/window regains focus. Beginner membership &
+  // application status change on ANOTHER user's screen (the mentor accepting),
+  // and there's no realtime for it — so re-pull when the beginner comes back.
+  useEffect(() => {
+    load();
+    const onFocus = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, [load]);
 
   const derived = useMemo(() => {
     if (!data) return null;
@@ -165,6 +186,23 @@ export function BeginnerProjectBoard() {
 
   if (state === "loading") return <ListSkeleton rows={4} />;
   if (state === "empty" || !data || !derived) {
+    // Accepted by the mentor, but the project hasn't been started yet.
+    if (awaiting) {
+      return (
+        <div className="flex flex-col items-center gap-3 rounded-[20px] border border-[#cfe89a] bg-[#f6fbe8] py-16 text-center">
+          <CheckCircle2 className="size-10 text-[#5da316]" />
+          <h3 className="text-base font-semibold text-foreground">Kamu Sudah Diterima! 🎉</h3>
+          <p className="max-w-md text-sm text-muted-foreground">
+            Kamu diterima di <strong>{awaiting.title}</strong>
+            {awaiting.role ? ` sebagai ${awaiting.role}` : ""}. Menunggu mentor memulai proyek —
+            ruang kerja akan muncul di sini begitu proyek dimulai.
+          </p>
+          <Button variant="outline" className="mt-1" render={<Link href={`/my-projects/${awaiting.id}`} />}>
+            <FolderKanban className="size-4" /> Lihat Detail Proyek
+          </Button>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border py-16 text-center">
         <FolderKanban className="size-10 text-muted-foreground" />
